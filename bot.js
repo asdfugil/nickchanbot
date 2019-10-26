@@ -2,8 +2,6 @@ console.log('Starting...')
 const Discord = require('discord.js')
 const fs = require('fs')
 const moment = require(`moment`)
-const nekosClient = require('nekos.life')
-const neko = new nekosClient()
 require('moment-duration-format')
 const googleIt = require('google-it');
 const fetch = require('node-fetch')
@@ -460,8 +458,9 @@ client.once('ready', () => {
     client.user.setActivity(`/help | ${client.guilds.size} server(s)`)
 })
 function sendError(error, receivedMessage) {
-    receivedMessage.channel.send(`An Error occured.. \n\n \`\`\`prolog\n${error.stack}\`\`\``)
+    let message = receivedMessage.channel.send(`An Error occured.. \n\n \`\`\`prolog\n${error.stack}\`\`\``)
     console.log(error)
+    return message
 }
 function botError(message) {
     var error = new Error(message)
@@ -645,9 +644,13 @@ function helpCommand(arguments, receivedMessage) {
     } else if (arguments == 'unban') {
         receivedMessage.channel.send(`Description:unbans a user. Usage: \`unban <User ID> [reason]\``)
     } else if (arguments == "") {
+        //Send the attachment in the message channel
         const attachment = new Discord.Attachment('./attachments/README.md');
-        // Send the attachment in the message channel
-        receivedMessage.channel.send("Prefix :`" + config.prefix + "` \n \n __**Command list**__ \n`help` `randomstring` `stats` `config` `embed-spam` `user-info` `play` `skip` `stop` `multiply` `dog` `cat` `spam` `logs` `server-info` `say` `8ball` `unban` `spam-ping` `kick` `ban` `purge` `about` `changelogs` `Ping` `googlesearch` \n Use `/help [string]` for more infromation on a specificed command. Arguments in [] are optional \n \n __**Support Server**__ \n https://discord.gg/kPMK3K5")
+        /*
+        MAIN HELP
+            commands available to public only
+        */
+        receivedMessage.channel.send("Prefix :`" + config.prefix + "` \n \n __**Command list**__ \n`help` `nekos-life` `randomstring` `stats` `config` `embed-spam` `user-info` `play` `skip` `stop` `multiply` `dog` `cat` `spam` `logs` `server-info` `say` `8ball` `unban` `spam-ping` `kick` `ban` `purge` `about` `changelogs` `Ping` `googlesearch` \n Use `/help [string]` for more infromation on a specificed command. Arguments in [] are optional \n \n __**Support Server**__ \n https://discord.gg/kPMK3K5")
         receivedMessage.channel.send(attachment)
     } else if (arguments == 'googsearch') {
         receivedMessage.channel.send('Google something \n Usage `googlesearch <query>`')
@@ -656,9 +659,22 @@ function helpCommand(arguments, receivedMessage) {
     } else if (arguments == 'stats') {
         receivedMessage.channel.send('Description:Return bot statistics\nUsage:`stats`')
     } else if (arguments == 'play') {
-        receivedMessage.channel.send('Description:undefined\nUsage:`undefined`')
+        receivedMessage.channel.send('Description:plays music\nUsage:`play <youtube url>`')
+    } else if (arguments == 'skip') {
+        receivedMessage.channel.send('Description:Skip the current song\nUsage:`skip`')
+    } else if (arguments == 'stop') {
+        receivedMessage.channel.send('Description:Stop playing music,including those that are in the queue.\nUsage:`stop`')
+    } else if (arguments == 'nekos-life') {
+        const SFWImages = ["smug", "baka", "tickle", "slap", "poke", 'pat', 'neko', 'nekoGif', 'meow', 'lizard', 'kiss', 'hug', 'foxGirl', 'feed', 'cuddle']
+        const NSFWImages = ["lewdkemo", "lewdk", "keta", "hololewd", "holoero", "hentai", "futanari", "femdom", "feetg", "erofeet", "feet", "ero", "erok", "erokemo", "eron", "eroyuri", "cum_jpg", "blowjob", "pussy" ]
+        receivedMessage.channel.send('Description:Fetch a image from nekos.life \nUsage:`nekos-life <argument>`\nAvailable arguments:')
+        receivedMessage.channel.send('SFW:\n`' + SFWImages.join('` `') + '`' + '\nNSFW:\n`' + NSFWImages.join('` `') + '`')
+    } else if (arguments == 'user-info') {
+        receivedMessage.channel.send('Description:Shows user info.\nUsage:`user-info [User ID|@mention|Tag|Username]`')
+    } else if (arguments == 'embed') {
+        receivedMessage.channel.send('Description:Spams embed.\nUsage:`embed-spam`')
     } else {
-        receivedMessage.channel.send('Incorrect command syntax.')
+        receivedMessage.channel.send('Incorrect command syntax. Usage:`help [command]')
     }
 }
 async function configCommand(arguments, receivedMessage, serverSettings) {
@@ -849,7 +865,7 @@ function spamPingCommand(arguments, receivedMessage) {
     }
 }
 function ChangelogsCommand(receivedMessage) {
-    receivedMessage.channel.send("Nick Chan Bot Beta 1.0.0 - pre4 \n **CHANGELOGS** \n ```-Added /play,/stop,/skip,/config,/embed-spam,/stats,/user-info,/nekos-life\n-255 character limit on /randomstring lifted\n-Added a logging system\n-Still updating documnation```")
+    receivedMessage.channel.send("Nick Chan Bot Beta 1.0.0 - pre5 \n **CHANGELOGS** \n ```-Added /play,/stop,/skip,/config,/embed-spam,/stats,/user-info,/nekos-life\n-255 character limit on /randomstring lifted\n-Added a logging system\n-Contiune to update documnation\n-Finished Updating /help (I think)```")
 }
 function kickCommand(arguments, receivedMessage) {
     if (receivedMessage.guild == null) return receivedMessage.channel.send('This command can only be used in servers');
@@ -1113,8 +1129,10 @@ async function userInfoCommand(arguments, receivedMessage) {
     receivedMessage.channel.send(embed)
 }
 async function nekosLifeCommand(arguments, receivedMessage) {
-    const SFWImages = ["smug", " baka", "tickle", "slap", "poke", 'pat', 'neko', 'nekoGif', 'meow', 'lizard', 'kiss', 'hug', 'foxGirl', 'feed', 'cuddle']
-    const NSFWImages = [`randomHentaiGif`, `pussy`, `nekoGif`, `neko`, `lesbian`, `cumsluts`, `classic`, `boobs`, `bJ`, `anal`, `avatar`, `yuri`, `trap`, `tits`, `girlSoloGif`, `girlSolo`, `smallBoobs`, `pussyWankGif`, `pussyArt`, `kemonomimi`, `kitsune`, `keta`, `holo`, `holoEro`, `hentai`, `futanari`, `femdom`, `feetGif`, `eroFeet`, `feet`, `ero`, `eroKitsune`, `eroKemonomimi`, `eroNeko`, `eroYuri`, `cumArts`, `blowJob`, `pussyGif`]
+    receivedMessage.channel.startTyping()
+    let api = 'https://nekos.life/api/v2/img/'
+    const SFWImages = ["smug", "baka", "tickle", "slap", "poke", 'pat', 'neko', 'nekoGif', 'meow', 'lizard', 'kiss', 'hug', 'foxGirl', 'feed', 'cuddle']
+    const NSFWImages =  ["lewdkemo", "lewdk", "keta", "hololewd", "holoero", "hentai", "futanari", "femdom", "feetg", "erofeet", "feet", "ero", "erok", "erokemo", "eron", "eroyuri", "cum_jpg", "blowjob", "pussy" ]
     let i = null
     let sfw = true
     SFWImages.forEach(option => {
@@ -1131,24 +1149,45 @@ async function nekosLifeCommand(arguments, receivedMessage) {
         }
     })
     if (i !== null && sfw) {
-        let { url } = await eval('neko.sfw.' + i + '()')
-        const { file } = await fetch(url).then(response => response.json())
-        const image = new Attachment(file)
-        receivedMessage.channel.send(image)
+        const file = await fetch(api + i).then(response => response.json())
+        try {
+            if (typeof file.msg != 'undefined') {
+                let error = new Error(file.msg)
+                error.name = 'nekos.lifeAPIError'
+                throw error
+            }
+        } catch (error) {
+            sendError(error, receivedMessage)
+            .then(() => receivedMessage.channel.stopTyping())
+        }
+        receivedMessage.channel.send(new Attachment(file.url))
+            .then(() => receivedMessage.channel.stopTyping())
         return
     }
     if (i !== null && !sfw) {
         if (receivedMessage.channel.nsfw == false) {
+            receivedMessage.channel.send('Please use NSFW arguments in NSFW channel only.')
+                .then(() => receivedMessage.channel.stopTyping())
             return
         }
-        let { url } = eval('await neko.nsfw.' + i + '()')
-        const { file } = await fetch(url).then(response => response.json())
-        const image = new Attachment(file)
-        receivedMessage.channel.send(image)
+        const file = await fetch(api + i).then(response => response.json())
+        try {
+            if (typeof file.msg != 'undefined') {
+                let error = new Error(file.msg)
+                error.name = 'nekos.lifeAPIError'
+                throw error
+            }
+        } catch (error) {
+            sendError(error, receivedMessage)
+            .then(() => receivedMessage.channel.stopTyping())
+        }
+        receivedMessage.channel.send(new Attachment(file.url))
+            .then(() => receivedMessage.channel.stopTyping())
         return
     }
     if (i == null) {
         receivedMessage.channel.send('Invalid arguments,available arguments:')
         receivedMessage.channel.send('SFW:\n`' + SFWImages.join('` `') + '`' + '\nNSFW:\n`' + NSFWImages.join('` `') + '`')
+            .then(() => receivedMessage.channel.stopTyping())
     }
 }
