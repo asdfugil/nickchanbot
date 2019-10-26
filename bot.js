@@ -528,6 +528,8 @@ function processCommand(receivedMessage, serverSettings, processStart) {
             embedSpamCommand(arguments, receivedMessage)
         } else if (primaryCommand == 'user-info') {
             userInfoCommand(arguments, receivedMessage)
+        } else if (primaryCommand == 'nekos-life') {
+            nekosLifeCommand(arguments, receivedMessage)
         }
     } catch (error) {
         sendError(error, receivedMessage)
@@ -1105,4 +1107,49 @@ async function userInfoCommand(arguments, receivedMessage) {
         }
     }
     receivedMessage.channel.send(embed)
+}
+async function nekosLifeCommand(arguments, receivedMessage) {
+    'use strict'
+    const SFWImages = ["smug", " baka", "tickle", "slap", "poke", 'pat', 'neko', 'nekoGif', 'meow', 'lizard', 'kiss', 'hug', 'foxGirl', 'feed', 'cuddle']
+    const NSFWImages = [`randomHentaiGif`, `pussy`, `nekoGif`, `neko`, `lesbian`, `cumsluts`, `classic`, `boobs`, `bJ`, `anal`, `avatar`, `yuri`, `trap`, `tits`, `girlSoloGif`, `girlSolo`, `smallBoobs`, `pussyWankGif`, `pussyArt`, `kemonomimi`, `kitsune`, `keta`, `holo`, `holoEro`, `hentai`, `futanari`, `femdom`, `feetGif`, `eroFeet`, `feet`, `ero`, `eroKitsune`, `eroKemonomimi`, `eroNeko`, `eroYuri`, `cumArts`, `blowJob`, `pussyGif`]
+    let i = null
+    let sfw = true
+    SFWImages.forEach(option => {
+        if (option != arguments[0]) {
+            continue
+        } else {
+            i = arguments[0]
+            break
+        }
+    })
+    NSFWImages.forEach(option => {
+        if (option != arguments[0]) {
+            continue
+        } else {
+            i = arguments[0]
+            sfw = false
+            break
+        }
+    })
+    if (i !== null && sfw) {
+        let { url } = eval('await neko.sfw.' + i + '()')
+        const { file } = await fetch(url).then(response => response.json())
+        const image = new Attachment(file)
+        receivedMessage.channel.send(image)
+        return
+    }
+    if (i !== null && !sfw) {
+        if (receivedMessage.channel.nsfw == false) {
+            return
+        }
+        let { url } = eval('await neko.sfw.' + i + '()')
+        const { file } = await fetch(url).then(response => response.json())
+        const image = new Attachment(file)
+        receivedMessage.channel.send(image)
+        return
+    }
+    if (i == null) {
+        receivedMessage.channel.send('Invalid arguments,available arguments:')
+        receivedMessage.channel.send('SFW:\n`' + SFWImages.join('` `') + '`' + '\nNSFW:\n`' + NSFWImages.join('` `') + '`')
+    }
 }
