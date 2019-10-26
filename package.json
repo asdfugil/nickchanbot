@@ -7,7 +7,6 @@
     "main": "bot.js",
     "dependencies": {
         "discord.js": "^11.5.1",
-        "ffmepg": "0.0.2-security",
         "google-it": "^1.2.1",
         "moment": "^2.24.0",
         "moment-duration-format": "^2.3.2",
