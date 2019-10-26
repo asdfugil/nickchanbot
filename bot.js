@@ -453,7 +453,7 @@ client.on('guildCreate', guild => {
 })
 
 client.on('error', console.error)
-client.once('ready', () => {
+client.on('ready', () => {
     console.log("Connected as " + client.user.tag)
     client.user.setActivity(`/help | ${client.guilds.size} server(s)`)
 })
@@ -1083,20 +1083,22 @@ function logsCommand(receivedMessage) {
     receivedMessage.channel.send(logs)
 }
 async function userInfoCommand(arguments, receivedMessage) {
-    var user;
+    var user = undefined
     if (arguments[0]) {
         try {
             user = await client.fetchUser(arguments[0])
         } catch (error) {
-            if (!user) user = receivedMessage.mentions.members.first().user
-            if (!user) user = client.users.find(x => x.tag == arguments.slice(0).join(' '))
-            if (!user) user = client.users.find(x => x.username == arguments.slice(0).join(' '))
-            if (!user) user = client.users.find(x => x.discriminator == arguments.slice(0).join(' '))
+            if (receivedMessage.mentions.members.first()) {
+                if (user == null||typeof user == 'undefined') user = receivedMessage.mentions.members.first().user
+            }
+            if (user == null||typeof user == 'undefined') user = client.users.find(x => x.tag == arguments.slice(0).join(' '))
+            if (user == null||typeof user == 'undefined') user = client.users.find(x => x.username == arguments.slice(0).join(' '))
+            if (user == null||typeof user == 'undefined') user = client.users.find(x => x.discriminator == arguments.slice(0).join(' '))
         }
     } else {
         user = receivedMessage.author
     }
-    if (typeof user.id == 'undefined') return receivedMessage.channel.send('Unknown user.')
+    if (user == null||typeof user == 'undefined') return receivedMessage.channel.send('Unknown user.')
     let embed = new Discord.RichEmbed()
         .setAuthor(receivedMessage.author.tag, receivedMessage.author.displayAvatarURL)
         .setTitle('User Info')
