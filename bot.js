@@ -2,10 +2,14 @@ console.log('Starting...')
 const Discord = require('discord.js')
 const fs = require('fs')
 const moment = require(`moment`)
+const nekosClient = require('nekos.life')
+const neko = new nekosClient()
 require('moment-duration-format')
 const googleIt = require('google-it');
+const fetch = require('node-fetch')
 const config = require('./config.json')
 const client = new Discord.Client()
+const { Attachment } = require('discord.js')
 var talkChannelOn = false
 var talkChannel = 'off'
 client.login(config.token)
@@ -275,7 +279,7 @@ client.on('channelDelete', (oldChannel) => {
                 .addField('Channel ID', oldChannel.id)
                 .setColor('#ff0000')
                 .setTimestamp()
-                .setFooter(client.user.tag,client.user.displayAvatarURL)
+                .setFooter(client.user.tag, client.user.displayAvatarURL)
             client.channels.get(settings.logChannels.channelDelete).send(embed)
         }
     }
@@ -845,7 +849,7 @@ function spamPingCommand(arguments, receivedMessage) {
     }
 }
 function ChangelogsCommand(receivedMessage) {
-    receivedMessage.channel.send("Nick Chan Bot Beta 1.0.0 - pre3 \n **CHANGELOGS** \n ```-Added /play,/stop,/skip,/config,/embed-spam,/stats,/user-info\n-255 character limit on /randomstring lifted\n-Added a logging system\n-Still updating documnation```")
+    receivedMessage.channel.send("Nick Chan Bot Beta 1.0.0 - pre4 \n **CHANGELOGS** \n ```-Added /play,/stop,/skip,/config,/embed-spam,/stats,/user-info,/nekos-life\n-255 character limit on /randomstring lifted\n-Added a logging system\n-Still updating documnation```")
 }
 function kickCommand(arguments, receivedMessage) {
     if (receivedMessage.guild == null) return receivedMessage.channel.send('This command can only be used in servers');
@@ -1109,30 +1113,25 @@ async function userInfoCommand(arguments, receivedMessage) {
     receivedMessage.channel.send(embed)
 }
 async function nekosLifeCommand(arguments, receivedMessage) {
-    'use strict'
     const SFWImages = ["smug", " baka", "tickle", "slap", "poke", 'pat', 'neko', 'nekoGif', 'meow', 'lizard', 'kiss', 'hug', 'foxGirl', 'feed', 'cuddle']
     const NSFWImages = [`randomHentaiGif`, `pussy`, `nekoGif`, `neko`, `lesbian`, `cumsluts`, `classic`, `boobs`, `bJ`, `anal`, `avatar`, `yuri`, `trap`, `tits`, `girlSoloGif`, `girlSolo`, `smallBoobs`, `pussyWankGif`, `pussyArt`, `kemonomimi`, `kitsune`, `keta`, `holo`, `holoEro`, `hentai`, `futanari`, `femdom`, `feetGif`, `eroFeet`, `feet`, `ero`, `eroKitsune`, `eroKemonomimi`, `eroNeko`, `eroYuri`, `cumArts`, `blowJob`, `pussyGif`]
     let i = null
     let sfw = true
     SFWImages.forEach(option => {
         if (option != arguments[0]) {
-            continue
         } else {
             i = arguments[0]
-            break
         }
     })
     NSFWImages.forEach(option => {
         if (option != arguments[0]) {
-            continue
         } else {
             i = arguments[0]
             sfw = false
-            break
         }
     })
     if (i !== null && sfw) {
-        let { url } = eval('await neko.sfw.' + i + '()')
+        let { url } = await eval('neko.sfw.' + i + '()')
         const { file } = await fetch(url).then(response => response.json())
         const image = new Attachment(file)
         receivedMessage.channel.send(image)
@@ -1142,7 +1141,7 @@ async function nekosLifeCommand(arguments, receivedMessage) {
         if (receivedMessage.channel.nsfw == false) {
             return
         }
-        let { url } = eval('await neko.sfw.' + i + '()')
+        let { url } = eval('await neko.nsfw.' + i + '()')
         const { file } = await fetch(url).then(response => response.json())
         const image = new Attachment(file)
         receivedMessage.channel.send(image)
