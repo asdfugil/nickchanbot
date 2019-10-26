@@ -1,3 +1,4 @@
+run npm install and change the settings in config.json before using it if you get it from github
 # NICK CHAN # 5213 [BOT]
 
 ## About
