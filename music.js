@@ -3,19 +3,19 @@ const {
 	prefix,
 	token,
 	ownerID,
-} = require('./config.json');
+} = require('./config/config.json');
 const ytdl = require('ytdl-core');
 
 const client = new Discord.Client();
 
 const queue = new Map();
 
-process.on('uncaughtException' ,error => {
+process.on('uncaughtException', error => {
 	console.log(error.stack)
 })
-process.on('unhandledRejection', (error,promise) => {
+process.on('unhandledRejection', (error, promise) => {
 	console.log(error.stack)
-	console.log(JSON.stringify(promise,null,2))
+	console.log(JSON.stringify(promise, null, 2))
 })
 client.once('ready', () => {
 	console.log('Ready!');
@@ -29,24 +29,62 @@ client.once('disconnect', () => {
 	console.log('Disconnect!');
 });
 
-client.on('message', async message => {
-	if (message.author.bot) return;
-	if (!message.content.startsWith(prefix)) return;
+client.on('message', async receivedMessage => {
+	let arguments = receivedMessage.content.substr(prefix.length).split(' ').slice(1)
+	if (!receivedMessage.guild) return
+	if (receivedMessage.author.bot) return;
+	if (!receivedMessage.content.startsWith(prefix)) return;
 
-	const serverQueue = queue.get(message.guild.id);
+	const serverQueue = queue.get(receivedMessage.guild.id);
 
-	if (message.content.startsWith(`${prefix}play`)) {
-		execute(message, serverQueue);
+	if (receivedMessage.content.startsWith(`${prefix}play`)) {
+		execute(receivedMessage, serverQueue);
 		return;
-	} else if (message.content.startsWith(`${prefix}skip`)) {
-		skip(message, serverQueue);
+	} else if (receivedMessage.content.startsWith(`${prefix}skip`)) {
+		skip(receivedMessage, serverQueue);
 		return;
-	} else if (message.content.startsWith(`${prefix}stop`)) {
-		stop(message, serverQueue);
+	} else if (receivedMessage.content.startsWith(`${prefix}stop`)) {
+		stop(receivedMessage, serverQueue);
 		return;
+	} else if (receivedMessage.content.startsWith(`${prefix}queue`)) {
+queueCommand(receivedMessage,serverQueue,arguments)
+	} else if (receivedMessage.content.startsWith(`${prefix}now-playing`)) {
+		nowPlaying(receivedMessage, serverQueue)
 	}
 });
-
+function nowPlaying(receivedMessage, serverQueue) {
+	if (typeof serverQueue != 'undefined') {
+		if (typeof serverQueue.songs != 'undefined') {
+			receivedMessage.channel.send(`\`\`\`json\n${JSON.stringify(serverQueue.songs[0], null, 2)}\`\`\``)
+		}
+	} else {
+		receivedMessage.channel.send('There is nothing playing')
+	}
+}
+function queueCommand(receivedMessage,serverQueue,arguments) {
+	if (!arguments[0]) {
+		if (typeof serverQueue != 'undefined') {
+			if (typeof serverQueue.songs != 'undefined') {
+				receivedMessage.channel.send(`\`\`\`json\n${JSON.stringify(serverQueue.songs, null, 2)}\`\`\``)
+			}
+		} else {
+			receivedMessage.channel.send('There is nothing in the queue')
+		}
+	} else {
+		if (typeof serverQueue != 'undefined') {
+			if (typeof serverQueue.songs != 'undefined') {
+		if (!Number(arguments[0]) == NaN) return receivedMessage.channel.send('Argument is not a number.')
+		if (Math.round(arguments[0]) != arguments[0]) return receivedMessage.channel.send('Arguments is not a integer.')
+		let i = arguments[0] - 1
+		if (i > serverQueue.songs.length || i < 0) return receivedMessage.channel.send("Out of range.")
+		receivedMessage.channel.send(`\`\`\`json\n${JSON.stringify(serverQueue.songs[i], null, 2)}\`\`\``)
+			}
+		} else {
+			receivedMessage.channel.send('There is nothing in the queue')
+		}
+	}
+	
+}
 async function execute(message, serverQueue) {
 	const args = message.content.split(' ');
 
@@ -105,6 +143,7 @@ function stop(message, serverQueue) {
 	if (!message.member.voiceChannel) return message.channel.send('You have to be in a voice channel to stop the music!');
 	serverQueue.songs = [];
 	serverQueue.connection.dispatcher.end();
+	message.channel.send('Music Ended.')
 }
 
 function play(guild, song) {

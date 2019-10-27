@@ -5,7 +5,7 @@ const moment = require(`moment`)
 require('moment-duration-format')
 const googleIt = require('google-it');
 const fetch = require('node-fetch')
-const config = require('./config.json')
+const config = require('./config/config.json')
 const client = new Discord.Client()
 const { Attachment } = require('discord.js')
 var talkChannelOn = false
@@ -864,7 +864,7 @@ function spamPingCommand(arguments, receivedMessage) {
     }
 }
 function ChangelogsCommand(receivedMessage) {
-    receivedMessage.channel.send("Nick Chan Bot Beta 1.0.0 - pre6 \n **CHANGELOGS** \n ```-Added /play,/stop,/skip,/config,/embed-spam,/stats,/user-info,/nekos-life\n-255 character limit on /randomstring lifted\n-Added a logging system\n-Contiune to update documnation\n-Finished Updating /help (I think)\n-Other minor improvements```")
+    receivedMessage.channel.send("Nick Chan Bot Beta 1.0.0 - pre7 \n **CHANGELOGS** \n ```-Added /play,/now-playing,/stop,/skip,/config,/embed-spam,/stats,/user-info,/nekos-life\n-255 character limit on /randomstring lifted\n-Added a logging system\n-Contiune to update documnation\n-Other minor improvements```")
 }
 function kickCommand(arguments, receivedMessage) {
     if (receivedMessage.guild == null) return receivedMessage.channel.send('This command can only be used in servers');
