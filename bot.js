@@ -22,8 +22,7 @@ process.on('uncaughtException', (error) => {
     } finally {
         console.log(error)
         setTimeout(function () {
-            client.destroy()
-            client.login(config.token)
+            process.exit(0)
         }, 10000)
     }
 })
