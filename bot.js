@@ -385,8 +385,8 @@ client.on('reconnect', () => {
 })
 client.on('messageDelete', DeletedMessage => {
     if (!DeletedMessage.guild) return
-    var serverSettings = JSON.parse(fs.readFileSync('./data/' + DeletedMessage.guild.id + '.json', 'utf8'))
-    if (typeof serverSettings.logChannels.messageDelete != 'undefined') {
+    var settings = JSON.parse(fs.readFileSync('./data/' + DeletedMessage.guild.id + '.json', 'utf8'))
+    if (typeof settings.logChannels.messageDelete != 'undefined') {
         if (DeletedMessage.content) {
             const embed = new Discord.RichEmbed()
                 .setTitle('Message deletion Log')
@@ -397,7 +397,7 @@ client.on('messageDelete', DeletedMessage => {
                 .setTimestamp()
                 .setFooter('Nick Chan#5213', client.user.displayAvatarURL)
                 if (typeof client.channels.get(settings.logChannels.messageDelete) == 'undefined') return bot.emit('missingLogChannel', settings.logChannels.messageDelete, DeletedMessage.guild,'messageDelete')
-            client.channels.get(serverSettings.logChannels.messageDelete).send(embed)
+            client.channels.get(settings.logChannels.messageDelete).send(embed)
 
         }
     }
