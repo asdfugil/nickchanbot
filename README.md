@@ -1,4 +1,3 @@
-run npm install and change the settings in config.json before using it if you get it from github
 # NICK CHAN # 5213 [BOT]
 
 ## About
@@ -11,6 +10,9 @@ Nick Chan#5213 [BOT] (Nick Chan Bot) is a private Discord bot written by Nick Ch
 
 **Prefix** : /
 
+## Support
+
+[Support server link](https://discord.gg/kPMK3K5)
 
 
 ## Commands
@@ -186,7 +188,39 @@ Note: Bot owner only
 
 Description: none
 
-## Support
+### play
 
-[Support server link](https://discord.gg/kPMK3K5)
+Description: plays music
+
+Usage: `play <youtube url>`
+
+### skip
+
+Description: skips the current song
+
+usage: `skip`
+
+### stop
+
+Description: ends all music 
+
+Usage: `stop`
+
+### nekos-life
+
+Description : fetch a image form nekos.life
+
+Usage: `nekos-life <argument>`
+
+Available arguments:
+
+SFW: `smug` `baka` `tickle` `slap` `poke` `pat` `neko` `nekoGif` `meow` `lizard` `kiss` `hug` `foxGirl` `feed` `cuddle` 
+
+NSFW: `lewdkemo` `lewdk` `keta` `hololewd` `holoero` `hentai` `futanari` `femdom` `feetg` `erofeet` `feet` `ero` `erok` `erokemo` `eron` `eroyuri` `cum_jpg` `blowjob` `pussy` 
+
+### config
+
+Description : Change server settings
+
+Usage: `config <config category> <config item> <new value> `
 
