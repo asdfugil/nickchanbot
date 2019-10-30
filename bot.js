@@ -7,23 +7,26 @@ const googleIt = require('google-it');
 const fetch = require('node-fetch')
 const config = require('./config/config.json')
 const client = new Discord.Client()
-const { Attachment } = require('discord.js')
+const { Attachment , RichEmbed} = require('discord.js')
+const EventEmitter = require('events')
+const bot = new EventEmitter()
 var talkChannelOn = false
 var talkChannel = 'off'
 client.login(config.token)
 process.on('uncaughtException', (error) => {
     console.log(error)
     try {
+        client.user.setActivity('❌ uncaughtExpection | Rebooting...')
         fs.writeFileSync('error.txt', error.stack)
         client.channels.get('633686557580066866').send(`Uncaught expection \n \`\`\`${error.stack}\`\`\``)
         client.channels.get('633686557580066866').send(new Discord.Attachment('error.txt'))
     } catch (error) {
-        console.log('BRUHHHHHHHHHHHHHH!')
+        console.error('Error!')
     } finally {
-        console.log(error)
+        console.error(error)
         setTimeout(function () {
-            process.exit(0)
-        }, 10000)
+            process.exit(1)
+        }, 20000)
     }
 })
 process.on('exit', code => {
@@ -32,9 +35,32 @@ process.on('exit', code => {
     client.channels.get('633686557580066866').send(new Discord.Attachment('logs.txt'))
 })
 process.on('unhandledRejection', (error, promise) => {
-    console.log(`Oops,the following promise rejection is not caught.\nError:${error.stack}\nPromise:${JSON.stringify(promise, null, 2)}`)
+    client.user.setActivity('⚠️ unhandledRejection')
+    console.warn(`Oops,the following promise rejection is not caught.\n${error.stack}\n${JSON.stringify(promise, null, 2)}`)
+    setTimeout(function () {
+        client.user.setActivity(`/help | ${client.guilds.size} server(s)`)
+    }, 10000)
 })
-
+bot.on('error', console.error)
+bot.on('missingLogChannel', (channelID, guild, logType) => {
+    let settingsExist = fs.existsSync(`./data/${guild.id}.json`)
+    if (settingsExist) {
+        var serverSettings = JSON.parse(fs.readFileSync('./data/' + guild.id + '.json','utf8'))
+            eval('serverSettings.logChannels.' + logType + '= undefined')
+            fs.writeFileSync('./data/' + guild.id + '.json',JSON.stringify(serverSettings,null,2))
+            if (serverSettings.logChannels.error != 'undefined') {
+                const embed = new RichEmbed()
+                .setTitle('Error : Missing log channel')
+                .setDescription('Likely due to the channel being deleted\nlog channel type : ' + logType + '\n log channel ID: ' + channelID + '\n\nThe log channel has been deleted from the settings.')
+                .setAuthor(guild.name,guild.iconURL)
+                .setColor('#ff0000')
+                .setTimestamp()
+                .setFooter(client.user.tag,client.user.avatarURL)
+                if (typeof client.channels.get(serverSettings.logChannels.error) == 'undefined') return bot.emit('missingLogChannel', serverSettings.logChannels.error, guild,'error')
+                client.channels.get(serverSettings.logChannels.error).send(embed)
+            }
+    }
+})
 client.on('message', (receivedMessage) => {
     let processStart = Date.now()
     try {
@@ -55,6 +81,7 @@ client.on('message', (receivedMessage) => {
                             .setColor('#28b9de')
                             .setTimestamp()
                             .setFooter('Nick Chan#5213', client.user.displayAvatarURL)
+                            if (typeof client.channels.get(serverSettings.logChannels.message) == 'undefined') return bot.emit('missingLogChannel', serverSettings.logChannels.message, receivedMessage.guild,'message')
                         client.channels.get(serverSettings.logChannels.message).send(embed)
                     }
                 }
@@ -117,6 +144,7 @@ client.on('typingStart', (channel, user) => {
                 .setColor('#ffffff')
                 .setTimestamp()
                 .setFooter('Nick Chan#5213', client.user.displayAvatarURL)
+            if (typeof client.channels.get(settings.logChannels.startTyping) == 'undefined') return bot.emit('missingLogChannel', settings.logChannels.startTyping, channel.guild,'startTyping')
             client.channels.get(settings.logChannels.startTyping).send(embed)
         }
     }
@@ -134,6 +162,7 @@ client.on('typingStop', (channel, user) => {
                 .setColor('#ffffff')
                 .setTimestamp()
                 .setFooter('Nick Chan#5213', client.user.displayAvatarURL)
+                if (typeof client.channels.get(settings.logChannels.startTyping) == 'undefined') return bot.emit('missingLogChannel', settings.logChannels.stopTyping, channel.guild,'stopTyping')
             client.channels.get(settings.logChannels.stopTyping).send(embed)
         }
     }
@@ -154,6 +183,7 @@ client.on('channelCreate', async channel => {
                     .addField('Type', channel.type)
                     .addField('Channel ID', channel.id)
                     .setColor('#00e622')
+                    if (typeof client.channels.get(settings.logChannels.channelCreate) == 'undefined') return bot.emit('missingLogChannel', settings.logChannels.channelCreate, channel.guild,'channelCreate')
                 client.channels.get(settings.logChannels.channelCreate).send(embed)
             } else {
                 const embed = new Discord.RichEmbed()
@@ -189,6 +219,7 @@ client.on('channelUpdate', async (oldChannel, channel) => {
     if (settingsExist) {
         let settings = JSON.parse(fs.readFileSync(`./data/${oldChannel.guild.id}.json`, 'utf8'))
         if (typeof settings.logChannels.channelUpdate != 'undefined') {
+            if (typeof client.channels.get(settings.logChannels.channelUpdate) == 'undefined') return bot.emit('missingLogChannel', settings.logChannels.channelUpdate, channel.guild,'channelUpdate')
             let perms = await oldChannel.permissionsFor(oldChannel.guild.defaultRole)
             let object = await perms.serialize()
             if (oldChannel.type == 'voice') {
@@ -224,8 +255,6 @@ client.on('channelUpdate', async (oldChannel, channel) => {
                 .setColor('#b3ff00')
                 .setTimestamp()
             client.channels.get(settings.logChannels.channelUpdate).send(embed)
-
-            let object1 = await perms.serialize()
             if (channel.type == 'voice') {
                 const embed = new Discord.RichEmbed()
                     .setTitle('Channel Updated (After)')
@@ -277,6 +306,7 @@ client.on('channelDelete', (oldChannel) => {
                 .setColor('#ff0000')
                 .setTimestamp()
                 .setFooter(client.user.tag, client.user.displayAvatarURL)
+                if (typeof client.channels.get(settings.logChannels.channelDelete) == 'undefined') return bot.emit('missingLogChannel', settings.logChannels.channelDetete, oldChannel.guild,'channelDelete')
             client.channels.get(settings.logChannels.channelDelete).send(embed)
         }
     }
@@ -294,6 +324,7 @@ client.on('guildMemberAdd', (newMember) => {
             .setThumbnail(newMember.user.displayAvatarURL)
             .setFooter(client.user.tag, client.user.displayAvatarURL)
             .setTimestamp()
+            if (typeof client.channels.get(settings.logChannels.guildMemberAdd) == 'undefined') return bot.emit('missingLogChannel', settings.logChannels.guildMemberAdd, newMember.guild,'guildMemberAdd')
         client.channels.get(settings.logChannels.guildMemberAdd).send(embed)
 
     }
@@ -311,6 +342,7 @@ client.on('guildMemberRemove', (newMember) => {
             .setThumbnail(newMember.user.displayAvatarURL)
             .setTimestamp()
             .setFooter(client.user.tag, client.user.displayAvatarURL)
+            if (typeof client.channels.get(settings.logChannels.guildMemberRemove) == 'undefined') return bot.emit('missingLogChannel', settings.logChannels.guildMemberRemove, newMember.guild,'guildMemberRemove')
         client.channels.get(settings.logChannels.guildMemberRemove).send(embed)
     }
 })
@@ -327,6 +359,7 @@ client.on('guildBanRemove', (guild, user) => {
             .setThumbnail(user.displayAvatarURL)
             .setFooter(client.user.tag, client.user.displayAvatarURL)
             .setTimestamp()
+            if (typeof client.channels.get(settings.logChannels.guildBanRemove) == 'undefined') return bot.emit('missingLogChannel', settings.logChannels.guildMemberRemove, guild,'guildBanRemove')
         client.channels.get(settings.logChannels.guildBanRemove).send(embed)
     }
 })
@@ -343,6 +376,7 @@ client.on('guildBanAdd', (guild, user) => {
             .setThumbnail(user.displayAvatarURL)
             .setFooter(client.user.tag, client.user.displayAvatarURL)
             .setTimestamp()
+            if (typeof client.channels.get(settings.logChannels.guildBanAdd) == 'undefined') return bot.emit('missingLogChannel', settings.logChannels.guildBanAdd, newMember.guild,'guildBanAdd')
         client.channels.get(settings.logChannels.guildBanAdd).send(embed)
     }
 })
@@ -362,7 +396,7 @@ client.on('messageDelete', DeletedMessage => {
                 .setColor('#ff0000')
                 .setTimestamp()
                 .setFooter('Nick Chan#5213', client.user.displayAvatarURL)
-
+                if (typeof client.channels.get(settings.logChannels.messageDelete) == 'undefined') return bot.emit('missingLogChannel', settings.logChannels.messageDelete, DeletedMessage.guild,'messageDelete')
             client.channels.get(serverSettings.logChannels.messageDelete).send(embed)
 
         }
@@ -379,6 +413,7 @@ client.on('messageDeleteBulk', deletedMessages => {
             .setColor('#f705ff')
             .setTimestamp()
             .setFooter(client.user.tag, client.user.displayAvatarURL)
+            if (typeof client.channels.get(settings.logChannels.messageDeleteBulk) == 'undefined') return bot.emit('missingLogChannel', settings.logChannels.messageDeleteBulk, deletedMessages.first().guild,'messageDeleteBulk')
         client.channels.get(serverSettings.logChannels.messageDeleteBulk).send(embed)
     }
 })
@@ -393,6 +428,7 @@ client.on('messageUpdate', (oldMessage, newMessage) => {
         if (newMessage.content.length < 1000) {
             trimmedNew = newMessage.content
         }
+        if (typeof client.channels.get(settings.logChannels.messageUpdate) == 'undefined') return bot.emit('missingLogChannel', settings.logChannels.messageUpdate, newMember.guild,'messageUpdate')
         if (typeof serverSettings.logChannels.messageUpdate != 'undefined') {
             const embed = new Discord.RichEmbed()
                 .setTitle('Message Updated')
@@ -665,7 +701,7 @@ function helpCommand(arguments, receivedMessage) {
         receivedMessage.channel.send('Description:Stop playing music,including those that are in the queue.\nUsage:`stop`')
     } else if (arguments == 'nekos-life') {
         const SFWImages = ["smug", "baka", "tickle", "slap", "poke", 'pat', 'neko', 'nekoGif', 'meow', 'lizard', 'kiss', 'hug', 'foxGirl', 'feed', 'cuddle']
-        const NSFWImages = ["lewdkemo", "lewdk", "keta", "hololewd", "holoero", "hentai", "futanari", "femdom", "feetg", "erofeet", "feet", "ero", "erok", "erokemo", "eron", "eroyuri", "cum_jpg", "blowjob", "pussy" ]
+        const NSFWImages = ["lewdkemo", "lewdk", "keta", "hololewd", "holoero", "hentai", "futanari", "femdom", "feetg", "erofeet", "feet", "ero", "erok", "erokemo", "eron", "eroyuri", "cum_jpg", "blowjob", "pussy"]
         receivedMessage.channel.send('Description:Fetch a image from nekos.life \nUsage:`nekos-life <argument>`\nAvailable arguments:')
         receivedMessage.channel.send('SFW:\n`' + SFWImages.join('` `') + '`' + '\nNSFW:\n`' + NSFWImages.join('` `') + '`')
     } else if (arguments == 'user-info') {
@@ -750,6 +786,8 @@ async function configCommand(arguments, receivedMessage, serverSettings) {
                 serverSettings.logChannels.roleUpdate = c
             } else if (arguments[1] == 'webhookUpdate') {
                 serverSettings.logChannels.emojiUpdate = c
+            } else if (arguments[1] == 'error') {
+                serverSettings.logChannels.error = c
             } else {
                 throw botError('Unknown settings')
             }
@@ -864,7 +902,7 @@ function spamPingCommand(arguments, receivedMessage) {
     }
 }
 function ChangelogsCommand(receivedMessage) {
-    receivedMessage.channel.send("Nick Chan Bot Beta 1.0.0 - pre7 \n **CHANGELOGS** \n ```-Added /play,/now-playing,/stop,/skip,/config,/embed-spam,/stats,/user-info,/nekos-life\n-255 character limit on /randomstring lifted\n-Added a logging system\n-Contiune to update documnation\n-Other minor improvements```")
+    receivedMessage.channel.send("Nick Chan Bot Beta 1.0.0 - pre8 \n **CHANGELOGS** \n ```-Added /play,/now-playing,/stop,/skip,/config,/embed-spam,/stats,/user-info,/nekos-life\n-255 character limit on /randomstring lifted\n-Added a logging system\n-Contiune to update documnation\n-Other minor improvements\n-Added a handler for missing log channels```")
 }
 function kickCommand(arguments, receivedMessage) {
     if (receivedMessage.guild == null) return receivedMessage.channel.send('This command can only be used in servers');
@@ -1088,16 +1126,16 @@ async function userInfoCommand(arguments, receivedMessage) {
             user = await client.fetchUser(arguments[0])
         } catch (error) {
             if (receivedMessage.mentions.members.first()) {
-                if (user == null||typeof user == 'undefined') user = receivedMessage.mentions.members.first().user
+                if (user == null || typeof user == 'undefined') user = receivedMessage.mentions.members.first().user
             }
-            if (user == null||typeof user == 'undefined') user = client.users.find(x => x.tag == arguments.slice(0).join(' '))
-            if (user == null||typeof user == 'undefined') user = client.users.find(x => x.username == arguments.slice(0).join(' '))
-            if (user == null||typeof user == 'undefined') user = client.users.find(x => x.discriminator == arguments.slice(0).join(' '))
+            if (user == null || typeof user == 'undefined') user = client.users.find(x => x.tag == arguments.slice(0).join(' '))
+            if (user == null || typeof user == 'undefined') user = client.users.find(x => x.username == arguments.slice(0).join(' '))
+            if (user == null || typeof user == 'undefined') user = client.users.find(x => x.discriminator == arguments.slice(0).join(' '))
         }
     } else {
         user = receivedMessage.author
     }
-    if (user == null||typeof user == 'undefined') return receivedMessage.channel.send('Unknown user.')
+    if (user == null || typeof user == 'undefined') return receivedMessage.channel.send('Unknown user.')
     let embed = new Discord.RichEmbed()
         .setAuthor(receivedMessage.author.tag, receivedMessage.author.displayAvatarURL)
         .setTitle('User Info')
@@ -1133,7 +1171,7 @@ async function nekosLifeCommand(arguments, receivedMessage) {
     receivedMessage.channel.startTyping()
     let api = 'https://nekos.life/api/v2/img/'
     const SFWImages = ["smug", "baka", "tickle", "slap", "poke", 'pat', 'neko', 'nekoGif', 'meow', 'lizard', 'kiss', 'hug', 'foxGirl', 'feed', 'cuddle']
-    const NSFWImages =  ["lewdkemo", "lewdk", "keta", "hololewd", "holoero", "hentai", "futanari", "femdom", "feetg", "erofeet", "feet", "ero", "erok", "erokemo", "eron", "eroyuri", "cum_jpg", "blowjob", "pussy" ]
+    const NSFWImages = ["lewdkemo", "lewdk", "keta", "hololewd", "holoero", "hentai", "futanari", "femdom", "feetg", "erofeet", "feet", "ero", "erok", "erokemo", "eron", "eroyuri", "cum_jpg", "blowjob", "pussy"]
     let i = null
     let sfw = true
     SFWImages.forEach(option => {
@@ -1159,7 +1197,7 @@ async function nekosLifeCommand(arguments, receivedMessage) {
             }
         } catch (error) {
             sendError(error, receivedMessage)
-            .then(() => receivedMessage.channel.stopTyping())
+                .then(() => receivedMessage.channel.stopTyping())
         }
         receivedMessage.channel.send(new Attachment(file.url))
             .then(() => receivedMessage.channel.stopTyping())
@@ -1180,7 +1218,7 @@ async function nekosLifeCommand(arguments, receivedMessage) {
             }
         } catch (error) {
             sendError(error, receivedMessage)
-            .then(() => receivedMessage.channel.stopTyping())
+                .then(() => receivedMessage.channel.stopTyping())
         }
         receivedMessage.channel.send(new Attachment(file.url))
             .then(() => receivedMessage.channel.stopTyping())
