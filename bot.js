@@ -403,8 +403,8 @@ client.on('messageDelete', DeletedMessage => {
     }
 })
 client.on('messageDeleteBulk', deletedMessages => {
-    var serverSettings = JSON.parse(fs.readFileSync('./data/' + deletedMessages.first().guild.id + '.json', 'utf8'))
-    if (typeof serverSettings.logChannels.messageDeleteBulk != 'undefined') {
+    var settings = JSON.parse(fs.readFileSync('./data/' + deletedMessages.first().guild.id + '.json', 'utf8'))
+    if (typeof settings.logChannels.messageDeleteBulk != 'undefined') {
         const embed = new Discord.RichEmbed()
             .setTitle('Bulk message deletion Log')
             .setAuthor(deletedMessages.first().guild.name, deletedMessages.first().guild.iconURL)
@@ -414,14 +414,14 @@ client.on('messageDeleteBulk', deletedMessages => {
             .setTimestamp()
             .setFooter(client.user.tag, client.user.displayAvatarURL)
             if (typeof client.channels.get(settings.logChannels.messageDeleteBulk) == 'undefined') return bot.emit('missingLogChannel', settings.logChannels.messageDeleteBulk, deletedMessages.first().guild,'messageDeleteBulk')
-        client.channels.get(serverSettings.logChannels.messageDeleteBulk).send(embed)
+        client.channels.get(settings.logChannels.messageDeleteBulk).send(embed)
     }
 })
 client.on('messageUpdate', (oldMessage, newMessage) => {
     if (newMessage.author == client.user) return
     if (!newMessage.guild) return
     if (newMessage.content == '') return
-    var serverSettings = JSON.parse(fs.readFileSync('./data/' + newMessage.guild.id + '.json', 'utf8'))
+    var settings = JSON.parse(fs.readFileSync('./data/' + newMessage.guild.id + '.json', 'utf8'))
     if (oldMessage.content.length > 1000) {
         let trimmedOld = oldMessage.content.substring(0, 1000) + '...'
         let trimmedNew = newMessage.content.substring(0, 1000) + '...'
@@ -429,7 +429,7 @@ client.on('messageUpdate', (oldMessage, newMessage) => {
             trimmedNew = newMessage.content
         }
         if (typeof client.channels.get(settings.logChannels.messageUpdate) == 'undefined') return bot.emit('missingLogChannel', settings.logChannels.messageUpdate, newMember.guild,'messageUpdate')
-        if (typeof serverSettings.logChannels.messageUpdate != 'undefined') {
+        if (typeof settings.logChannels.messageUpdate != 'undefined') {
             const embed = new Discord.RichEmbed()
                 .setTitle('Message Updated')
                 .setAuthor(newMessage.author.tag, newMessage.author.displayAvatarURL)
@@ -439,10 +439,10 @@ client.on('messageUpdate', (oldMessage, newMessage) => {
                 .setColor('#cffc03')
                 .setTimestamp()
                 .setFooter(client.user.tag, client.user.displayAvatarURL)
-            client.channels.get(serverSettings.logChannels.messageDeleteBulk).send(embed)
+            client.channels.get(settings.logChannels.messageDeleteBulk).send(embed)
         }
     } else {
-        if (typeof serverSettings.logChannels.messageUpdate != 'undefined') {
+        if (typeof settings.logChannels.messageUpdate != 'undefined') {
             let trimmedOld = oldMessage.content.substring(0, 1000)
             let trimmedNew = newMessage.content.substring(0, 1000)
             if (newMessage.content.length > 1000) {
@@ -457,7 +457,7 @@ client.on('messageUpdate', (oldMessage, newMessage) => {
                 .setColor('#cffc03')
                 .setTimestamp()
                 .setFooter(client.user.tag, client.user.displayAvatarURL)
-            client.channels.get(serverSettings.logChannels.messageDeleteBulk).send(embed)
+            client.channels.get(settings.logChannels.messageDeleteBulk).send(embed)
         }
     }
 })
@@ -902,7 +902,7 @@ function spamPingCommand(arguments, receivedMessage) {
     }
 }
 function ChangelogsCommand(receivedMessage) {
-    receivedMessage.channel.send("Nick Chan Bot Beta 1.0.0 - pre8 \n **CHANGELOGS** \n ```-Added /play,/now-playing,/stop,/skip,/config,/embed-spam,/stats,/user-info,/nekos-life\n-255 character limit on /randomstring lifted\n-Added a logging system\n-Contiune to update documnation\n-Other minor improvements\n-Added a handler for missing log channels```")
+    receivedMessage.channel.send("Nick Chan Bot Beta 1.0.0 - pre9 \n **CHANGELOGS** \n ```-Added /play,/now-playing,/stop,/skip,/config,/embed-spam,/stats,/user-info,/nekos-life\n-255 character limit on /randomstring lifted\n-Added a logging system\n-Contiune to update documnation\n-Other minor improvements\n-Added a handler for missing log channels```")
 }
 function kickCommand(arguments, receivedMessage) {
     if (receivedMessage.guild == null) return receivedMessage.channel.send('This command can only be used in servers');
