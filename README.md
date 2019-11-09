@@ -33,6 +33,14 @@ Usage : `Spam <count>`
 
 Note: `<count>` cannot be higher than 50000
 
+### embed-spam
+
+Description: Spam a specified number of embeds
+
+Usage : `embed-spam <count>`
+
+Note: `<count>` cannot be higher than 300
+
 ### Multiply
 
 Description : Multiply two or more numbers together
@@ -206,6 +214,18 @@ Description: ends all music
 
 Usage: `stop`
 
+### now-playing
+
+Description: shows the currently playing song
+
+Usage: `now-playing`
+
+### queue
+
+Description: Shows the server queue,or a song with a specific position in queue
+
+Usage : `queue [position]`
+
 ### nekos-life
 
 Description : fetch a image form nekos.life
@@ -220,7 +240,27 @@ NSFW: `lewdkemo` `lewdk` `keta` `hololewd` `holoero` `hentai` `futanari` `femdom
 
 ### config
 
-Description : Change server settings
+Description:Change server settings
 
-Usage: `config <config category> <config item> <new value> `
+Usage `config <config category> <config item> <new value>`
 
+**__Category:`log-channels`__** Sets the log channels
+In this category `<new value>` must be a channel mention. 
+List of `<config item>`s
+`startTyping` Logged when someone starts typing
+`stopTyping` Logged when someone stops typing
+`message` Logged when someone sends a message
+`messageDelete` Logged when someone deletes a message
+`messageDeleteBulk` Logged when someone bulk delete messages
+`messageUpdate` Logged when a message is updated
+`channelCreate` Logged when a channel is created
+`channelDelete` Logged when achannel is deleted
+`channelUpdate` Logged when a channel is updated
+`guildBanAdd` Logged when someone is banned
+`guildBanRemove` Logged when someone is unbanned
+`guildMemberAdd` Logged when someone joins the server
+`guildMemebrRemove` Logged when someone leaves the server.
+`error` Logged when the bot encouters an error wjile doing something on the server.
+`emojiCreate` Logged when a emoji is craeted.
+`emojiDelete`Logged when an emoji is deleted
+`emojiUpdate`Logged when an emoji is updated.

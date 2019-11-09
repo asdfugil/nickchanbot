@@ -10,6 +10,9 @@ Nick Chan#5213 [BOT] (Nick Chan Bot) is a private Discord bot written by Nick Ch
 
 **Prefix** : /
 
+## Support
+
+[Support server link](https://discord.gg/kPMK3K5)
 
 
 ## Commands
@@ -29,6 +32,14 @@ Description: Spam a specified number of messages
 Usage : `Spam <count>`
 
 Note: `<count>` cannot be higher than 50000
+
+### embed-spam
+
+Description: Spam a specified number of embeds
+
+Usage : `embed-spam <count>`
+
+Note: `<count>` cannot be higher than 300
 
 ### Multiply
 
@@ -185,7 +196,71 @@ Note: Bot owner only
 
 Description: none
 
-## Support
+### play
 
-[Support server link](https://discord.gg/kPMK3K5)
+Description: plays music
 
+Usage: `play <youtube url>`
+
+### skip
+
+Description: skips the current song
+
+usage: `skip`
+
+### stop
+
+Description: ends all music 
+
+Usage: `stop`
+
+### now-playing
+
+Description: shows the currently playing song
+
+Usage: `now-playing`
+
+### queue
+
+Description: Shows the server queue,or a song with a specific position in queue
+
+Usage : `queue [position]`
+
+### nekos-life
+
+Description : fetch a image form nekos.life
+
+Usage: `nekos-life <argument>`
+
+Available arguments:
+
+SFW: `smug` `baka` `tickle` `slap` `poke` `pat` `neko` `nekoGif` `meow` `lizard` `kiss` `hug` `foxGirl` `feed` `cuddle` 
+
+NSFW: `lewdkemo` `lewdk` `keta` `hololewd` `holoero` `hentai` `futanari` `femdom` `feetg` `erofeet` `feet` `ero` `erok` `erokemo` `eron` `eroyuri` `cum_jpg` `blowjob` `pussy` 
+
+### config
+
+Description:Change server settings
+
+Usage `config <config category> <config item> <new value>`
+
+**__Category:`log-channels`__** Sets the log channels
+In this category `<new value>` must be a channel mention. 
+List of `<config item>`s
+`startTyping` Logged when someone starts typing
+`stopTyping` Logged when someone stops typing
+`message` Logged when someone sends a message
+`messageDelete` Logged when someone deletes a message
+`messageDeleteBulk` Logged when someone bulk delete messages
+`messageUpdate` Logged when a message is updated
+`channelCreate` Logged when a channel is created
+`channelDelete` Logged when achannel is deleted
+`channelUpdate` Logged when a channel is updated
+`guildBanAdd` Logged when someone is banned
+`guildBanRemove` Logged when someone is unbanned
+`guildMemberAdd` Logged when someone joins the server
+`guildMemebrRemove` Logged when someone leaves the server.
+`error` Logged when the bot encouters an error wjile doing something on the server.
+`emojiCreate` Logged when a emoji is craeted.
+`emojiDelete`Logged when an emoji is deleted
+`emojiUpdate`Logged when an emoji is updated.
