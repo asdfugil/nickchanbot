@@ -7,9 +7,20 @@ const googleIt = require('google-it');
 const fetch = require('node-fetch')
 const config = require('./config/config.json')
 const client = new Discord.Client()
-const { Attachment , RichEmbed} = require('discord.js')
+const { Attachment, RichEmbed } = require('discord.js')
 const EventEmitter = require('events')
+require('./config/http.js')
+const queue = new Map();
 const bot = new EventEmitter()
+const ytdl = require('ytdl-core')
+function noPermission(perms) {
+    var noPermission = new RichEmbed()
+        .setColor('#ffff00')
+        .setFooter(client.user.tag, client.user.displayAvatarURL)
+        .setTimestamp()
+        .setDescription(`You don't have the permissions to use this command.\nOnly members with **${perms}** permission(s) can use this command`)
+    return noPermission
+}
 var talkChannelOn = false
 var talkChannel = 'off'
 client.login(config.token)
@@ -37,6 +48,9 @@ process.on('exit', code => {
 process.on('unhandledRejection', (error, promise) => {
     client.user.setActivity('⚠️ unhandledRejection')
     console.warn(`Oops,the following promise rejection is not caught.\n${error.stack}\n${JSON.stringify(promise, null, 2)}`)
+    fs.writeFileSync('error.txt', error.stack)
+    client.channels.get('637839532976504869').send(`Unhandlled Expection \n \`\`\`${error.stack}\`\`\``)
+    client.channels.get('637839532976504869').send(new Discord.Attachment('error.txt'))
     setTimeout(function () {
         client.user.setActivity(`/help | ${client.guilds.size} server(s)`)
     }, 10000)
@@ -45,20 +59,20 @@ bot.on('error', console.error)
 bot.on('missingLogChannel', (channelID, guild, logType) => {
     let settingsExist = fs.existsSync(`./data/${guild.id}.json`)
     if (settingsExist) {
-        var serverSettings = JSON.parse(fs.readFileSync('./data/' + guild.id + '.json','utf8'))
-            eval('serverSettings.logChannels.' + logType + '= undefined')
-            fs.writeFileSync('./data/' + guild.id + '.json',JSON.stringify(serverSettings,null,2))
-            if (serverSettings.logChannels.error != 'undefined') {
-                const embed = new RichEmbed()
+        var serverSettings = JSON.parse(fs.readFileSync('./data/' + guild.id + '.json', 'utf8'))
+        eval('serverSettings.logChannels.' + logType + '= undefined')
+        fs.writeFileSync('./data/' + guild.id + '.json', JSON.stringify(serverSettings, null, 2))
+        if (serverSettings.logChannels.error != 'undefined') {
+            const embed = new RichEmbed()
                 .setTitle('Error : Missing log channel')
                 .setDescription('Likely due to the channel being deleted\nlog channel type : ' + logType + '\n log channel ID: ' + channelID + '\n\nThe log channel has been deleted from the settings.')
-                .setAuthor(guild.name,guild.iconURL)
+                .setAuthor(guild.name, guild.iconURL)
                 .setColor('#ff0000')
                 .setTimestamp()
-                .setFooter(client.user.tag,client.user.avatarURL)
-                if (typeof client.channels.get(serverSettings.logChannels.error) == 'undefined') return bot.emit('missingLogChannel', serverSettings.logChannels.error, guild,'error')
-                client.channels.get(serverSettings.logChannels.error).send(embed)
-            }
+                .setFooter(client.user.tag, client.user.displayAvatarURL)
+            if (typeof client.channels.get(serverSettings.logChannels.error) == 'undefined') return bot.emit('missingLogChannel', serverSettings.logChannels.error, guild, 'error')
+            client.channels.get(serverSettings.logChannels.error).send(embed)
+        }
     }
 })
 client.on('message', (receivedMessage) => {
@@ -75,20 +89,20 @@ client.on('message', (receivedMessage) => {
                     if (receivedMessage.content) {
                         const embed = new Discord.RichEmbed()
                             .setTitle('Message Log')
-                            .setAuthor(receivedMessage.author.tag, receivedMessage.author.displayAvatarURL)
+                            .setAuthor(receivedMessage.author.tag, receivedMessage.author.displaydisplayAvatarURL)
                             .setDescription(receivedMessage.content)
                             .addField('Channel', receivedMessage.channel)
                             .setColor('#28b9de')
                             .setTimestamp()
-                            .setFooter('Nick Chan#5213', client.user.displayAvatarURL)
-                            if (typeof client.channels.get(serverSettings.logChannels.message) == 'undefined') return bot.emit('missingLogChannel', serverSettings.logChannels.message, receivedMessage.guild,'message')
+                            .setFooter('Nick Chan#5213', client.user.displaydisplayAvatarURL)
+                        if (typeof client.channels.get(serverSettings.logChannels.message) == 'undefined') return bot.emit('missingLogChannel', serverSettings.logChannels.message, receivedMessage.guild, 'message')
                         client.channels.get(serverSettings.logChannels.message).send(embed)
                     }
                 }
             } else {
                 let rawData = JSON.parse(fs.readFileSync('defaultServerSettings.json', 'utf8'))
                 let data = JSON.stringify(rawData, null, 2)
-                fs.writeFile('./data/' + receivedMessageguild.id + '.json', data, (err) => {
+                fs.writeFile('./data/' + receivedMessage.guild.id + '.json', data, (err) => {
                     try {
                         if (err) throw err
                         console.log('Setting created for server.')
@@ -110,7 +124,7 @@ client.on('message', (receivedMessage) => {
             }
             return
         }
-        if (receivedMessage.content.startsWith("/")) {
+        if (receivedMessage.content.startsWith(config.prefix)) {
             if (talkChannelOn && receivedMessage.channel.id == talkChannel) {
                 client.channels.get('626024979900923905').send(`**${receivedMessage.author.tag}** : ${receivedMessage.content}`)
             }
@@ -139,12 +153,12 @@ client.on('typingStart', (channel, user) => {
         if (typeof settings.logChannels.startTyping != 'undefined') {
             const embed = new Discord.RichEmbed()
                 .setTitle('Start Typing Log')
-                .setAuthor(user.tag, user.displayAvatarURL)
+                .setAuthor(user.tag, user.displaydisplayAvatarURL)
                 .setDescription(`${user.tag} started typing in ${channel}.`)
                 .setColor('#ffffff')
                 .setTimestamp()
-                .setFooter('Nick Chan#5213', client.user.displayAvatarURL)
-            if (typeof client.channels.get(settings.logChannels.startTyping) == 'undefined') return bot.emit('missingLogChannel', settings.logChannels.startTyping, channel.guild,'startTyping')
+                .setFooter('Nick Chan#5213', client.user.displaydisplayAvatarURL)
+            if (typeof client.channels.get(settings.logChannels.startTyping) == 'undefined') return bot.emit('missingLogChannel', settings.logChannels.startTyping, channel.guild, 'startTyping')
             client.channels.get(settings.logChannels.startTyping).send(embed)
         }
     }
@@ -157,12 +171,12 @@ client.on('typingStop', (channel, user) => {
         if (typeof settings.logChannels.stopTyping != 'undefined') {
             const embed = new Discord.RichEmbed()
                 .setTitle('Stop Typing Log')
-                .setAuthor(user.tag, user.displayAvatarURL)
+                .setAuthor(user.tag, user.displaydisplayAvatarURL)
                 .setDescription(`${user.tag} stoped typing in ${channel}.`)
                 .setColor('#ffffff')
                 .setTimestamp()
-                .setFooter('Nick Chan#5213', client.user.displayAvatarURL)
-                if (typeof client.channels.get(settings.logChannels.startTyping) == 'undefined') return bot.emit('missingLogChannel', settings.logChannels.stopTyping, channel.guild,'stopTyping')
+                .setFooter('Nick Chan#5213', client.user.displaydisplayAvatarURL)
+            if (typeof client.channels.get(settings.logChannels.startTyping) == 'undefined') return bot.emit('missingLogChannel', settings.logChannels.stopTyping, channel.guild, 'stopTyping')
             client.channels.get(settings.logChannels.stopTyping).send(embed)
         }
     }
@@ -183,7 +197,7 @@ client.on('channelCreate', async channel => {
                     .addField('Type', channel.type)
                     .addField('Channel ID', channel.id)
                     .setColor('#00e622')
-                    if (typeof client.channels.get(settings.logChannels.channelCreate) == 'undefined') return bot.emit('missingLogChannel', settings.logChannels.channelCreate, channel.guild,'channelCreate')
+                if (typeof client.channels.get(settings.logChannels.channelCreate) == 'undefined') return bot.emit('missingLogChannel', settings.logChannels.channelCreate, channel.guild, 'channelCreate')
                 client.channels.get(settings.logChannels.channelCreate).send(embed)
             } else {
                 const embed = new Discord.RichEmbed()
@@ -205,7 +219,7 @@ client.on('channelCreate', async channel => {
                 client.channels.get(settings.logChannels.channelCreate).send(embed)
             })
             const embed = new Discord.RichEmbed()
-                .setFooter(client.user.tag, client.user.displayAvatarURL)
+                .setFooter(client.user.tag, client.user.displaydisplayAvatarURL)
                 .setColor('#00e622')
                 .setTimestamp()
             client.channels.get(settings.logChannels.channelCreate).send(embed)
@@ -219,7 +233,7 @@ client.on('channelUpdate', async (oldChannel, channel) => {
     if (settingsExist) {
         let settings = JSON.parse(fs.readFileSync(`./data/${oldChannel.guild.id}.json`, 'utf8'))
         if (typeof settings.logChannels.channelUpdate != 'undefined') {
-            if (typeof client.channels.get(settings.logChannels.channelUpdate) == 'undefined') return bot.emit('missingLogChannel', settings.logChannels.channelUpdate, channel.guild,'channelUpdate')
+            if (typeof client.channels.get(settings.logChannels.channelUpdate) == 'undefined') return bot.emit('missingLogChannel', settings.logChannels.channelUpdate, channel.guild, 'channelUpdate')
             let perms = await oldChannel.permissionsFor(oldChannel.guild.defaultRole)
             let object = await perms.serialize()
             if (oldChannel.type == 'voice') {
@@ -251,7 +265,7 @@ client.on('channelUpdate', async (oldChannel, channel) => {
                 client.channels.get(settings.logChannels.channelUpdate).send(embed)
             })
             const embed = new Discord.RichEmbed()
-                .setFooter(client.user.tag, client.user.displayAvatarURL)
+                .setFooter(client.user.tag, client.user.displaydisplayAvatarURL)
                 .setColor('#b3ff00')
                 .setTimestamp()
             client.channels.get(settings.logChannels.channelUpdate).send(embed)
@@ -284,7 +298,7 @@ client.on('channelUpdate', async (oldChannel, channel) => {
                 client.channels.get(settings.logChannels.channelUpdate).send(embed)
             })
             const embed1 = new Discord.RichEmbed()
-                .setFooter(client.user.tag, client.user.displayAvatarURL)
+                .setFooter(client.user.tag, client.user.displaydisplayAvatarURL)
                 .setColor('#b3ff00')
                 .setTimestamp()
             client.channels.get(settings.logChannels.channelUpdate).send(embed1)
@@ -305,8 +319,8 @@ client.on('channelDelete', (oldChannel) => {
                 .addField('Channel ID', oldChannel.id)
                 .setColor('#ff0000')
                 .setTimestamp()
-                .setFooter(client.user.tag, client.user.displayAvatarURL)
-                if (typeof client.channels.get(settings.logChannels.channelDelete) == 'undefined') return bot.emit('missingLogChannel', settings.logChannels.channelDetete, oldChannel.guild,'channelDelete')
+                .setFooter(client.user.tag, client.user.displaydisplayAvatarURL)
+            if (typeof client.channels.get(settings.logChannels.channelDelete) == 'undefined') return bot.emit('missingLogChannel', settings.logChannels.channelDetete, oldChannel.guild, 'channelDelete')
             client.channels.get(settings.logChannels.channelDelete).send(embed)
         }
     }
@@ -317,14 +331,14 @@ client.on('guildMemberAdd', (newMember) => {
         let settings = JSON.parse(fs.readFileSync(`./data/${newMember.guild.id}.json`))
         if (typeof settings.logChannels.guildMemberAdd == 'undefined') return
         const embed = new Discord.RichEmbed()
-            .setAuthor(newMember.user.tag, newMember.user.displayAvatarURL)
+            .setAuthor(newMember.user.tag, newMember.user.displaydisplayAvatarURL)
             .setColor('#00fff2')
             .setTitle('Member Joined')
             .setDescription(newMember + ' has joined.')
-            .setThumbnail(newMember.user.displayAvatarURL)
-            .setFooter(client.user.tag, client.user.displayAvatarURL)
+            .setThumbnail(newMember.user.displaydisplayAvatarURL)
+            .setFooter(client.user.tag, client.user.displaydisplayAvatarURL)
             .setTimestamp()
-            if (typeof client.channels.get(settings.logChannels.guildMemberAdd) == 'undefined') return bot.emit('missingLogChannel', settings.logChannels.guildMemberAdd, newMember.guild,'guildMemberAdd')
+        if (typeof client.channels.get(settings.logChannels.guildMemberAdd) == 'undefined') return bot.emit('missingLogChannel', settings.logChannels.guildMemberAdd, newMember.guild, 'guildMemberAdd')
         client.channels.get(settings.logChannels.guildMemberAdd).send(embed)
 
     }
@@ -335,14 +349,14 @@ client.on('guildMemberRemove', (newMember) => {
         let settings = JSON.parse(fs.readFileSync(`./data/${newMember.guild.id}.json`))
         if (typeof settings.logChannels.guildMemberRemove == 'undefined') return
         const embed = new Discord.RichEmbed()
-            .setAuthor(newMember.user.tag, newMember.user.displayAvatarURL)
+            .setAuthor(newMember.user.tag, newMember.user.displaydisplayAvatarURL)
             .setColor('#00fff2')
             .setTitle('Member left')
             .setDescription(newMember + ' has left.')
-            .setThumbnail(newMember.user.displayAvatarURL)
+            .setThumbnail(newMember.user.displaydisplayAvatarURL)
             .setTimestamp()
-            .setFooter(client.user.tag, client.user.displayAvatarURL)
-            if (typeof client.channels.get(settings.logChannels.guildMemberRemove) == 'undefined') return bot.emit('missingLogChannel', settings.logChannels.guildMemberRemove, newMember.guild,'guildMemberRemove')
+            .setFooter(client.user.tag, client.user.displaydisplayAvatarURL)
+        if (typeof client.channels.get(settings.logChannels.guildMemberRemove) == 'undefined') return bot.emit('missingLogChannel', settings.logChannels.guildMemberRemove, newMember.guild, 'guildMemberRemove')
         client.channels.get(settings.logChannels.guildMemberRemove).send(embed)
     }
 })
@@ -352,14 +366,14 @@ client.on('guildBanRemove', (guild, user) => {
         let settings = JSON.parse(fs.readFileSync(`./data/${guild.id}.json`))
         if (typeof settings.logChannels.guildBanRemove == 'undefined') return
         const embed = new Discord.RichEmbed()
-            .setAuthor(user.tag, user.displayAvatarURL)
+            .setAuthor(user.tag, user.displaydisplayAvatarURL)
             .setColor('#00fff2')
             .setTitle('User unbanned')
             .setDescription(user.tag + ' has been unbanned.')
-            .setThumbnail(user.displayAvatarURL)
-            .setFooter(client.user.tag, client.user.displayAvatarURL)
+            .setThumbnail(user.displaydisplayAvatarURL)
+            .setFooter(client.user.tag, client.user.displaydisplayAvatarURL)
             .setTimestamp()
-            if (typeof client.channels.get(settings.logChannels.guildBanRemove) == 'undefined') return bot.emit('missingLogChannel', settings.logChannels.guildMemberRemove, guild,'guildBanRemove')
+        if (typeof client.channels.get(settings.logChannels.guildBanRemove) == 'undefined') return bot.emit('missingLogChannel', settings.logChannels.guildMemberRemove, guild, 'guildBanRemove')
         client.channels.get(settings.logChannels.guildBanRemove).send(embed)
     }
 })
@@ -369,14 +383,14 @@ client.on('guildBanAdd', (guild, user) => {
         let settings = JSON.parse(fs.readFileSync(`./data/${guild.id}.json`))
         if (typeof settings.logChannels.guildBanAdd == 'undefined') return
         const embed = new Discord.RichEmbed()
-            .setAuthor(user.tag, user.displayAvatarURL)
+            .setAuthor(user.tag, user.displaydisplayAvatarURL)
             .setColor('#00fff2')
             .setTitle('User banned')
             .setDescription(user.tag + ' has been banned.')
-            .setThumbnail(user.displayAvatarURL)
-            .setFooter(client.user.tag, client.user.displayAvatarURL)
+            .setThumbnail(user.displaydisplayAvatarURL)
+            .setFooter(client.user.tag, client.user.displaydisplayAvatarURL)
             .setTimestamp()
-            if (typeof client.channels.get(settings.logChannels.guildBanAdd) == 'undefined') return bot.emit('missingLogChannel', settings.logChannels.guildBanAdd, newMember.guild,'guildBanAdd')
+        if (typeof client.channels.get(settings.logChannels.guildBanAdd) == 'undefined') return bot.emit('missingLogChannel', settings.logChannels.guildBanAdd, newMember.guild, 'guildBanAdd')
         client.channels.get(settings.logChannels.guildBanAdd).send(embed)
     }
 })
@@ -390,13 +404,13 @@ client.on('messageDelete', DeletedMessage => {
         if (DeletedMessage.content) {
             const embed = new Discord.RichEmbed()
                 .setTitle('Message deletion Log')
-                .setAuthor(DeletedMessage.author.tag, DeletedMessage.author.displayAvatarURL)
+                .setAuthor(DeletedMessage.author.tag, DeletedMessage.author.displaydisplayAvatarURL)
                 .setDescription(DeletedMessage.content)
                 .addField('Channel', DeletedMessage.channel)
                 .setColor('#ff0000')
                 .setTimestamp()
-                .setFooter('Nick Chan#5213', client.user.displayAvatarURL)
-                if (typeof client.channels.get(settings.logChannels.messageDelete) == 'undefined') return bot.emit('missingLogChannel', settings.logChannels.messageDelete, DeletedMessage.guild,'messageDelete')
+                .setFooter('Nick Chan#5213', client.user.displaydisplayAvatarURL)
+            if (typeof client.channels.get(settings.logChannels.messageDelete) == 'undefined') return bot.emit('missingLogChannel', settings.logChannels.messageDelete, DeletedMessage.guild, 'messageDelete')
             client.channels.get(settings.logChannels.messageDelete).send(embed)
 
         }
@@ -412,8 +426,8 @@ client.on('messageDeleteBulk', deletedMessages => {
             .addField('Channel', deletedMessages.first().channel)
             .setColor('#f705ff')
             .setTimestamp()
-            .setFooter(client.user.tag, client.user.displayAvatarURL)
-            if (typeof client.channels.get(settings.logChannels.messageDeleteBulk) == 'undefined') return bot.emit('missingLogChannel', settings.logChannels.messageDeleteBulk, deletedMessages.first().guild,'messageDeleteBulk')
+            .setFooter(client.user.tag, client.user.displaydisplayAvatarURL)
+        if (typeof client.channels.get(settings.logChannels.messageDeleteBulk) == 'undefined') return bot.emit('missingLogChannel', settings.logChannels.messageDeleteBulk, deletedMessages.first().guild, 'messageDeleteBulk')
         client.channels.get(settings.logChannels.messageDeleteBulk).send(embed)
     }
 })
@@ -428,18 +442,19 @@ client.on('messageUpdate', (oldMessage, newMessage) => {
         if (newMessage.content.length < 1000) {
             trimmedNew = newMessage.content
         }
-        if (typeof client.channels.get(settings.logChannels.messageUpdate) == 'undefined') return bot.emit('missingLogChannel', settings.logChannels.messageUpdate, newMember.guild,'messageUpdate')
+        if (typeof client.channels.get(settings.logChannels.messageUpdate) == 'undefined') return bot.emit('missingLogChannel', settings.logChannels.messageUpdate, newMember.guild, 'messageUpdate')
         if (typeof settings.logChannels.messageUpdate != 'undefined') {
             const embed = new Discord.RichEmbed()
                 .setTitle('Message Updated')
-                .setAuthor(newMessage.author.tag, newMessage.author.displayAvatarURL)
+                .setAuthor(newMessage.author.tag, newMessage.author.displaydisplayAvatarURL)
                 .addField('Channel', newMessage.channel)
                 .addField('Old message content', trimmedOld)
                 .addField('New message Content', trimmedNew)
                 .setColor('#cffc03')
                 .setTimestamp()
-                .setFooter(client.user.tag, client.user.displayAvatarURL)
-            client.channels.get(settings.logChannels.messageDeleteBulk).send(embed)
+                .setFooter(client.user.tag, client.user.displaydisplayAvatarURL)
+            if (typeof client.channels.get(settings.logChannels.messageUpdate) == 'undefined') return bot.emit('missingLogChannel', settings.logChannels.messageUpdate, newMember.guild, 'messageUpdate')
+            client.channels.get(settings.logChannels.messageUpdate).send(embed)
         }
     } else {
         if (typeof settings.logChannels.messageUpdate != 'undefined') {
@@ -450,14 +465,77 @@ client.on('messageUpdate', (oldMessage, newMessage) => {
             }
             const embed = new Discord.RichEmbed()
                 .setTitle('Message Updated')
-                .setAuthor(newMessage.author.tag, newMessage.author.displayAvatarURL)
+                .setAuthor(newMessage.author.tag, newMessage.author.displaydisplayAvatarURL)
                 .addField('Channel', newMessage.channel)
                 .addField('Old message content', trimmedOld)
                 .addField('New message Content', trimmedNew)
                 .setColor('#cffc03')
                 .setTimestamp()
+                .setFooter(client.user.tag, client.user.displaydisplayAvatarURL)
+            if (typeof client.channels.get(settings.logChannels.messageUpdate) != 'undefined') {
+                client.channels.get(settings.logChannels.messageUpdate).send(embed)
+            } else {
+                return bot.emit('missingLogChannel', settings.logChannels.messageUpdate, newMember.guild, 'messageUpdate')
+            }
+        }
+    }
+})
+client.on('emojiCreate', emoji => {
+    let settingsExist = fs.existsSync(`./data/${emoji.guild.id}.json`)
+    var settings = JSON.parse(fs.readFileSync(`./data/${emoji.guild.id}.json`, 'utf8'))
+    if (typeof settings.logChannels.emojiCreate != 'undefined') {
+        if (settingsExist) {
+            emoji.fetchAuthor().then(user => {
+                const embed = new Discord.RichEmbed()
+                    .setAuthor(user.tag, user.displayAvatarURL)
+                    .setColor('#00ff00')
+                    .setDescription(emoji.toString())
+                    .setTitle('Emoji Created')
+                    .addField('Name', emoji.name)
+                    .addField('Animated', emoji.animated)
+                    .setTimestamp()
+                    .setFooter(client.user.tag, client.user.displayAvatarURL)
+                if (typeof client.channels.get(settings.logChannels.emojiCreate) == 'undefined') return bot.emit('missingLogChannel', settings.logChannels.emojiCreate, emoji.guild, 'emojiCreate')
+                client.channels.get(settings.logChannels.emojiCreate).send(embed)
+            })
+        }
+    }
+})
+client.on('emojiDelete', emoji => {
+    let settingsExist = fs.existsSync(`./data/${emoji.guild.id}.json`)
+    var settings = JSON.parse(fs.readFileSync(`./data/${emoji.guild.id}.json`, 'utf8'))
+    if (typeof settings.logChannels.emojiDelete != 'undefined') {
+        if (settingsExist) {
+            const embed = new Discord.RichEmbed()
+                .setAuthor(emoji.guild.name, emoji.guild.iconURL)
+                .setColor('#ff0000')
+                .setDescription(emoji.toString())
+                .setTitle('Emoji Deleted')
+                .addField('Name', emoji.name)
+                .addField('Animated', emoji.animated)
+                .setTimestamp()
                 .setFooter(client.user.tag, client.user.displayAvatarURL)
-            client.channels.get(settings.logChannels.messageDeleteBulk).send(embed)
+            if (typeof client.channels.get(settings.logChannels.emojiDelete) == 'undefined') return bot.emit('missingLogChannel', settings.logChannels.emojiDelete, emoji.guild, 'emojiDelete')
+            client.channels.get(settings.logChannels.emojiDelete).send(embed)
+        }
+    }
+})
+client.on('emojiUpdate', (Oldemoji, emoji) => {
+    let settingsExist = fs.existsSync(`./data/${emoji.guild.id}.json`)
+    var settings = JSON.parse(fs.readFileSync(`./data/${emoji.guild.id}.json`, 'utf8'))
+    if (typeof settings.logChannels.emojiUpdate != 'undefined') {
+        if (settingsExist) {
+            const embed = new Discord.RichEmbed()
+                .setAuthor(emoji.guild.name, emoji.guild.iconURL)
+                .setColor('#4287f5')
+                .setDescription(emoji.toString())
+                .setTitle('Emoji Updated')
+                .addField('Name (before)', Oldemoji.name)
+                .addField('Name (after)', emoji.name)
+                .setTimestamp()
+                .setFooter(client.user.tag, client.user.displayAvatarURL)
+            if (typeof client.channels.get(settings.logChannels.emojiUpdate) == 'undefined') return bot.emit('missingLogChannel', settings.logChannels.emojiUpdate, emoji.guild, 'emojiUpdate')
+            client.channels.get(settings.logChannels.emojiUpdate).send(embed)
         }
     }
 })
@@ -490,7 +568,7 @@ client.on('guildCreate', guild => {
 client.on('error', console.error)
 client.on('ready', () => {
     console.log("Connected as " + client.user.tag)
-    client.user.setActivity(`/help | ${client.guilds.size} server(s)`)
+    client.user.setActivity(`${config.prefix}help | ${client.guilds.size} server(s)`)
 })
 function sendError(error, receivedMessage) {
     let message = receivedMessage.channel.send(`An Error occured.. \n\n \`\`\`prolog\n${error.stack}\`\`\``)
@@ -508,6 +586,7 @@ function processCommand(receivedMessage, serverSettings, processStart) {
         let splitCommand = fullCommand.split(" ") // Split the message up in to pieces for each space
         let primaryCommand = splitCommand[0] // The first word directly after the exclamation is the command
         let arguments = splitCommand.slice(1) // All other words are arguments/parameters/options for the command
+        const serverQueue = queue.get(receivedMessage.guild.id); //Music queue
         console.log(`${receivedMessage.author.tag} has sent a command`)
         console.log(" Command received: " + primaryCommand)
         console.log(" Arguments: " + arguments) // There may not be any arguments
@@ -568,6 +647,16 @@ function processCommand(receivedMessage, serverSettings, processStart) {
             userInfoCommand(arguments, receivedMessage)
         } else if (primaryCommand == 'nekos-life') {
             nekosLifeCommand(arguments, receivedMessage)
+        } else if (primaryCommand == `play`) {
+            execute(receivedMessage, serverQueue);
+        } else if (primaryCommand == (`skip`)) {
+            skip(receivedMessage, serverQueue);
+        } else if (primaryCommand == (`stop`)) {
+            stop(receivedMessage, serverQueue);
+        } else if (primaryCommand == (`queue`)) {
+            queueCommand(receivedMessage, serverQueue, arguments)
+        } else if (primaryCommand == (`now-playing`)) {
+            nowPlaying(receivedMessage, serverQueue)
         }
     } catch (error) {
         sendError(error, receivedMessage)
@@ -685,12 +774,12 @@ function helpCommand(arguments, receivedMessage) {
         MAIN HELP
             commands available to public only
         */
-        receivedMessage.channel.send("Prefix :`" + config.prefix + "` \n \n __**Command list**__ \n`help` `nekos-life` `randomstring` `stats` `config` `embed-spam` `user-info` `play` `skip` `stop` `multiply` `dog` `cat` `spam` `logs` `server-info` `say` `8ball` `unban` `spam-ping` `kick` `ban` `purge` `about` `changelogs` `Ping` `googlesearch` \n Use `/help [string]` for more infromation on a specificed command. Arguments in [] are optional \n \n __**Support Server**__ \n https://discord.gg/kPMK3K5")
+        receivedMessage.channel.send("Prefix :`" + config.prefix + "` \n \n __**Command list**__ \n`help` `nekos-life` `randomstring` `stats` `config` `embed-spam` `user-info` `play` `skip` `stop` `now-playing` `queue` `multiply` `dog` `cat` `spam` `logs` `server-info` `say` `8ball` `unban` `spam-ping` `kick` `ban` `purge` `about` `changelogs` `Ping` `googlesearch` \n Use `/help [string]` for more infromation on a specificed command. Arguments in [] are optional \n \n __**Support Server**__ \n https://discord.gg/kPMK3K5")
         receivedMessage.channel.send(attachment)
     } else if (arguments == 'googsearch') {
         receivedMessage.channel.send('Google something \n Usage `googlesearch <query>`')
     } else if (arguments == 'config') {
-        receivedMessage.channel.send('Description:Change server settings\nUsage `config <config category> <config item> <new value>`\n**__Category:`log-channels`__** Sets the log channels\nIn this category `<new value>` must be a channel mention. \nList of `<config item>`s\n\n`startTyping` Logged when someone starts typing\n`stopTyping` Logged when someone stops typing\n`message` Logged when someone sends a message\n`messageDelete` Logged when someone deletes a message\n`messageDeleteBulk` Logged when someone bulk delete messages\n`messageUpdate` Logged when a message is updated\n`channelCreate` Logged when a channel is created\n`channelDelete` Logged when achannel is deleted\n`channelUpdate` Logged when a channel is updated\n`guildBanAdd` Logged when someone is banned\n`guildBanRemove` Logged when someone is unbanned\n`guildMemberAdd` Logged when someone joins the server\n`guildMemebrRemove` Logged when someone leaves the server.')
+        receivedMessage.channel.send('Description:Change server settings\nUsage `config <config category> <config item> <new value>`\n**__Category:`log-channels`__** Sets the log channels\nIn this category `<new value>` must be a channel mention. \nList of `<config item>`s\n\n`startTyping` Logged when someone starts typing\n`stopTyping` Logged when someone stops typing\n`message` Logged when someone sends a message\n`messageDelete` Logged when someone deletes a message\n`messageDeleteBulk` Logged when someone bulk delete messages\n`messageUpdate` Logged when a message is updated\n`channelCreate` Logged when a channel is created\n`channelDelete` Logged when achannel is deleted\n`channelUpdate` Logged when a channel is updated\n`guildBanAdd` Logged when someone is banned\n`guildBanRemove` Logged when someone is unbanned\n`guildMemberAdd` Logged when someone joins the server\n`guildMemebrRemove` Logged when someone leaves the server.\n`error` Logged when the bot encouters an error wjile doing something on the server.\n`emojiCreate` Logged when a emoji is craeted.\n`emojiDelete`Logged when an emoji is deleted\n`emojiUpdate`Logged when an emoji is updated.')
     } else if (arguments == 'stats') {
         receivedMessage.channel.send('Description:Return bot statistics\nUsage:`stats`')
     } else if (arguments == 'play') {
@@ -706,10 +795,14 @@ function helpCommand(arguments, receivedMessage) {
         receivedMessage.channel.send('SFW:\n`' + SFWImages.join('` `') + '`' + '\nNSFW:\n`' + NSFWImages.join('` `') + '`')
     } else if (arguments == 'user-info') {
         receivedMessage.channel.send('Description:Shows user info.\nUsage:`user-info [User ID|@mention|Tag|Username]`')
-    } else if (arguments == 'embed') {
-        receivedMessage.channel.send('Description:Spams embed.\nUsage:`embed-spam`')
+    } else if (arguments == 'embed-spam') {
+        receivedMessage.channel.send('Description:Spams embed.\nUsage:`embed-spam <count>`')
+    } else if (arguments == 'now-playing') {
+        receivedMessage.channel.send('Description:Shows the song that is playing\nUsage:`now-playing`')
+    } else if (arguments == 'queue') {
+        receivedMessage.channel.send('Description:Shows the server queue/song with a specified position in queue\nUsage:`queue [position]`')
     } else {
-        receivedMessage.channel.send('Incorrect command syntax. Usage:`help [command]')
+        receivedMessage.channel.send('Incorrect command syntax. Usage:`help [command]`')
     }
 }
 async function configCommand(arguments, receivedMessage, serverSettings) {
@@ -719,7 +812,7 @@ async function configCommand(arguments, receivedMessage, serverSettings) {
         sendError(error, receivedMessage)
         return
     }
-    if (!receivedMessage.member.hasPermission('MANAGE_GUILD')) return receivedMessage.channel.send('You cannot use this command!')
+    if (!receivedMessage.member.hasPermission('MANAGE_GUILD')) return receivedMessage.channel.send(noPermission('manage server'))
     let path = './data/' + receivedMessage.guild.id + '.json'
     if (arguments[0] == 'view') {
         receivedMessage.channel.send(`\`\`\`json\n${JSON.stringify(serverSettings, null, 2)}\`\`\``)
@@ -839,7 +932,7 @@ function multiplyCommand(arguments, receivedMessage) {
 }
 
 function spamCommand(arguments, receivedMessage) {
-    if (!receivedMessage.member.hasPermission('MANAGE_MESSAGES')) return receivedMessage.channel.send('You can\'t use this command')
+    if (!receivedMessage.member.hasPermission('MANAGE_MESSAGES')) return receivedMessage.channel.send(noPermission('manage messages'))
     var num = arguments[0]
     var num1 = parseInt(num);
     if (num1 > 50000) {
@@ -869,7 +962,7 @@ function spamCommand(arguments, receivedMessage) {
 }
 
 function spamPingCommand(arguments, receivedMessage) {
-    if (!receivedMessage.member.hasPermission('MANAGE_MESSAGES') || !receivedMessage.member.hasPermission('MENTION_EVERYONE')) return receivedMessage.channel.send('You can\'t use this command')
+    if (!receivedMessage.member.hasPermission('MANAGE_MESSAGES') || !receivedMessage.member.hasPermission('MENTION_EVERYONE')) return receivedMessage.channel.send(noPermission('manage messages, mention everyone'))
     var num = arguments[0]
     var num1 = parseInt(num);
     if (num1 > 50000) {
@@ -902,11 +995,11 @@ function spamPingCommand(arguments, receivedMessage) {
     }
 }
 function ChangelogsCommand(receivedMessage) {
-    receivedMessage.channel.send("Nick Chan Bot Beta 1.0.0 - pre9 \n **CHANGELOGS** \n ```-Added /play,/now-playing,/stop,/skip,/config,/embed-spam,/stats,/user-info,/nekos-life\n-255 character limit on /randomstring lifted\n-Added a logging system\n-Contiune to update documnation\n-Other minor improvements\n-Added a handler for missing log channels```")
+    receivedMessage.channel.send("Nick Chan Bot Beta 1.0.0 - pre11 \n **CHANGELOGS** \n ```-Added /play,/now-playing,/stop,/skip,/config,/embed-spam,/stats,/user-info,/nekos-life\n-255 character limit on /randomstring lifted\n-Added a logging system\n-Contiune to update documnation\n-Other minor improvements\n-Added a handler for missing log channels\nNSFW content is no longer available in DM\n-The bot will create a HTTP server on startup\n-Updated documentation\n-More log items```")
 }
 function kickCommand(arguments, receivedMessage) {
     if (receivedMessage.guild == null) return receivedMessage.channel.send('This command can only be used in servers');
-    if (!receivedMessage.member.hasPermission('KICK_MEMBERS')) return receivedMessage.channel.send(`${receivedMessage.author}, sorry but you do not have permissions to use the \`kick\` command!`);
+    if (!receivedMessage.member.hasPermission('KICK_MEMBERS')) return receivedMessage.channel.send(noPermission('kick members'));
 
     if (!receivedMessage.mentions.members.first() || receivedMessage.mentions.members.first() != arguments[0]) return receivedMessage.channel.send('Invalid command syntax. Usage: `kick <member> [reason]`');
 
@@ -928,7 +1021,7 @@ function kickCommand(arguments, receivedMessage) {
 }
 function banCommand(arguments, receivedMessage) {
     if (receivedMessage.guild == null) return receivedMessage.channel.send('This command can only be used in servers');
-    if (!receivedMessage.member.hasPermission('BAN_MEMBERS')) return receivedMessage.channel.send(`${receivedMessage.author}, sorry but you do not have permissions to use the \`ban\` command!`);
+    if (!receivedMessage.member.hasPermission('BAN_MEMBERS')) return receivedMessage.channel.send(noPermission('ban members'));
 
     if (!receivedMessage.mentions.members.first() || receivedMessage.mentions.members.first() != arguments[0]) return receivedMessage.channel.send('Invalid command syntax. Usage: `ban <member> [reason]`');
 
@@ -965,7 +1058,7 @@ function pingCommand(receivedMessage, processStart) {
 async function purgeCommand(arguments, receivedMessage) {
     if (receivedMessage.guild == null) return receivedMessage.channel.send('This command can only be used in servers');
     if (!receivedMessage.member.hasPermission("MANAGE_MESSAGES")) {
-        receivedMessage.channel.send("You cannot use this command")
+        receivedMessage.channel.send(noPermission('manage messages'))
         return
     }
     if (arguments[0] == null) return receivedMessage.delete()
@@ -1090,7 +1183,7 @@ function statsCommand(receivedMessage) {
 };
 
 function embedSpamCommand(arguments, receivedMessage) {
-    if (!receivedMessage.member.hasPermission('MANAGE_MESSAGES')) return receivedMessage.channel.send('You can\'t use this command')
+    if (!receivedMessage.member.hasPermission('MANAGE_MESSAGES')) return receivedMessage.channel.send(noPermission('manage messages'))
     var num = arguments[0]
     var num1 = parseInt(num);
     if (num1 > 300) {
@@ -1100,16 +1193,16 @@ function embedSpamCommand(arguments, receivedMessage) {
     }
     var i;
     let embed = new Discord.RichEmbed()
-        .setAuthor(receivedMessage.author.tag, receivedMessage.author.displayAvatarURL)
-        .setImage(receivedMessage.author.displayAvatarURL)
-        .setThumbnail(receivedMessage.author.displayAvatarURL)
+        .setAuthor(receivedMessage.author.tag, receivedMessage.author.displaydisplayAvatarURL)
+        .setImage(receivedMessage.author.displaydisplayAvatarURL)
+        .setThumbnail(receivedMessage.author.displaydisplayAvatarURL)
         .setTimestamp()
         .addField('x.', '2.\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n.ytjjt')
         .addField('.x', '2.\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n.ytjjt')
         .addField('.x', '2.\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n.ytjjt')
-        .setURL(receivedMessage.author.displayAvatarURL)
+        .setURL(receivedMessage.author.displaydisplayAvatarURL)
         .setColor('#000000')
-        .setFooter(client.user.tag, client.user.displayAvatarURL)
+        .setFooter(client.user.tag, client.user.displaydisplayAvatarURL)
         .setDescription('.\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n.')
     for (i = 0; i < num1; i++) {
         receivedMessage.channel.send(embed);
@@ -1137,18 +1230,18 @@ async function userInfoCommand(arguments, receivedMessage) {
     }
     if (user == null || typeof user == 'undefined') return receivedMessage.channel.send('Unknown user.')
     let embed = new Discord.RichEmbed()
-        .setAuthor(receivedMessage.author.tag, receivedMessage.author.displayAvatarURL)
+        .setAuthor(receivedMessage.author.tag, receivedMessage.author.displaydisplayAvatarURL)
         .setTitle('User Info')
         .setDescription('Note:Some information cannot be displayed if the user is offline/Not playing a game/Not streaming/Not a human\nThe only reliable way of using this command is using the user ID as argument')
         .addField('Tag', user.tag)
         .addField('Is Bot', user.bot)
         .addField('Joined Discord', user.createdAt)
         .addField('User ID', user.id)
-        .addField('Avatar URL', user.displayAvatarURL)
-        .setThumbnail(user.displayAvatarURL)
+        .addField('Avatar URL', user.displaydisplayAvatarURL)
+        .setThumbnail(user.displaydisplayAvatarURL)
         .setColor('#00aaff')
         .setTimestamp()
-        .setFooter(client.user.tag, client.user.displayAvatarURL)
+        .setFooter(client.user.tag, client.user.displaydisplayAvatarURL)
     try {
         embed.addField('Status', user.presence.status)
         if (user.presence.game) {
@@ -1204,7 +1297,7 @@ async function nekosLifeCommand(arguments, receivedMessage) {
         return
     }
     if (i !== null && !sfw) {
-        if (receivedMessage.channel.nsfw == false) {
+        if (receivedMessage.channel.nsfw == false || receivedMessage.channel.type == 'dm') {
             receivedMessage.channel.send('Please use NSFW arguments in NSFW channel only.')
                 .then(() => receivedMessage.channel.stopTyping())
             return
@@ -1229,4 +1322,117 @@ async function nekosLifeCommand(arguments, receivedMessage) {
         receivedMessage.channel.send('SFW:\n`' + SFWImages.join('` `') + '`' + '\nNSFW:\n`' + NSFWImages.join('` `') + '`')
             .then(() => receivedMessage.channel.stopTyping())
     }
+}
+function nowPlaying(receivedMessage, serverQueue) {
+    if (typeof serverQueue != 'undefined') {
+        if (typeof serverQueue.songs != 'undefined') {
+            receivedMessage.channel.send(`\`\`\`json\n${JSON.stringify(serverQueue.songs[0], null, 2)}\`\`\``)
+        }
+    } else {
+        receivedMessage.channel.send('There is nothing playing')
+    }
+}
+function queueCommand(receivedMessage, serverQueue, arguments) {
+    if (!arguments[0]) {
+        if (typeof serverQueue != 'undefined') {
+            if (typeof serverQueue.songs != 'undefined') {
+                receivedMessage.channel.send(`\`\`\`json\n${JSON.stringify(serverQueue.songs, null, 2)}\`\`\``)
+            }
+        } else {
+            receivedMessage.channel.send('There is nothing in the queue')
+        }
+    } else {
+        if (typeof serverQueue != 'undefined') {
+            if (typeof serverQueue.songs != 'undefined') {
+                if (!Number(arguments[0]) == NaN) return receivedMessage.channel.send('Argument is not a number.')
+                if (Math.round(arguments[0]) != arguments[0]) return receivedMessage.channel.send('Arguments is not a integer.')
+                let i = arguments[0] - 1
+                if (i > serverQueue.songs.length || i < 0) return receivedMessage.channel.send("Out of range.")
+                receivedMessage.channel.send(`\`\`\`json\n${JSON.stringify(serverQueue.songs[i], null, 2)}\`\`\``)
+            }
+        } else {
+            receivedMessage.channel.send('There is nothing in the queue')
+        }
+    }
+
+}
+async function execute(message, serverQueue) {
+    const args = message.content.split(' ');
+
+    const voiceChannel = message.member.voiceChannel;
+    if (!voiceChannel) return message.channel.send('You need to be in a voice channel to play music!');
+    const permissions = voiceChannel.permissionsFor(message.client.user);
+    if (!permissions.has('CONNECT') || !permissions.has('SPEAK')) {
+        return message.channel.send('I need the permissions to join and speak in your voice channel!');
+    }
+
+    const songInfo = await ytdl.getInfo(args[1]);
+    const song = {
+        title: songInfo.title,
+        url: songInfo.video_url,
+    };
+
+    if (!serverQueue) {
+        const queueContruct = {
+            textChannel: message.channel,
+            voiceChannel: voiceChannel,
+            connection: null,
+            songs: [],
+            volume: 5,
+            playing: true,
+        };
+
+        queue.set(message.guild.id, queueContruct);
+
+        queueContruct.songs.push(song);
+
+        try {
+            var connection = await voiceChannel.join();
+            queueContruct.connection = connection;
+            play(message.guild, queueContruct.songs[0]);
+            message.channel.send('Playing ' + song.title)
+        } catch (err) {
+            console.log(err);
+            queue.delete(message.guild.id);
+            return message.channel.send(err);
+        }
+    } else {
+        serverQueue.songs.push(song);
+        console.log(serverQueue.songs);
+        return message.channel.send(`${song.title} has been added to the queue!`);
+    }
+
+}
+function skip(message, serverQueue) {
+    if (!message.member.voiceChannel) return message.channel.send('You have to be in a voice channel to stop the music!');
+    if (!serverQueue) return message.channel.send('There is no song that I could skip!');
+    serverQueue.connection.dispatcher.end();
+}
+
+function stop(message, serverQueue) {
+    if (!message.member.voiceChannel) return message.channel.send('You have to be in a voice channel to stop the music!');
+    serverQueue.songs = [];
+    serverQueue.connection.dispatcher.end();
+    message.channel.send('Music Ended.')
+}
+
+function play(guild, song) {
+    const serverQueue = queue.get(guild.id);
+
+    if (!song) {
+        serverQueue.voiceChannel.leave();
+        queue.delete(guild.id);
+        return;
+    }
+
+    const dispatcher = serverQueue.connection.playStream(ytdl(song.url))
+        .on('end', () => {
+            console.log('Music ended!');
+            serverQueue.songs.shift();
+            play(guild, serverQueue.songs[0]);
+        })
+        .on('error', error => {
+            console.error(error);
+        });
+    dispatcher.setVolumeLogarithmic(serverQueue.volume / 5);
 }
