@@ -1,1 +1,11 @@
-
+ReferenceError: limit is not defined
+    at purgeCommand (C:\Users\nick\Desktop\nick\Nick Chan Bot [DEV]\bot.js:1099:18)
+    at processCommand (C:\Users\nick\Desktop\nick\Nick Chan Bot [DEV]\bot.js:623:13)
+    at Client.<anonymous> (C:\Users\nick\Desktop\nick\Nick Chan Bot [DEV]\bot.js:137:13)
+    at Client.emit (events.js:210:5)
+    at MessageCreateHandler.handle (C:\Users\nick\Desktop\nick\Nick Chan Bot [DEV]\node_modules\discord.js\src\client\websocket\packets\handlers\MessageCreate.js:9:34)
+    at WebSocketPacketManager.handle (C:\Users\nick\Desktop\nick\Nick Chan Bot [DEV]\node_modules\discord.js\src\client\websocket\packets\WebSocketPacketManager.js:105:65)
+    at WebSocketConnection.onPacket (C:\Users\nick\Desktop\nick\Nick Chan Bot [DEV]\node_modules\discord.js\src\client\websocket\WebSocketConnection.js:333:35)
+    at WebSocketConnection.onMessage (C:\Users\nick\Desktop\nick\Nick Chan Bot [DEV]\node_modules\discord.js\src\client\websocket\WebSocketConnection.js:296:17)
+    at WebSocket.onMessage (C:\Users\nick\Desktop\nick\Nick Chan Bot [DEV]\node_modules\ws\lib\event-target.js:120:16)
+    at WebSocket.emit (events.js:210:5)
