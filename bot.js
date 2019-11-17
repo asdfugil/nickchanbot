@@ -8,14 +8,52 @@ const googleIt = require('google-it');
 const fetch = require('node-fetch')
 const config = require('./config/config.json')
 const client = new Discord.Client()
-const { Attachment, RichEmbed } = require('discord.js')
+const { Attachment, RichEmbed, Collection } = require('discord.js')
+const Keyv = require('keyv')
+const levels = new Keyv()
 const EventEmitter = require('events')
 const { YTSearcher } = require('ytsearcher')
 const sercher = new YTSearcher(config.youTubeAPIKey)
-const servers = new Map()
 const queue = new Map();
 const bot = new EventEmitter()
 const ytdl = require('ytdl-core')
+class Rank {
+    constructor(guildID, memberID, xp) {
+        'use strict'
+        if (xp) {
+        this.xp = xp
+        } else {
+            this.xp = 0
+        }
+        this.guildID = guildID
+        this.member = memberID
+        this.getLevel = function () {
+            let xpRequiredToLevelUp = 100
+            let level = 1
+            let xpo = this.xp
+            for (let i = 0; xpo > 0; i++) {
+                xpo = xpo - xpRequiredToLevelUp
+                xpRequiredToLevelUp += 100
+                level += 1
+            }
+            sleep(100)
+            level -= 1
+            return level
+        }
+        this.getLevelXP = function () {
+            let xpRequiredToLevelUp = 100
+            let level = 1
+            let xpo = this.xp
+            for (let i = 0; xpo > 0; i++) {
+                xpo = xpo - xpRequiredToLevelUp
+                xpRequiredToLevelUp += 100
+                level += 1
+            }
+            sleep(100)
+            return (-xpo + '/' + xpRequiredToLevelUp)
+        }
+    }
+}
 function noPermission(perms) {
     var noPermission = new RichEmbed()
         .setColor('#ffff00')
@@ -26,7 +64,6 @@ function noPermission(perms) {
 }
 var talkChannelOn = false
 var talkChannel = 'off'
-client.login(config.token)
 process.on('uncaughtException', (error) => {
     console.error(error.stack)
     try {
@@ -58,9 +95,10 @@ process.on('unhandledRejection', (error, promise) => {
         client.user.setActivity(`/help | ${client.guilds.size} server(s)`)
     }, 10000)
 })
-bot.on('error', console.error)
+levels.on('error', error => console.error(error))
+bot.on('error', error => console.error(error))
 bot.on('missingLogChannel', (channelID, guild, logType) => {
-    let settingsExist = fs.existsSync(`./data/${guild.id}.json`)
+    var settingsExist = fs.existsSync(`./data/${guild.id}.json`)
     if (settingsExist) {
         var serverSettings = JSON.parse(fs.readFileSync('./data/' + guild.id + '.json', 'utf8'))
         eval('serverSettings.logChannels.' + logType + '= undefined')
@@ -79,13 +117,13 @@ bot.on('missingLogChannel', (channelID, guild, logType) => {
     }
 })
 client.on('message', (receivedMessage) => {
-    let processStart = performance.now()
+    var processStart = performance.now()
     try {
         if (receivedMessage.author == client.user) { // Prevent bot from responding to its own messages
             return
         }
         if (receivedMessage.guild) {
-            let settingsExist = fs.existsSync(`./data/${receivedMessage.guild.id}.json`)
+            var settingsExist = fs.existsSync(`./data/${receivedMessage.guild.id}.json`)
             if (settingsExist) {
                 var serverSettings = JSON.parse(fs.readFileSync('./data/' + receivedMessage.guild.id + '.json', 'utf8'))
                 if (typeof serverSettings.logChannels.message != 'undefined') {
@@ -103,8 +141,8 @@ client.on('message', (receivedMessage) => {
                     }
                 }
             } else {
-                let rawData = JSON.parse(fs.readFileSync('defaultServerSettings.json', 'utf8'))
-                let data = JSON.stringify(rawData, null, 2)
+                var rawData = JSON.parse(fs.readFileSync('defaultServerSettings.json', 'utf8'))
+                var data = JSON.stringify(rawData, null, 2)
                 fs.writeFile('./data/' + receivedMessage.guild.id + '.json', data, (err) => {
                     try {
                         if (err) throw err
@@ -150,9 +188,9 @@ client.on('message', (receivedMessage) => {
 })
 client.on('typingStart', (channel, user) => {
     if (!channel.guild) return
-    let settingsExist = fs.existsSync(`./data/${channel.guild.id}.json`)
+    var settingsExist = fs.existsSync(`./data/${channel.guild.id}.json`)
     if (settingsExist) {
-        let settings = JSON.parse(fs.readFileSync(`./data/${channel.guild.id}.json`, 'utf8'))
+        var settings = JSON.parse(fs.readFileSync(`./data/${channel.guild.id}.json`, 'utf8'))
         if (typeof settings.logChannels.startTyping != 'undefined') {
             const embed = new Discord.RichEmbed()
                 .setTitle('Start Typing Log')
@@ -168,9 +206,9 @@ client.on('typingStart', (channel, user) => {
 })
 client.on('typingStop', (channel, user) => {
     if (!channel.guild) return
-    let settingsExist = fs.existsSync(`./data/${channel.guild.id}.json`)
+    var settingsExist = fs.existsSync(`./data/${channel.guild.id}.json`)
     if (settingsExist) {
-        let settings = JSON.parse(fs.readFileSync(`./data/${channel.guild.id}.json`, 'utf8'))
+        var settings = JSON.parse(fs.readFileSync(`./data/${channel.guild.id}.json`, 'utf8'))
         if (typeof settings.logChannels.stopTyping != 'undefined') {
             const embed = new Discord.RichEmbed()
                 .setTitle('Stop Typing Log')
@@ -186,12 +224,12 @@ client.on('typingStop', (channel, user) => {
 })
 client.on('channelCreate', async channel => {
     if (!channel.guild) return
-    let settingsExist = fs.existsSync(`./data/${channel.guild.id}.json`)
+    var settingsExist = fs.existsSync(`./data/${channel.guild.id}.json`)
     if (settingsExist) {
-        let settings = JSON.parse(fs.readFileSync(`./data/${channel.guild.id}.json`, 'utf8'))
+        var settings = JSON.parse(fs.readFileSync(`./data/${channel.guild.id}.json`, 'utf8'))
         if (typeof settings.logChannels.channelCreate != 'undefined') {
-            let perms = await channel.permissionsFor(channel.guild.defaultRole)
-            let object = await perms.serialize()
+            var perms = await channel.permissionsFor(channel.guild.defaultRole)
+            var object = await perms.serialize()
             if (channel.type == 'voice') {
                 const embed = new Discord.RichEmbed()
                     .setTitle('Channel created')
@@ -213,9 +251,9 @@ client.on('channelCreate', async channel => {
                 client.channels.get(settings.logChannels.channelCreate).send(embed)
             }
             channel.guild.roles.forEach(role => {
-                let perms = channel.permissionsFor(role)
-                let object = perms.serialize()
-                let overWrites = JSON.stringify(object, null, 2)
+                var perms = channel.permissionsFor(role)
+                var object = perms.serialize()
+                var overWrites = JSON.stringify(object, null, 2)
                 const embed = new Discord.RichEmbed()
                     .addField(`Permissions overwrites for ${role.name}.`, `\`\`\`json\n${overWrites}\`\`\``)
                     .setColor('#00e622')
@@ -229,16 +267,24 @@ client.on('channelCreate', async channel => {
         }
     }
 })
+client.once('ready',() => {
+    client.guilds.forEach(async guild => {
+        await levels.set(guild.id, new Map())
+    })
+    client.guilds.forEach(guild => {
+        console.log(levels.get(guild.id))
+    })
+})
 client.on('channelUpdate', async (oldChannel, channel) => {
     if (JSON.stringify(oldChannel) == JSON.stringify(channel)) return
     if (!oldChannel.guild) return
-    let settingsExist = fs.existsSync(`./data/${oldChannel.guild.id}.json`)
+    var settingsExist = fs.existsSync(`./data/${oldChannel.guild.id}.json`)
     if (settingsExist) {
-        let settings = JSON.parse(fs.readFileSync(`./data/${oldChannel.guild.id}.json`, 'utf8'))
+        var settings = JSON.parse(fs.readFileSync(`./data/${oldChannel.guild.id}.json`, 'utf8'))
         if (typeof settings.logChannels.channelUpdate != 'undefined') {
             if (typeof client.channels.get(settings.logChannels.channelUpdate) == 'undefined') return bot.emit('missingLogChannel', settings.logChannels.channelUpdate, channel.guild, 'channelUpdate')
-            let perms = await oldChannel.permissionsFor(oldChannel.guild.defaultRole)
-            let object = await perms.serialize()
+            var perms = await oldChannel.permissionsFor(oldChannel.guild.defaultRole)
+            var object = await perms.serialize()
             if (oldChannel.type == 'voice') {
                 const embed = new Discord.RichEmbed()
                     .setTitle('Channel Updated (before)')
@@ -259,9 +305,9 @@ client.on('channelUpdate', async (oldChannel, channel) => {
                 client.channels.get(settings.logChannels.channelUpdate).send(embed)
             }
             oldChannel.guild.roles.forEach(role => {
-                let perms = oldChannel.permissionsFor(role)
-                let object = perms.serialize()
-                let overWrites = JSON.stringify(object, null, 2)
+                var perms = oldChannel.permissionsFor(role)
+                var object = perms.serialize()
+                var overWrites = JSON.stringify(object, null, 2)
                 const embed = new Discord.RichEmbed()
                     .addField(`Old Permissions overwrites for ${role.name}.`, `\`\`\`json\n${overWrites}\`\`\``)
                     .setColor('#b3ff00')
@@ -292,9 +338,9 @@ client.on('channelUpdate', async (oldChannel, channel) => {
                 client.channels.get(settings.logChannels.channelUpdate).send(embed)
             }
             channel.guild.roles.forEach(role => {
-                let perms = channel.permissionsFor(role)
-                let object = perms.serialize()
-                let overWrites = JSON.stringify(object, null, 2)
+                var perms = channel.permissionsFor(role)
+                var object = perms.serialize()
+                var overWrites = JSON.stringify(object, null, 2)
                 const embed = new Discord.RichEmbed()
                     .addField(`New Permissions overwrites for ${role.name}.`, `\`\`\`json\n${overWrites}\`\`\``)
                     .setColor('#b3ff00')
@@ -310,9 +356,9 @@ client.on('channelUpdate', async (oldChannel, channel) => {
 })
 client.on('channelDelete', (oldChannel) => {
     if (!oldChannel.guild) return
-    let settingsExist = fs.existsSync(`./data/${oldChannel.guild.id}.json`)
+    var settingsExist = fs.existsSync(`./data/${oldChannel.guild.id}.json`)
     if (settingsExist) {
-        let settings = JSON.parse(fs.readFileSync(`./data/${oldChannel.guild.id}.json`, 'utf8'))
+        var settings = JSON.parse(fs.readFileSync(`./data/${oldChannel.guild.id}.json`, 'utf8'))
         if (typeof settings.logChannels.channelDelete != 'undefined') {
             const embed = new Discord.RichEmbed()
                 .setTitle('Channel Deleted')
@@ -329,9 +375,9 @@ client.on('channelDelete', (oldChannel) => {
     }
 })
 client.on('guildMemberAdd', (newMember) => {
-    let settingsExist = fs.existsSync(`./data/${newMember.guild.id}.json`)
+    var settingsExist = fs.existsSync(`./data/${newMember.guild.id}.json`)
     if (settingsExist) {
-        let settings = JSON.parse(fs.readFileSync(`./data/${newMember.guild.id}.json`))
+        var settings = JSON.parse(fs.readFileSync(`./data/${newMember.guild.id}.json`))
         if (typeof settings.logChannels.guildMemberAdd == 'undefined') return
         const embed = new Discord.RichEmbed()
             .setAuthor(newMember.user.tag, newMember.user.displayAvatarURL)
@@ -347,9 +393,9 @@ client.on('guildMemberAdd', (newMember) => {
     }
 })
 client.on('guildMemberRemove', (newMember) => {
-    let settingsExist = fs.existsSync(`./data/${newMember.guild.id}.json`)
+    var settingsExist = fs.existsSync(`./data/${newMember.guild.id}.json`)
     if (settingsExist) {
-        let settings = JSON.parse(fs.readFileSync(`./data/${newMember.guild.id}.json`))
+        var settings = JSON.parse(fs.readFileSync(`./data/${newMember.guild.id}.json`))
         if (typeof settings.logChannels.guildMemberRemove == 'undefined') return
         const embed = new Discord.RichEmbed()
             .setAuthor(newMember.user.tag, newMember.user.displayAvatarURL)
@@ -364,9 +410,9 @@ client.on('guildMemberRemove', (newMember) => {
     }
 })
 client.on('guildBanRemove', (guild, user) => {
-    let settingsExist = fs.existsSync(`./data/${guild.id}.json`)
+    var settingsExist = fs.existsSync(`./data/${guild.id}.json`)
     if (settingsExist) {
-        let settings = JSON.parse(fs.readFileSync(`./data/${guild.id}.json`))
+        var settings = JSON.parse(fs.readFileSync(`./data/${guild.id}.json`))
         if (typeof settings.logChannels.guildBanRemove == 'undefined') return
         const embed = new Discord.RichEmbed()
             .setAuthor(user.tag, user.displayAvatarURL)
@@ -381,9 +427,9 @@ client.on('guildBanRemove', (guild, user) => {
     }
 })
 client.on('guildBanAdd', (guild, user) => {
-    let settingsExist = fs.existsSync(`./data/${guild.id}.json`)
+    var settingsExist = fs.existsSync(`./data/${guild.id}.json`)
     if (settingsExist) {
-        let settings = JSON.parse(fs.readFileSync(`./data/${guild.id}.json`))
+        var settings = JSON.parse(fs.readFileSync(`./data/${guild.id}.json`))
         if (typeof settings.logChannels.guildBanAdd == 'undefined') return
         const embed = new Discord.RichEmbed()
             .setAuthor(user.tag, user.displayAvatarURL)
@@ -440,8 +486,8 @@ client.on('messageUpdate', (oldMessage, newMessage) => {
     if (newMessage.content == '') return
     var settings = JSON.parse(fs.readFileSync('./data/' + newMessage.guild.id + '.json', 'utf8'))
     if (oldMessage.content.length > 1000) {
-        let trimmedOld = oldMessage.content.substring(0, 1000) + '...'
-        let trimmedNew = newMessage.content.substring(0, 1000) + '...'
+        var trimmedOld = oldMessage.content.substring(0, 1000) + '...'
+        var trimmedNew = newMessage.content.substring(0, 1000) + '...'
         if (newMessage.content.length < 1000) {
             trimmedNew = newMessage.content
         }
@@ -461,8 +507,8 @@ client.on('messageUpdate', (oldMessage, newMessage) => {
         }
     } else {
         if (typeof settings.logChannels.messageUpdate != 'undefined') {
-            let trimmedOld = oldMessage.content.substring(0, 1000)
-            let trimmedNew = newMessage.content.substring(0, 1000)
+            var trimmedOld = oldMessage.content.substring(0, 1000)
+            var trimmedNew = newMessage.content.substring(0, 1000)
             if (newMessage.content.length > 1000) {
                 trimmedNew = trimmedNew + '...'
             }
@@ -484,7 +530,7 @@ client.on('messageUpdate', (oldMessage, newMessage) => {
     }
 })
 client.on('emojiCreate', emoji => {
-    let settingsExist = fs.existsSync(`./data/${emoji.guild.id}.json`)
+    var settingsExist = fs.existsSync(`./data/${emoji.guild.id}.json`)
     var settings = JSON.parse(fs.readFileSync(`./data/${emoji.guild.id}.json`, 'utf8'))
     if (typeof settings.logChannels.emojiCreate != 'undefined') {
         if (settingsExist) {
@@ -505,7 +551,7 @@ client.on('emojiCreate', emoji => {
     }
 })
 client.on('emojiDelete', emoji => {
-    let settingsExist = fs.existsSync(`./data/${emoji.guild.id}.json`)
+    var settingsExist = fs.existsSync(`./data/${emoji.guild.id}.json`)
     var settings = JSON.parse(fs.readFileSync(`./data/${emoji.guild.id}.json`, 'utf8'))
     if (typeof settings.logChannels.emojiDelete != 'undefined') {
         if (settingsExist) {
@@ -524,7 +570,7 @@ client.on('emojiDelete', emoji => {
     }
 })
 client.on('emojiUpdate', (Oldemoji, emoji) => {
-    let settingsExist = fs.existsSync(`./data/${emoji.guild.id}.json`)
+    var settingsExist = fs.existsSync(`./data/${emoji.guild.id}.json`)
     var settings = JSON.parse(fs.readFileSync(`./data/${emoji.guild.id}.json`, 'utf8'))
     if (typeof settings.logChannels.emojiUpdate != 'undefined') {
         if (settingsExist) {
@@ -555,8 +601,8 @@ client.on('guildDelete', guild => {
     }
 })
 client.on('guildCreate', guild => {
-    let rawData = JSON.parse(fs.readFileSync('defaultServerSettings.json', 'utf8'))
-    let data = JSON.stringify(rawData, null, 2)
+    var rawData = JSON.parse(fs.readFileSync('defaultServerSettings.json', 'utf8'))
+    var data = JSON.stringify(rawData, null, 2)
     fs.writeFile('./data/' + guild.id + '.json', data, (err) => {
         try {
             if (err) throw err
@@ -573,15 +619,9 @@ client.on('ready', () => {
     console.log("Connected as " + client.user.tag)
     sleep(20000)
     client.shard.fetchClientValues('guilds.size').then(result => client.user.setActivity(config.prefix + 'help | ' + result.reduce((prev, guildCount) => prev + guildCount, 0) + ' server(s)'))
-    client.guilds.forEach(guild => {
-        guild.members.forEach(member => {
-            servers.set(guild.id, new Map())
-            servers.get(guild.id).set(member.user.id, 0)
-        })
-    })
 })
 function sendError(error, receivedMessage) {
-    let message = receivedMessage.channel.send(`An Error occured.. \n\n \`\`\`prolog\n${error.stack}\`\`\``)
+    var message = receivedMessage.channel.send(`An Error occured.. \n\n \`\`\`prolog\n${error.stack}\`\`\``)
     console.error(error.stack)
     return message
 }
@@ -592,10 +632,10 @@ function botError(message) {
 }
 function processCommand(receivedMessage, serverSettings, processStart) {
     try {
-        let fullCommand = receivedMessage.content.substr(1) // Remove the prefix
-        let splitCommand = fullCommand.split(" ") // Split the message up in to pieces for each space
-        let primaryCommand = splitCommand[0] // The first word directly after the exclamation is the command
-        let arguments = splitCommand.slice(1) // All other words are arguments/parameters/options for the command
+        var fullCommand = receivedMessage.content.substr(1) // Remove the prefix
+        var splitCommand = fullCommand.split(" ") // Split the message up in to pieces for each space
+        var primaryCommand = splitCommand[0] // The first word directly after the exclamation is the command
+        var arguments = splitCommand.slice(1) // All other words are arguments/parameters/options for the command
         const serverQueue = queue.get(receivedMessage.guild.id); //Music queue
         console.log(`${receivedMessage.author.tag} has sent a command`)
         console.log(" Command received: " + primaryCommand)
@@ -672,18 +712,26 @@ function processCommand(receivedMessage, serverSettings, processStart) {
         sendError(error, receivedMessage)
     }
 }
-function evalCommand(arguments, receivedMessage) {
+function clean(text) {
+    if (typeof(text) === "string")
+      return text.replace(/`/g, "`" + String.fromCharCode(8203)).replace(/@/g, "@" + String.fromCharCode(8203));
+    else
+        return text;
+  }
+function evalCommand(arguments,receivedMessage) {
+    if(receivedMessage.author.id !== config.ownerID) return;
     try {
-        if (receivedMessage.author.id != '570634232465063967') {
-            receivedMessage.channel.send('You don\'t have the permission to use this command!')
-                .then(m => m.delete(5000))
-            receivedMessage.react('🚫')
-            receivedMessage.delete(5000)
-            return
-        }
-        eval(arguments.slice(0).join(' '))
-    } catch (error) {
-        sendError(error, receivedMessage)
+      const code = arguments.join(" ");
+      let evaled = eval(code);
+ 
+      if (typeof evaled !== "string")
+        evaled = require("util").inspect(evaled);
+ 
+      if(clean(evaled).length < 1980) receivedMessage.channel.send(clean(evaled), {code:"xl"})
+      fs.writeFileSync('./temp/result.txt',clean(evaled))
+      receivedMessage.channel.send(new Attachment('./temp/result.txt'))
+    } catch (err) {
+      receivedMessage.channel.send(`\`ERROR\` \`\`\`xl\n${clean(err)}\n\`\`\``);
     }
 }
 async function googleSearchCommand(arguments, receivedMessage) {
@@ -720,8 +768,8 @@ function processTrigger(receivedMessage) {
 function mentionEveryoneTrigger(receivedMessage) {
     if (receivedMessage.guild == null) return
     if (receivedMessage.channel.permissionsFor(receivedMessage.member).serialize().MENTION_EVERYONE) return
-    receivedMessage.channel.send(`${receivedMessage.author.toString()},do you think that would really work?`)
-    let youTried = client.emojis.get('640441711704801290')
+    receivedMessage.channel.send(`${receivedMessage.author.toString()},don't tell me that you think this would work.`)
+    var youTried = client.emojis.get('640441711704801290')
     receivedMessage.react(youTried)
 }
 function introTrigger(receivedMessage) {
@@ -830,9 +878,9 @@ async function configCommand(arguments, receivedMessage, serverSettings) {
         sendError(error, receivedMessage)
         return
     }
-    let read = JSON.stringify(serverSettings, null, 2).length
+    var read = JSON.stringify(serverSettings, null, 2).length
     if (!receivedMessage.member.hasPermission('MANAGE_GUILD')) return receivedMessage.channel.send(noPermission('manage server'))
-    let path = './data/' + receivedMessage.guild.id + '.json'
+    var path = './data/' + receivedMessage.guild.id + '.json'
     if (arguments[0] == 'view') {
         receivedMessage.channel.send(`\`\`\`json\n${JSON.stringify(serverSettings, null, 2)}\`\`\``)
         return
@@ -949,7 +997,7 @@ function multiplyCommand(arguments, receivedMessage) {
         receivedMessage.channel.send("Not enough values to multiply. Try `/multiply 2 4 10` or `/multiply 5.2 7`")
         return
     }
-    let product = 1
+    var product = 1
     arguments.forEach((value) => {
         product = product * parseFloat(value)
     })
@@ -1035,7 +1083,7 @@ function kickCommand(arguments, receivedMessage) {
     if (taggedUser.id == receivedMessage.guild.owner.id) return receivedMessage.channel.send('Cannot kick the server owner!');
 
     if (!taggedUser.kickable) return receivedMessage.channel.send('The bot does not have permissions to kick this user. Check that I have permissions to kick members and my role is above the member you are trying to kick.')
-    let reason = arguments.slice(1).join(' ')
+    var reason = arguments.slice(1).join(' ')
     if (!reason) reason = "No reason specified"
     taggedUser.kick(reason)
         .catch(error => {
@@ -1058,7 +1106,7 @@ function banCommand(arguments, receivedMessage) {
     if (taggedUser.id == receivedMessage.guild.owner.id) return receivedMessage.channel.send('Cannot ban the server owner!');
 
     if (!taggedUser.kickable) return receivedMessage.channel.send('The bot does not have permissions to ban this user. Check that I have permissions to ban members and my role is above the member you are trying to ban.')
-    let reason = arguments.slice(1).join(' ')
+    var reason = arguments.slice(1).join(' ')
     if (!reason) reason = "No reason specified"
     taggedUser.ban(reason)
         .catch(() => receivedMessage.channel.send('Oops, an error occured while trying to ban this person.'));
@@ -1069,7 +1117,7 @@ function aboutCommand(receivedMessage) {
     receivedMessage.channel.send("Nick Chan Bot is a bot made by `Nick Chan#0001[570634232465063967]`.\nCredits:\n```\n-" + fs.readFileSync('./config/bruh.txt', 'utf8') + "Developement)\n-RandomPerson0244#0244[549471563616092171] (Developement)```");
 }
 function pingCommand(receivedMessage, processStart) {
-    let time = Math.floor(Math.round((performance.now() - processStart) * 1000))
+    var time = Math.floor(Math.round((performance.now() - processStart) * 1000))
     receivedMessage.channel.send(`Pinging...`).then(m => {
         m.edit(
             `
@@ -1094,7 +1142,7 @@ function purgeCommand(arguments, receivedMessage) {
     if (isNaN(count)) return receivedMessage.channel.send('not a number')
     receivedMessage.channel.send('searching messages...')
     var messages_to_be_deleted = []
-    let channel = receivedMessage.channel
+    var channel = receivedMessage.channel
     var limit = arguments[0]
     var messages = []
     var last = null
@@ -1129,7 +1177,7 @@ function purgeCommand(arguments, receivedMessage) {
                     console.log('done')
                 })
         }
-        bot.on('done',() => done = true)
+        bot.on('done', () => done = true)
         if (done = true) {
             break
         } else continue
@@ -1139,7 +1187,7 @@ function purgeCommand(arguments, receivedMessage) {
         msgs.forEach(m => {
             if (!m.pinned) messages_to_be_deleted.push(m)
         })
-        let result = messages_to_be_deleted.length
+        var result = messages_to_be_deleted.length
         while (count > 0) {
             if (count > 100) {
                 receivedMessage.channel.bulkDelete(messages_to_be_deleted.slice(0, 99), true)
@@ -1164,7 +1212,7 @@ function eightBallCommand(arguments, receivedMessage) {
         receivedMessage.channel.send("Please enter something for 8ball to answer.")
         return
     }
-    let answer = eightballRandCommand()
+    var answer = eightballRandCommand()
     receivedMessage.channel.send('8ball answered with:' + answer)
 }
 function eightballRandCommand() {
@@ -1172,14 +1220,14 @@ function eightballRandCommand() {
     return answers[Math.floor(Math.random() * answers.length)];
 }
 function dogCommand(receivedMessage) {
-    let dogs = fs.readdirSync('./attachments/cats')
-    let dog = dogs[Math.floor(Math.random() * dogs.length)]
+    var dogs = fs.readdirSync('./attachments/cats')
+    var dog = dogs[Math.floor(Math.random() * dogs.length)]
     const attachment = new Discord.Attachment('./attachments/dogs/' + dog)
     receivedMessage.channel.send(attachment)
 }
 function catCommand(receivedMessage) {
-    let cats = fs.readdirSync('./attachments/cats')
-    let cat = cats[Math.floor(Math.random() * cats.length)]
+    var cats = fs.readdirSync('./attachments/cats')
+    var cat = cats[Math.floor(Math.random() * cats.length)]
     const attachment = new Discord.Attachment('./attachments/cats/' + cat)
     receivedMessage.channel.send(attachment)
 }
@@ -1188,8 +1236,8 @@ async function unbanCommand(arguments, receivedMessage) {
     if (!receivedMessage.member.hasPermission('BAN_MEMBERS') && !receivedMessage.member.hasPermission("ADMINISTRATOR")) return receivedMessage.channel.send('You cannot unban users.')
     if (!receivedMessage.guild.me.hasPermission('BAN_MEMBERS')) return receivedMessage.channel.send('Please check if the bot has the permissions to unban members.')
     try {
-        let bannedUser = await client.fetchUser(arguments[0])
-        let reason = arguments.slice(1).join(' ')
+        var bannedUser = await client.fetchUser(arguments[0])
+        var reason = arguments.slice(1).join(' ')
         if (!reason) reason = "No reason specified"
         await receivedMessage.guild.unban(bannedUser, reason).catch(error => {
             throw error
@@ -1212,7 +1260,7 @@ function sayCommand(arguments, receivedMessage) {
 }
 function randomStringCommand(arguments, receivedMessage) {
     if (arguments[0] <= 1048576) {
-        let str = randomString(arguments[0])
+        var str = randomString(arguments[0])
         if (arguments[0] <= 2000 && arguments[0] > 0) {
             receivedMessage.channel.send(str)
         }
@@ -1241,12 +1289,12 @@ async function serverInfoCommand(arguments, receivedMessage) {
     const g = receivedMessage.guild
     const e = '\n'
     if (arguments[0] == 'detailed') {
-        let info = 'AFK Channel:' + g.afkChannel + e + 'AFK Channel ID:' + g.afkChannelID + e + 'Application ID:' + g.applicationID + e + 'Availbility:' + g.available + e + 'Created at:' + g.createdAt + e + 'Created Timestamp:' + g.createdTimestamp + e + 'default Message Notifications:' + g.defaultMessageNotifications + e + '`@everyone` role:' + '`' + g.defaultRole + '`' + e + 'Deleted:' + g.deleted + e + 'explicit Content Filter:' + g.explicitContentFilter + e + 'Server icon hash:' + g.icon + e + 'Server ID: ' + g.id + e + 'Server icon URL:' + g.iconURL + e + `Large?: ${g.large} \n Member count: ${g.memberCount} \n MFA Level: ${g.mfaLevel} \n Server name: ${g.name} \n Server name acronym: ${g.nameAcronym} \n Server owner: ${g.owner.user.tag} \n Server owner ID: ${g.ownerID} \n Server region: ${g.region} \n Sever splsah screen hash: ${g.splash} \n Server splash screen URL: ${g.splashURL} \n System Channel: <#${g.systemChannelID}> \n System Channel ID: ${g.systemChannelID} \n Verification Level : ${g.verificationLevel} \n Verified?: ${g.verified}`
+        var info = 'AFK Channel:' + g.afkChannel + e + 'AFK Channel ID:' + g.afkChannelID + e + 'Application ID:' + g.applicationID + e + 'Availbility:' + g.available + e + 'Created at:' + g.createdAt + e + 'Created Timestamp:' + g.createdTimestamp + e + 'default Message Notifications:' + g.defaultMessageNotifications + e + '`@everyone` role:' + '`' + g.defaultRole + '`' + e + 'Deleted:' + g.deleted + e + 'explicit Content Filter:' + g.explicitContentFilter + e + 'Server icon hash:' + g.icon + e + 'Server ID: ' + g.id + e + 'Server icon URL:' + g.iconURL + e + `Large?: ${g.large} \n Member count: ${g.memberCount} \n MFA Level: ${g.mfaLevel} \n Server name: ${g.name} \n Server name acronym: ${g.nameAcronym} \n Server owner: ${g.owner.user.tag} \n Server owner ID: ${g.ownerID} \n Server region: ${g.region} \n Sever splsah screen hash: ${g.splash} \n Server splash screen URL: ${g.splashURL} \n System Channel: <#${g.systemChannelID}> \n System Channel ID: ${g.systemChannelID} \n Verification Level : ${g.verificationLevel} \n Verified?: ${g.verified}`
         await receivedMessage.channel.send(`**Server Info** \n \n` + info)
     } else if (arguments[0] == 'json') {
         receivedMessage.channel.send('```js\n' + JSON.stringify(g, null, 2) + '```')
     } else {
-        let info = 'AFK Channel:' + g.afkChannel + 'Created at:' + g.createdAt + e + 'Server ID: ' + g.id + e + 'Server icon URL:' + g.iconURL + e + `Large?: ${g.large} \n Member count: ${g.memberCount} \n MFA Level: ${g.mfaLevel} \n Server name: ${g.name} \n Server name acronym: ${g.nameAcronym} \n Server owner: ${g.owner.user.tag} \n Server region: ${g.region}\n Server splash screen URL: ${g.splashURL} \n System Channel: <#${g.systemChannelID}> \n System Channel ID: ${g.systemChannelID} \n Verification Level : ${g.verificationLevel} \n Verified?: ${g.verified}`
+        var info = 'AFK Channel:' + g.afkChannel + 'Created at:' + g.createdAt + e + 'Server ID: ' + g.id + e + 'Server icon URL:' + g.iconURL + e + `Large?: ${g.large} \n Member count: ${g.memberCount} \n MFA Level: ${g.mfaLevel} \n Server name: ${g.name} \n Server name acronym: ${g.nameAcronym} \n Server owner: ${g.owner.user.tag} \n Server region: ${g.region}\n Server splash screen URL: ${g.splashURL} \n System Channel: <#${g.systemChannelID}> \n System Channel ID: ${g.systemChannelID} \n Verification Level : ${g.verificationLevel} \n Verified?: ${g.verified}`
         await receivedMessage.channel.send(`**Server Info** \n \n` + info)
     }
 
@@ -1281,7 +1329,7 @@ function embedSpamCommand(arguments, receivedMessage) {
         return
     }
     var i;
-    let embed = new Discord.RichEmbed()
+    var embed = new Discord.RichEmbed()
         .setAuthor(receivedMessage.author.tag, receivedMessage.author.displayAvatarURL)
         .setImage(receivedMessage.author.displayAvatarURL)
         .setThumbnail(receivedMessage.author.displayAvatarURL)
@@ -1298,7 +1346,7 @@ function embedSpamCommand(arguments, receivedMessage) {
     }
 }
 function logsCommand(receivedMessage) {
-    let logs = new Discord.Attachment('logs.txt')
+    var logs = new Discord.Attachment('logs.txt')
     receivedMessage.channel.send(logs)
 }
 async function userInfoCommand(arguments, receivedMessage) {
@@ -1318,7 +1366,7 @@ async function userInfoCommand(arguments, receivedMessage) {
         user = receivedMessage.author
     }
     if (user == null || typeof user == 'undefined') return receivedMessage.channel.send('Unknown user.')
-    let embed = new Discord.RichEmbed()
+    var embed = new Discord.RichEmbed()
         .setAuthor(receivedMessage.author.tag, receivedMessage.author.displayAvatarURL)
         .setTitle('User Info')
         .setDescription('Note:Some information cannot be displayed if the user is offline/Not playing a game/Not streaming/Not a human\nThe only reliable way of using this command is using the user ID as argument')
@@ -1351,11 +1399,11 @@ async function userInfoCommand(arguments, receivedMessage) {
 }
 async function nekosLifeCommand(arguments, receivedMessage) {
     receivedMessage.channel.startTyping()
-    let api = 'https://nekos.life/api/v2/img/'
+    var api = 'https://nekos.life/api/v2/img/'
     const SFWImages = ["smug", "baka", "tickle", "slap", "poke", 'pat', 'neko', 'nekoGif', 'meow', 'lizard', 'kiss', 'hug', 'foxGirl', 'feed', 'cuddle']
     const NSFWImages = ["lewdkemo", "lewdk", "keta", "hololewd", "holoero", "hentai", "futanari", "femdom", "feetg", "erofeet", "feet", "ero", "erok", "erokemo", "eron", "eroyuri", "cum_jpg", "blowjob", "pussy"]
-    let i = null
-    let sfw = true
+    var i = null
+    var sfw = true
     SFWImages.forEach(option => {
         if (option != arguments[0]) {
         } else {
@@ -1373,7 +1421,7 @@ async function nekosLifeCommand(arguments, receivedMessage) {
         const file = await fetch(api + i).then(response => response.json())
         try {
             if (typeof file.msg != 'undefined') {
-                let error = new Error(file.msg)
+                var error = new Error(file.msg)
                 error.name = 'nekos.lifeAPIError'
                 throw error
             }
@@ -1394,7 +1442,7 @@ async function nekosLifeCommand(arguments, receivedMessage) {
         const file = await fetch(api + i).then(response => response.json())
         try {
             if (typeof file.msg != 'undefined') {
-                let error = new Error(file.msg)
+                var error = new Error(file.msg)
                 error.name = 'nekos.lifeAPIError'
                 throw error
             }
@@ -1435,7 +1483,7 @@ function queueCommand(receivedMessage, serverQueue, arguments) {
             if (typeof serverQueue.songs != 'undefined') {
                 if (!Number(arguments[0]) == NaN) return receivedMessage.channel.send('Argument is not a number.')
                 if (Math.round(arguments[0]) != arguments[0]) return receivedMessage.channel.send('Arguments is not a integer.')
-                let i = arguments[0] - 1
+                var i = arguments[0] - 1
                 if (i > serverQueue.songs.length || i < 0) return receivedMessage.channel.send("Out of range.")
                 receivedMessage.channel.send(`\`\`\`json\n${JSON.stringify(serverQueue.songs[i], null, 2)}\`\`\``)
             }
@@ -1452,7 +1500,7 @@ async function execute(receivedMessage, serverQueue) {
     if (!permissions.has('CONNECT') || !permissions.has('SPEAK')) {
         return receivedMessage.channel.send('I need the permissions to join and speak in your voice channel!');
     }
-    let result = await sercher.search(receivedMessage.content.substr(Math.floor(config.prefix.length + 5)), { type: 'video' })
+    var result = await sercher.search(receivedMessage.content.substr(Math.floor(config.prefix.length + 5)), { type: 'video' })
         .catch(error => {
             sendError(error, receivedMessage)
             return
@@ -1527,7 +1575,8 @@ function play(guild, song, receivedMessage) {
     dispatcher.setVolumeLogarithmic(serverQueue.volume / 5);
 }
 function sleep(delay) {
-    let time = performance.now() + delay
+    var time = performance.now() + delay
     while ((performance.now() - time) > 0) { }
     return delay
 }
+client.login(config.token)
