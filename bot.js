@@ -222,17 +222,17 @@ client.on('message', (receivedMessage) => {
         sendError(error, receivedMessage)
     }
 })
-function processRank(receivedMessage) {
+async function processRank(receivedMessage) {
 
-    if (cooldowns.get(receivedMessage.guild.id).has(receivedMessage.author.id)) return console.log('on cooldown')
+    if (cooldowns.get(receivedMessage.guild.id).has(receivedMessage.author.id)) return
     if (!guildRanks.get(receivedMessage.guild.id).has(receivedMessage.author.id)) guildRanks.get(receivedMessage.guild.id).set(receivedMessage.author.id,0) 
     const newXP = Math.floor(guildRanks.get(receivedMessage.guild.id).get(receivedMessage.author.id) + (18 - Math.round(Math.random()*10)))
     guildRanks.get(receivedMessage.guild.id).set(receivedMessage.author.id,newXP)
     cooldowns.get(receivedMessage.guild.id).set(receivedMessage.author.id,true)
-    console.log('XP increased')
+
     setTimeout(function(){
         cooldowns.get(receivedMessage.guild.id).delete(receivedMessage.author.id)
-        console.log('cooldown cleared')
+
     },60000)
     return
 }
@@ -330,8 +330,8 @@ client.once('ready', () => {
             setInterval(function () {
                 settings.ranks = map2json(guildRanks.get(guild.id))
                 fs.writeFileSync(`./data/${guild.id}.json`,JSON.stringify((settings),null,2))
-                console.log('XP saved.')
-            }, 300000)
+
+            }, 30000)
     }) 
 })
 client.on('channelUpdate', async (oldChannel, channel) => {
@@ -435,6 +435,7 @@ client.on('channelDelete', (oldChannel) => {
 })
 client.on('guildMemberAdd', (newMember) => {
     var settingsExist = fs.existsSync(`./data/${newMember.guild.id}.json`)
+    guildRanks.get(newMember.guild.id).set(newMember.user.id,0)
     if (settingsExist) {
         var settings = JSON.parse(fs.readFileSync(`./data/${newMember.guild.id}.json`))
         if (typeof settings.logChannels.guildMemberAdd == 'undefined') return
@@ -452,6 +453,7 @@ client.on('guildMemberAdd', (newMember) => {
     }
 })
 client.on('guildMemberRemove', (newMember) => {
+    if (guildRanks.get(newMember.guild.id).has(newMember.user.id)) guildRanks.get(newMember.guild.id).delete(newMember.user.id)
     var settingsExist = fs.existsSync(`./data/${newMember.guild.id}.json`)
     if (settingsExist) {
         var settings = JSON.parse(fs.readFileSync(`./data/${newMember.guild.id}.json`))
@@ -965,7 +967,7 @@ async function configCommand(arguments, receivedMessage, serverSettings) {
     if (!receivedMessage.member.hasPermission('MANAGE_GUILD')) return receivedMessage.channel.send(noPermission('manage server'))
     var path = './data/' + receivedMessage.guild.id + '.json'
     if (arguments[0] == 'view') {
-        receivedMessage.channel.send(`\`\`\`json\n${JSON.stringify(serverSettings, null, 2)}\`\`\``)
+        receivedMessage.channel.send(JSON.stringify(serverSettings.logChannels,null,2),{code:"json"})
         return
     } else if (arguments[0] == 'log-channels') {
         try {
@@ -1151,7 +1153,7 @@ function spamPingCommand(arguments, receivedMessage) {
     }
 }
 function ChangelogsCommand(receivedMessage) {
-    receivedMessage.channel.send("Nick Chan Bot Beta 1.0.0 - pre12 \n **CHANGELOGS** \n ```-/play now support keywords. \n -Added a trigger\n-/config now support removing a config item. Just pass 'none' into the <new value> argument. ```")
+    receivedMessage.channel.send("Nick Chan Bot Beta 1.0.0 - pre13 \n **CHANGELOGS** \n ```-Added /rank,/errors\n-Added a ranking system (level rewards later)\n-purge doesn't delete pinned messages.```")
 }
 function kickCommand(arguments, receivedMessage) {
     if (receivedMessage.guild == null) return receivedMessage.channel.send('This command can only be used in servers');
@@ -1319,6 +1321,7 @@ async function rankCommand(arguments,receivedMessage) {
     if (arguments[0]) {
         try {
             member = await client.fetchUser(arguments[0])
+            member = await receivedMessage.guild.fetchMember(member)
         } catch (error) {
             if (receivedMessage.mentions.members.first()) {
                 if (member == null || typeof member == 'undefined') member = receivedMessage.mentions.members.first().user
