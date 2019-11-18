@@ -16,12 +16,46 @@ const { YTSearcher } = require('ytsearcher')
 const sercher = new YTSearcher(config.youTubeAPIKey)
 const queue = new Map();
 const bot = new EventEmitter()
+const guildRanks = new Map()
+const cooldowns = new Map()
 const ytdl = require('ytdl-core')
+function map2json(map) {
+    const obj = {};
+
+    for (const key of map.keys()) {
+        const child = map.get(key);
+        if (child instanceof Map) {
+            obj[key] = map2Json(child);
+        } else {
+            obj[key] = child;
+        }
+    }
+
+    return obj;
+}
+
+function json2map(obj) {
+    const map = new Map();
+
+    for (const key of Object.keys(obj)) {
+        const child = obj[key];
+
+        if (child != null) {
+            if (typeof child === "object") {
+                map.set(key, json2Map(child));
+            } else {
+                map.set(key, child);
+            }
+        }
+    }
+
+    return map;
+}
 class Rank {
     constructor(guildID, memberID, xp) {
         'use strict'
         if (xp) {
-        this.xp = xp
+            this.xp = xp
         } else {
             this.xp = 0
         }
@@ -36,21 +70,20 @@ class Rank {
                 xpRequiredToLevelUp += 100
                 level += 1
             }
-            sleep(100)
             level -= 1
             return level
         }
         this.getLevelXP = function () {
-            let xpRequiredToLevelUp = 100
-            let level = 1
+            let xpRequiredToLevelUp = 0
             let xpo = this.xp
             for (let i = 0; xpo > 0; i++) {
                 xpo = xpo - xpRequiredToLevelUp
-                xpRequiredToLevelUp += 100
-                level += 1
+                if (xpo > 0) {
+                    xpRequiredToLevelUp += 100
+                }
+                i += 1
             }
-            sleep(100)
-            return (-xpo + '/' + xpRequiredToLevelUp)
+            return (Math.floor(xpRequiredToLevelUp + xpo) + '/' + xpRequiredToLevelUp)
         }
     }
 }
@@ -89,7 +122,7 @@ process.on('unhandledRejection', (error, promise) => {
     client.user.setActivity('⚠️ unhandledRejection')
     console.warn(`Oops,the following promise rejection is not caught.\n${error.stack}\n${JSON.stringify(promise, null, 2)}`)
     fs.writeFileSync('error.txt', error.stack)
-    client.channels.get('637839532976504869').send(`Unhandlled Expection \n \`\`\`${error.stack}\`\`\``)
+    client.channels.get('637839532976504869').send(`Unhandlled Rejection \n \`\`\`${error.stack}\`\`\``)
     client.channels.get('637839532976504869').send(new Discord.Attachment('error.txt'))
     setTimeout(function () {
         client.user.setActivity(`/help | ${client.guilds.size} server(s)`)
@@ -153,6 +186,9 @@ client.on('message', (receivedMessage) => {
                     }
                 })
             }
+            if (!receivedMessage.author.bot) {
+                processRank(receivedMessage)
+            }
         } else {
             var serverSettings = null
         }
@@ -186,6 +222,20 @@ client.on('message', (receivedMessage) => {
         sendError(error, receivedMessage)
     }
 })
+function processRank(receivedMessage) {
+
+    if (cooldowns.get(receivedMessage.guild.id).has(receivedMessage.author.id)) return console.log('on cooldown')
+    if (!guildRanks.get(receivedMessage.guild.id).has(receivedMessage.author.id)) guildRanks.get(receivedMessage.guild.id).set(receivedMessage.author.id,0) 
+    const newXP = Math.floor(guildRanks.get(receivedMessage.guild.id).get(receivedMessage.author.id) + (18 - Math.round(Math.random()*10)))
+    guildRanks.get(receivedMessage.guild.id).set(receivedMessage.author.id,newXP)
+    cooldowns.get(receivedMessage.guild.id).set(receivedMessage.author.id,true)
+    console.log('XP increased')
+    setTimeout(function(){
+        cooldowns.get(receivedMessage.guild.id).delete(receivedMessage.author.id)
+        console.log('cooldown cleared')
+    },60000)
+    return
+}
 client.on('typingStart', (channel, user) => {
     if (!channel.guild) return
     var settingsExist = fs.existsSync(`./data/${channel.guild.id}.json`)
@@ -267,13 +317,22 @@ client.on('channelCreate', async channel => {
         }
     }
 })
-client.once('ready',() => {
-    client.guilds.forEach(async guild => {
-        await levels.set(guild.id, new Map())
-    })
+client.once('ready', () => {
     client.guilds.forEach(guild => {
-        console.log(levels.get(guild.id))
-    })
+        const settingsExist = fs.existsSync(`./data/${guild.id}.json`)
+        if (!settingsExist) fs.writeFileSync(`./data/${guild.id}.json`,fs.readFileSync('./defaultServerSettings.json'),null,2)
+            let settings = JSON.parse(fs.readFileSync(`./data/${guild.id}.json`, 'utf8'))
+            if (typeof settings.ranks == 'undefined') {
+                settings.ranks = {}
+            }
+            guildRanks.set(guild.id, json2map(settings.ranks))
+            cooldowns.set(guild.id,new Map())
+            setInterval(function () {
+                settings.ranks = map2json(guildRanks.get(guild.id))
+                fs.writeFileSync(`./data/${guild.id}.json`,JSON.stringify((settings),null,2))
+                console.log('XP saved.')
+            }, 300000)
+    }) 
 })
 client.on('channelUpdate', async (oldChannel, channel) => {
     if (JSON.stringify(oldChannel) == JSON.stringify(channel)) return
@@ -611,6 +670,19 @@ client.on('guildCreate', guild => {
             guild.systemChannel.send(`An Error occured.. \n\n \`${error.name}:${error.message}\``)
             console.error(error.stack)
         }
+        if (!err) {
+            let settings = JSON.parse(fs.readFileSync(`./data/${guild.id}.json`, 'utf8'))
+            if (typeof settings.ranks == 'undefined') {
+                settings.ranks = {}
+            }
+            guildRanks.set(guild.id, json2map(settings.ranks))
+            cooldowns.set(guild.id,new Map())
+            setInterval(function () {
+                settings.ranks = map2json(guildRanks.get(guild.id))
+                fs.writeFileSync(`./data/${guild.id}.json`,JSON.stringify((settings),null,2))
+                console.log('XP saved.')
+            }, 300000)
+        }
     })
 })
 
@@ -707,32 +779,39 @@ function processCommand(receivedMessage, serverSettings, processStart) {
             queueCommand(receivedMessage, serverQueue, arguments)
         } else if (primaryCommand == (`now-playing`)) {
             nowPlaying(receivedMessage, serverQueue)
+        } else if (primaryCommand == 'errors') {
+            errorsCommand(arguments, receivedMessage)
+        } else if (primaryCommand == 'rank') {
+            rankCommand(arguments,receivedMessage)
         }
     } catch (error) {
         sendError(error, receivedMessage)
     }
 }
 function clean(text) {
-    if (typeof(text) === "string")
-      return text.replace(/`/g, "`" + String.fromCharCode(8203)).replace(/@/g, "@" + String.fromCharCode(8203));
+    if (typeof (text) === "string")
+        return text.replace(/`/g, "`" + String.fromCharCode(8203)).replace(/@/g, "@" + String.fromCharCode(8203));
     else
         return text;
-  }
-function evalCommand(arguments,receivedMessage) {
-    if(receivedMessage.author.id !== config.ownerID) return;
+}
+function evalCommand(arguments, receivedMessage) {
+    if (receivedMessage.author.id !== config.ownerID) return;
     try {
-      const code = arguments.join(" ");
-      let evaled = eval(code);
- 
-      if (typeof evaled !== "string")
-        evaled = require("util").inspect(evaled);
- 
-      if(clean(evaled).length < 1980) receivedMessage.channel.send(clean(evaled), {code:"xl"})
-      fs.writeFileSync('./temp/result.txt',clean(evaled))
-      receivedMessage.channel.send(new Attachment('./temp/result.txt'))
+        const code = arguments.join(" ");
+        let evaled = eval(code);
+
+        if (typeof evaled !== "string")
+            evaled = require("util").inspect(evaled);
+
+        if (clean(evaled).length < 1980) receivedMessage.channel.send(clean(evaled), { code: "xl" })
+        fs.writeFileSync('./temp/result.txt', clean(evaled))
+        receivedMessage.channel.send(new Attachment('./temp/result.txt'))
     } catch (err) {
-      receivedMessage.channel.send(`\`ERROR\` \`\`\`xl\n${clean(err)}\n\`\`\``);
+        receivedMessage.channel.send(`\`ERROR\` \`\`\`xl\n${clean(err)}\n\`\`\``);
     }
+}
+function errorsCommand(arguments, receivedMessage) {
+    receivedMessage.channel.send(new Attachment('errors.txt'))
 }
 async function googleSearchCommand(arguments, receivedMessage) {
     receivedMessage.channel.send('Searching for:`' + arguments.slice(0).join(' ') + '`')
@@ -840,7 +919,7 @@ function helpCommand(arguments, receivedMessage) {
         MAIN HELP
             commands available to public only
         */
-        receivedMessage.channel.send("Prefix :`" + config.prefix + "` \n \n __**Command list**__ \n`help` `nekos-life` `randomstring` `stats` `config` `embed-spam` `user-info` `play` `skip` `stop` `now-playing` `queue` `multiply` `dog` `cat` `spam` `logs` `server-info` `say` `8ball` `unban` `spam-ping` `kick` `ban` `purge` `about` `changelogs` `Ping` `googlesearch` \n Use `/help [string]` for more infromation on a specificed command. Arguments in [] are optional \n \n __**Support Server**__ \n https://discord.gg/kPMK3K5")
+        receivedMessage.channel.send("Prefix :`" + config.prefix + "` \n \n __**Command list**__ \n`help` `rank` `nekos-life` `errors` `randomstring` `stats` `config` `embed-spam` `user-info` `play` `skip` `stop` `now-playing` `queue` `multiply` `dog` `cat` `spam` `logs` `server-info` `say` `8ball` `unban` `spam-ping` `kick` `ban` `purge` `about` `changelogs` `Ping` `googlesearch` \n Use `/help [string]` for more infromation on a specificed command. Arguments in [] are optional \n \n __**Support Server**__ \n https://discord.gg/kPMK3K5")
         receivedMessage.channel.send(attachment)
     } else if (arguments == 'googsearch') {
         receivedMessage.channel.send('Google something \n Usage `googlesearch <query>`')
@@ -867,6 +946,10 @@ function helpCommand(arguments, receivedMessage) {
         receivedMessage.channel.send('Description:Shows the song that is playing\nUsage:`now-playing`')
     } else if (arguments == 'queue') {
         receivedMessage.channel.send('Description:Shows the server queue/song with a specified position in queue\nUsage:`queue [position]`')
+    } else if (arguments == 'errors') {
+        receivedMessage.channel.send('Description: Shows bot\'s errors \n Usage `errors`')
+    } else if (arguments == 'rank') {
+        receivedMessage.channel.send(`Description:shows a member's level.\nUsage: \`rank [member]\``)
     } else {
         receivedMessage.channel.send('Incorrect command syntax. Usage:`help [command]`')
     }
@@ -1230,6 +1313,35 @@ function catCommand(receivedMessage) {
     var cat = cats[Math.floor(Math.random() * cats.length)]
     const attachment = new Discord.Attachment('./attachments/cats/' + cat)
     receivedMessage.channel.send(attachment)
+}
+async function rankCommand(arguments,receivedMessage) {
+    let member = undefined
+    if (arguments[0]) {
+        try {
+            member = await client.fetchUser(arguments[0])
+        } catch (error) {
+            if (receivedMessage.mentions.members.first()) {
+                if (member == null || typeof member == 'undefined') member = receivedMessage.mentions.members.first().user
+            }
+            if (member == null || typeof member == 'undefined') member = receivedMessage.guild.members.find(x => x.user.tag == arguments.slice(0).join(' '))
+            if (member == null || typeof member == 'undefined') member = receivedMessage.guild.members.find(x => x.user.username == arguments.slice(0).join(' '))
+            if (member == null || typeof member == 'undefined') member = receivedMessage.guild.members.find(x => x.user.discriminator == arguments.slice(0).join(' '))
+        }
+    } else {
+        member = receivedMessage.member
+    }
+    if (member == null || typeof member == 'undefined') return receivedMessage.channel.send('Unknown user.')
+    if (!guildRanks.get(receivedMessage.guild.id).has(member.user.id)) return receivedMessage.channel.send(`**${member.user.tag}** is not ranked yet.`)
+    const rank = new Rank(receivedMessage.guild.id,member.user.id,guildRanks.get(receivedMessage.guild.id).get(member.user.id))
+    const level = rank.getLevel()
+    const xp = rank.xp
+    const xpLevelUp = rank.getLevelXP()
+    receivedMessage.channel.send(`
+    **__RANK of ${member.user.tag} __**
+    Total XP:${xp}
+    Level:${level}
+    XP (This level) : ${xpLevelUp}
+    `)
 }
 async function unbanCommand(arguments, receivedMessage) {
     if (receivedMessage.guild == null) return receivedMessage.channel.send('This command can only be used in servers');
