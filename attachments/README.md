@@ -264,3 +264,15 @@ List of `<config item>`s
 `emojiCreate` Logged when a emoji is craeted.
 `emojiDelete`Logged when an emoji is deleted
 `emojiUpdate`Logged when an emoji is updated.
+
+### rank
+
+Description : Shows the rank of a member
+
+Usage : `rank [member]`
+
+### errors
+
+Description: Shows the bot's errors
+
+Usage: `errors`

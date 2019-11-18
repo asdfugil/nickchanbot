@@ -1,4 +1,5 @@
 console.log('Starting...')
+const { performance } = require('perf_hooks');
 const Discord = require('discord.js')
 const fs = require('fs')
 const moment = require(`moment`)
@@ -9,6 +10,8 @@ const config = require('./config/config.json')
 const client = new Discord.Client()
 const { Attachment, RichEmbed } = require('discord.js')
 const EventEmitter = require('events')
+const { YTSearcher } = require('ytsearcher')
+const sercher = new YTSearcher(config.youTubeAPIKey)
 require('./config/http.js')
 const queue = new Map();
 const bot = new EventEmitter()
@@ -25,16 +28,16 @@ var talkChannelOn = false
 var talkChannel = 'off'
 client.login(config.token)
 process.on('uncaughtException', (error) => {
-    console.log(error)
+    console.error(error.stack)
     try {
-        client.user.setActivity('��� uncaughtExpection | Rebooting...')
+        client.user.setActivity('❌ uncaughtExpection | Rebooting...')
         fs.writeFileSync('error.txt', error.stack)
         client.channels.get('633686557580066866').send(`Uncaught expection \n \`\`\`${error.stack}\`\`\``)
         client.channels.get('633686557580066866').send(new Discord.Attachment('error.txt'))
     } catch (error) {
         console.error('Error!')
     } finally {
-        console.error(error)
+        console.error(error.stack)
         setTimeout(function () {
             process.exit(1)
         }, 20000)
@@ -46,7 +49,7 @@ process.on('exit', code => {
     client.channels.get('633686557580066866').send(new Discord.Attachment('logs.txt'))
 })
 process.on('unhandledRejection', (error, promise) => {
-    client.user.setActivity('��𩤃�� unhandledRejection')
+    client.user.setActivity('⚠️ unhandledRejection')
     console.warn(`Oops,the following promise rejection is not caught.\n${error.stack}\n${JSON.stringify(promise, null, 2)}`)
     fs.writeFileSync('error.txt', error.stack)
     client.channels.get('637839532976504869').send(`Unhandlled Expection \n \`\`\`${error.stack}\`\`\``)
@@ -76,7 +79,7 @@ bot.on('missingLogChannel', (channelID, guild, logType) => {
     }
 })
 client.on('message', (receivedMessage) => {
-    let processStart = Date.now()
+    let processStart = performance.now()
     try {
         if (receivedMessage.author == client.user) { // Prevent bot from responding to its own messages
             return
@@ -108,7 +111,7 @@ client.on('message', (receivedMessage) => {
                         console.log('Setting created for server.')
                     } catch (error) {
                         receivedMessage.channel.send(`An Error occured.. \n\n \`${error.name}:${error.message}\``)
-                        console.log(error)
+                        console.error(error.stack)
                     }
                 })
             }
@@ -548,7 +551,7 @@ client.on('guildDelete', guild => {
             }
         })
     } catch (error) {
-        console.log(error)
+        console.error(error.stack)
     }
 })
 client.on('guildCreate', guild => {
@@ -560,7 +563,7 @@ client.on('guildCreate', guild => {
             console.log('Setting created for new server.')
         } catch (error) {
             guild.systemChannel.send(`An Error occured.. \n\n \`${error.name}:${error.message}\``)
-            console.log(error)
+            console.error(error.stack)
         }
     })
 })
@@ -572,7 +575,7 @@ client.on('ready', () => {
 })
 function sendError(error, receivedMessage) {
     let message = receivedMessage.channel.send(`An Error occured.. \n\n \`\`\`prolog\n${error.stack}\`\`\``)
-    console.log(error)
+    console.error(error.stack)
     return message
 }
 function botError(message) {
@@ -662,20 +665,30 @@ function processCommand(receivedMessage, serverSettings, processStart) {
         sendError(error, receivedMessage)
     }
 }
+function clean(text) {
+    if (typeof(text) === "string")
+      return text.replace(/`/g, "`" + String.fromCharCode(8203)).replace(/@/g, "@" + String.fromCharCode(8203));
+    else
+        return text;
+  }
 function evalCommand(arguments, receivedMessage) {
+    if (receivedMessage.author.id !== config.ownerID) return;
     try {
-        if (receivedMessage.author.id != '570634232465063967') {
-            receivedMessage.channel.send('You don\'t have the permission to use this command!')
-                .then(m => m.delete(5000))
-            receivedMessage.react('��麱')
-            receivedMessage.delete(5000)
-            return
-        }
-        eval(arguments.slice(0).join(' '))
-    } catch (error) {
-        sendError(error, receivedMessage)
+        const code = arguments.join(" ");
+        let evaled = eval(code);
+
+        if (typeof evaled !== "string")
+            evaled = require("util").inspect(evaled);
+
+            if(clean(evaled).length < 1980) receivedMessage.channel.send(clean(evaled), {code:"xl"})
+            fs.writeFileSync('./temp/result.txt',clean(evaled))
+            receivedMessage.channel.send(new Attachment('./temp/result.txt'))
+    } catch (err) {
+        receivedMessage.channel.send(`\`ERROR\` \`\`\`xl\n${clean(err)}\n\`\`\``);
     }
 }
+
+
 async function googleSearchCommand(arguments, receivedMessage) {
     receivedMessage.channel.send('Searching for:`' + arguments.slice(0).join(' ') + '`')
     googleIt({ 'query': arguments.slice(0).join(' ') })
@@ -699,12 +712,20 @@ function setTalkChannelCommand(arguments, receivedMessage) {
     receivedMessage.channel.send(`Operation Completed.`)
 }
 function processTrigger(receivedMessage) {
-    let Trigger = receivedMessage.content.substr(0)
-    if (Trigger == '<@!610070268198780947>' || Trigger == '<@610070268198780947>') {
+    if (receivedMessage.content.startsWith('<@!610070268198780947>') || receivedMessage.content.startsWith('<@610070268198780947>')) {
         introTrigger(receivedMessage)
+    } else if (receivedMessage.content.includes('@everyone') || receivedMessage.content.includes('@here')) {
+        mentionEveryoneTrigger(receivedMessage)
     } else {
         return
     }
+}
+function mentionEveryoneTrigger(receivedMessage) {
+    if (receivedMessage.guild == null) return
+    if (receivedMessage.channel.permissionsFor(receivedMessage.member).serialize().MENTION_EVERYONE) return
+    receivedMessage.channel.send(`${receivedMessage.author.toString()},don't tell me that you think this would work.`)
+    let youTried = client.emojis.get('640441711704801290')
+    receivedMessage.react(youTried)
 }
 function introTrigger(receivedMessage) {
     receivedMessage.channel.send(`Hi! my prefix is \`${config.prefix}\` \n To get started type \`/help\``)
@@ -717,8 +738,8 @@ async function reconnectCommand(receivedMessage) {
                     .then(() => {
                         client.login(config.token)
                             .catch(error => {
-                                console.log('Unable to reconnect')
-                                console.log(error.stack)
+                                console.error('Unable to reconnect')
+                                console.error(error.stack)
                             })
                             .then(() => {
                                 receivedMessage.channel.send('Successfully reconnected')
@@ -779,7 +800,7 @@ function helpCommand(arguments, receivedMessage) {
     } else if (arguments == 'googsearch') {
         receivedMessage.channel.send('Google something \n Usage `googlesearch <query>`')
     } else if (arguments == 'config') {
-        receivedMessage.channel.send('Description:Change server settings\nUsage `config <config category> <config item> <new value>`\n**__Category:`log-channels`__** Sets the log channels\nIn this category `<new value>` must be a channel mention. \nList of `<config item>`s\n\n`startTyping` Logged when someone starts typing\n`stopTyping` Logged when someone stops typing\n`message` Logged when someone sends a message\n`messageDelete` Logged when someone deletes a message\n`messageDeleteBulk` Logged when someone bulk delete messages\n`messageUpdate` Logged when a message is updated\n`channelCreate` Logged when a channel is created\n`channelDelete` Logged when achannel is deleted\n`channelUpdate` Logged when a channel is updated\n`guildBanAdd` Logged when someone is banned\n`guildBanRemove` Logged when someone is unbanned\n`guildMemberAdd` Logged when someone joins the server\n`guildMemebrRemove` Logged when someone leaves the server.\n`error` Logged when the bot encouters an error wjile doing something on the server.\n`emojiCreate` Logged when a emoji is craeted.\n`emojiDelete`Logged when an emoji is deleted\n`emojiUpdate`Logged when an emoji is updated.')
+        receivedMessage.channel.send('Description:Change server settings\nUsage `config <config category> <config item> <new value>`\nUse `none` as the <new value> argument to remove the config item.\n\n**__Category:`log-channels`__** Sets the log channels\nIn this category `<new value>` must be a channel mention. \nList of `<config item>`s\n\n`startTyping` Logged when someone starts typing\n`stopTyping` Logged when someone stops typing\n`message` Logged when someone sends a message\n`messageDelete` Logged when someone deletes a message\n`messageDeleteBulk` Logged when someone bulk delete messages\n`messageUpdate` Logged when a message is updated\n`channelCreate` Logged when a channel is created\n`channelDelete` Logged when achannel is deleted\n`channelUpdate` Logged when a channel is updated\n`guildBanAdd` Logged when someone is banned\n`guildBanRemove` Logged when someone is unbanned\n`guildMemberAdd` Logged when someone joins the server\n`guildMemebrRemove` Logged when someone leaves the server.\n`error` Logged when the bot encouters an error wjile doing something on the server.\n`emojiCreate` Logged when a emoji is craeted.\n`emojiDelete`Logged when an emoji is deleted\n`emojiUpdate`Logged when an emoji is updated.')
     } else if (arguments == 'stats') {
         receivedMessage.channel.send('Description:Return bot statistics\nUsage:`stats`')
     } else if (arguments == 'play') {
@@ -812,7 +833,7 @@ async function configCommand(arguments, receivedMessage, serverSettings) {
         sendError(error, receivedMessage)
         return
     }
-    let read = JSON.stringify(serverSettings,null,2).length
+    let read = JSON.stringify(serverSettings, null, 2).length
     if (!receivedMessage.member.hasPermission('MANAGE_GUILD')) return receivedMessage.channel.send(noPermission('manage server'))
     let path = './data/' + receivedMessage.guild.id + '.json'
     if (arguments[0] == 'view') {
@@ -820,10 +841,14 @@ async function configCommand(arguments, receivedMessage, serverSettings) {
         return
     } else if (arguments[0] == 'log-channels') {
         try {
-            if (arguments[2] != receivedMessage.mentions.channels.first()) throw botError('Invalid Commadn Syntax.')
+            if (arguments[2] != receivedMessage.mentions.channels.first() && arguments[2].toLowerCase() != 'none') throw botError('Invalid Command Syntax.')
             if (arguments[2] == '') throw botError('Invalid Commadn Syntax.')
-            const cObj = await receivedMessage.mentions.channels.first()
-            const c = cObj.id
+            var c;
+            if (arguments[2] == receivedMessage.mentions.channels.first()) {
+                const cObj = await receivedMessage.mentions.channels.first()
+                c = cObj.id
+            }
+            if (arguments[2].toLowerCase() === 'none') c = undefined
             if (arguments[1] == 'startTyping') {
                 serverSettings.logChannels.startTyping = c
             } else if (arguments[1] == 'stopTyping') {
@@ -899,6 +924,7 @@ async function configCommand(arguments, receivedMessage, serverSettings) {
                     return
                 }
             } else {
+                if (arguments[2].toLowerCase() === 'none') arguments[2] = undefined
                 serverSettings.welcomeMessage = arguments.slice(2).join(' ')
             }
         } else if (arguments[1] == 'leavingMessage') {
@@ -910,6 +936,7 @@ async function configCommand(arguments, receivedMessage, serverSettings) {
                     return
                 }
             } else {
+                if (arguments[2].toLowerCase() === 'none') arguments[2] = undefined
                 serverSettings.leavingMessage = arguments.slice(2).join(' ')
             }
         }
@@ -918,7 +945,7 @@ async function configCommand(arguments, receivedMessage, serverSettings) {
         return receivedMessage.channel.send('Unknown config')
     }
     fs.writeFileSync(path, JSON.stringify(serverSettings, null, 2))
-    receivedMessage.channel.send(`Overwrote server settings\n**${read}** bytes read, **${JSON.stringify(serverSettings,null,2).length}** bytes written.`)
+    receivedMessage.channel.send(`Overwrote server settings\n**${read}** bytes read, **${JSON.stringify(serverSettings, null, 2).length}** bytes written.`)
 }
 function multiplyCommand(arguments, receivedMessage) {
     if (arguments.length < 2) {
@@ -933,7 +960,7 @@ function multiplyCommand(arguments, receivedMessage) {
 }
 
 function spamCommand(arguments, receivedMessage) {
-    if (!receivedMessage.member.hasPermission('MANAGE_MESSAGES')) return receivedMessage.channel.send(noPermission('manage messages'))
+    if (!receivedMessage.channel.permissionsFor(receivedMessage.member).serialize().MANAGE_MESSAGES) return receivedMessage.channel.send(noPermission('manage messages'))
     var num = arguments[0]
     var num1 = parseInt(num);
     if (num1 > 50000) {
@@ -963,7 +990,7 @@ function spamCommand(arguments, receivedMessage) {
 }
 
 function spamPingCommand(arguments, receivedMessage) {
-    if (!receivedMessage.member.hasPermission('MANAGE_MESSAGES') || !receivedMessage.member.hasPermission('MENTION_EVERYONE')) return receivedMessage.channel.send(noPermission('manage messages, mention everyone'))
+    if (receivedMessage.guild) { if (!receivedMessage.channel.permissionsFor(receivedMessage.member).serialize().MANAGE_MESSAGES || !receivedMessage.channel.permissionsFor(receivedMessage.member).serialize().MENTION_EVERYONE) return receivedMessage.channel.send(noPermission('manage messages, mention everyone')) }
     var num = arguments[0]
     var num1 = parseInt(num);
     if (num1 > 50000) {
@@ -977,7 +1004,7 @@ function spamPingCommand(arguments, receivedMessage) {
     for (i = 0; i < num1; i++) {
         receivedMessage.channel.send("Spamming...  count:" + spamCount + "\n @everyone")
             .catch(error => {
-                console.log(error)
+                console.error(error.stack)
                 return
             });
         if (spamming) {
@@ -996,7 +1023,7 @@ function spamPingCommand(arguments, receivedMessage) {
     }
 }
 function ChangelogsCommand(receivedMessage) {
-    receivedMessage.channel.send("Nick Chan Bot Beta 1.0.0 - pre11 \n **CHANGELOGS** \n ```-Added /play,/now-playing,/stop,/skip,/config,/embed-spam,/stats,/user-info,/nekos-life\n-255 character limit on /randomstring lifted\n-Added a logging system\n-Contiune to update documnation\n-Other minor improvements\n-Added a handler for missing log channels\nNSFW content is no longer available in DM\n-The bot will create a HTTP server on startup\n-Updated documentation\n-More log items```")
+    receivedMessage.channel.send("Nick Chan Bot Beta 1.0.0 - pre12 \n **CHANGELOGS** \n ```-/play now support keywords. \n -Added a trigger\n-/config now support removing a config item. Just pass 'none' into the <new value> argument. ```")
 }
 function kickCommand(arguments, receivedMessage) {
     if (receivedMessage.guild == null) return receivedMessage.channel.send('This command can only be used in servers');
@@ -1015,7 +1042,7 @@ function kickCommand(arguments, receivedMessage) {
     if (!reason) reason = "No reason specified"
     taggedUser.kick(reason)
         .catch(error => {
-            console.log(error)
+            console.error(error.stack)
             return
         });
     receivedMessage.channel.send(`Successfully kicked ${taggedUser.user.tag}. Reason: ${reason}`)
@@ -1042,40 +1069,41 @@ function banCommand(arguments, receivedMessage) {
 }
 
 function aboutCommand(receivedMessage) {
-    receivedMessage.channel.send("Nick Chan Bot is a bot made by Nick Chan#0001[570634232465063967].\nCredits:\n```\n-Favian#8324[400581909912223744] (Developement)\n-RandomPerson0244#0244[549471563616092171] (Developement)```");
+    receivedMessage.channel.send("Nick Chan Bot is a bot made by `Nick Chan#0001[570634232465063967]`.\nCredits:\n```\n-" + fs.readFileSync('./config/bruh.txt', 'utf8') + "Developement)\n-RandomPerson0244#0244[549471563616092171] (Developement)```");
 }
 function pingCommand(receivedMessage, processStart) {
-    let time = Date.now() - processStart
+    let time = Math.floor(Math.round((performance.now() - processStart) * 1000))
     receivedMessage.channel.send(`Pinging...`).then(m => {
         m.edit(
-            `:ping_pong: Wew, made it over the ~waves~ ! **Pong!**\nMessage edit time:` +
-            (m.createdTimestamp - receivedMessage.createdTimestamp) +
-            `ms \n  Discord API heartbeat:` +
-            Math.round(client.ping) +
-            `ms\n Command process time:` + time + 'ms'
+            `
+• Message edit time                         :: ${(m.createdTimestamp - receivedMessage.createdTimestamp)} ms 
+• Discord API heartbeat                     :: ${Math.round(client.ping)} ms 
+• Command process time                      :: ${time} μs 
+• -(performance.now() - performance.now())  :: ${Math.round(-(performance.now() - performance.now()) * 1000000)} ns`, { code: "asciidoc" }
         );
     });
 }
 async function purgeCommand(arguments, receivedMessage) {
-    if (receivedMessage.guild == null) return receivedMessage.channel.send('This command can only be used in servers');
-    if (!receivedMessage.member.hasPermission("MANAGE_MESSAGES")) {
+    if (receivedMessage.guild == null) return receivedMessage.channel.send('This command can only be used in servers.');
+    if (!receivedMessage.channel.permissionsFor(receivedMessage.member).serialize().MANAGE_MESSAGES) {
         receivedMessage.channel.send(noPermission('manage messages'))
         return
     }
+    if (!receivedMessage.channel.permissionsFor(receivedMessage.guild.me).serialize().MANAGE_MESSAGES) return receivedMessage.channel.send('THe bot doesn\'t have the permissions to purge messages.')
     if (arguments[0] == null) return receivedMessage.delete()
     if (arguments[0] > 10000) return receivedMessage.channel.send('Please use a value that is smaller than 10000.')
     var count = parseInt(arguments[0]) + 1
     while (count > 100) {
         await receivedMessage.channel.bulkDelete(100, true)
             .catch((error) => {
-                console.log(error)
+                console.error(error.stack)
                 return
             });
         count = count - 100
     }
     await receivedMessage.channel.bulkDelete(count, true)
         .catch((error) => {
-            console.log(error)
+            console.error(error.stack)
             return
         });
 }
@@ -1174,17 +1202,17 @@ async function serverInfoCommand(arguments, receivedMessage) {
 function statsCommand(receivedMessage) {
     const duration = moment.duration(client.uptime).format(" D [days], H [hrs], m [mins], s [secs]");
     receivedMessage.channel.send(`= STATISTICS =
-  �� Mem Usage  :: ${(process.memoryUsage().heapUsed / 1024 / 1024).toFixed(2)} MB
-  �� Uptime     :: ${duration}
-  �� Users      :: ${client.users.size.toLocaleString()}
-  �� Servers    :: ${client.guilds.size.toLocaleString()}
-  �� Channels   :: ${client.channels.size.toLocaleString()}
-  �� Discord.js :: v${Discord.version}
-  �� Node       :: ${process.version}`, { code: "asciidoc" });
+  • Mem Usage  :: ${(process.memoryUsage().heapUsed / 1024 / 1024).toFixed(2)} MB
+  • Uptime     :: ${duration}
+  • Users      :: ${client.users.size.toLocaleString()}
+  • Servers    :: ${client.guilds.size.toLocaleString()}
+  • Channels   :: ${client.channels.size.toLocaleString()}
+  • Discord.js :: v${Discord.version}
+  • Node       :: ${process.version}`, { code: "asciidoc" });
 };
 
 function embedSpamCommand(arguments, receivedMessage) {
-    if (!receivedMessage.member.hasPermission('MANAGE_MESSAGES')) return receivedMessage.channel.send(noPermission('manage messages'))
+    if (receivedMessage.guild) { if (!receivedMessage.channel.permissionsFor(receivedMessage.member).serialize.MANAGE_MESSAGES) return receivedMessage.channel.send(noPermission('manage messages')) }
     var num = arguments[0]
     var num1 = parseInt(num);
     if (num1 > 300) {
@@ -1357,25 +1385,26 @@ function queueCommand(receivedMessage, serverQueue, arguments) {
     }
 
 }
-async function execute(message, serverQueue) {
-    const args = message.content.split(' ');
-
-    const voiceChannel = message.member.voiceChannel;
-    if (!voiceChannel) return message.channel.send('You need to be in a voice channel to play music!');
-    const permissions = voiceChannel.permissionsFor(message.client.user);
+async function execute(receivedMessage, serverQueue) {
+    const voiceChannel = receivedMessage.member.voiceChannel;
+    if (!voiceChannel) return receivedMessage.channel.send('You need to be in a voice channel to play music!');
+    const permissions = voiceChannel.permissionsFor(receivedMessage.client.user);
     if (!permissions.has('CONNECT') || !permissions.has('SPEAK')) {
-        return message.channel.send('I need the permissions to join and speak in your voice channel!');
+        return receivedMessage.channel.send('I need the permissions to join and speak in your voice channel!');
     }
-
-    const songInfo = await ytdl.getInfo(args[1]);
+    let result = await sercher.search(receivedMessage.content.substr(Math.floor(config.prefix.length + 5)), { type: 'video' })
+        .catch(error => {
+            sendError(error, receivedMessage)
+            return
+        })
+    if (result.first == null) return receivedMessage.channel.send('No results,please try another keyword.')
     const song = {
-        title: songInfo.title,
-        url: songInfo.video_url,
-    };
-
+        title: result.first.title,
+        url: result.first.url,
+    }
     if (!serverQueue) {
         const queueContruct = {
-            textChannel: message.channel,
+            textChannel: receivedMessage.channel,
             voiceChannel: voiceChannel,
             connection: null,
             songs: [],
@@ -1383,24 +1412,24 @@ async function execute(message, serverQueue) {
             playing: true,
         };
 
-        queue.set(message.guild.id, queueContruct);
+        queue.set(receivedMessage.guild.id, queueContruct);
 
         queueContruct.songs.push(song);
 
         try {
             var connection = await voiceChannel.join();
             queueContruct.connection = connection;
-            play(message.guild, queueContruct.songs[0]);
-            message.channel.send('Playing ' + song.title)
+            play(receivedMessage.guild, queueContruct.songs[0], receivedMessage);
+            receivedMessage.channel.send('Playing ' + song.title)
         } catch (err) {
             console.log(err);
-            queue.delete(message.guild.id);
-            return message.channel.send(err);
+            queue.delete(receivedMessage.guild.id);
+            return receivedMessage.channel.send(err);
         }
     } else {
         serverQueue.songs.push(song);
         console.log(serverQueue.songs);
-        return message.channel.send(`${song.title} has been added to the queue!`);
+        return receivedMessage.channel.send(`${song.title} has been added to the queue!`);
     }
 
 }
@@ -1417,7 +1446,7 @@ function stop(message, serverQueue) {
     message.channel.send('Music Ended.')
 }
 
-function play(guild, song) {
+function play(guild, song, receivedMessage) {
     const serverQueue = queue.get(guild.id);
 
     if (!song) {
@@ -1433,7 +1462,7 @@ function play(guild, song) {
             play(guild, serverQueue.songs[0]);
         })
         .on('error', error => {
-            console.error(error);
+            sendError(error, receivedMessage)
         });
     dispatcher.setVolumeLogarithmic(serverQueue.volume / 5);
 }
