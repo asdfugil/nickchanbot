@@ -35,7 +35,7 @@
         "moment-duration-format": "^2.3.2",
         "nekos.life": "^2.0.4",
         "node-fetch": "^2.6.0",
-        "npm": "^6.13.0",
+        "npm": "^6.13.4",
         "opusscript": "0.0.7",
         "ytdl-core": "^1.0.0",
         "ytsearcher": "^1.2.2"
