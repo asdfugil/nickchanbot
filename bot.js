@@ -1208,7 +1208,7 @@ function statsCommand(receivedMessage) {
     .setDescription('Contains essential information regarding our service and bot information.')
     .setThumbnail(client.user.displayAvatarURL)
     .addField('Uptime', `${duration}`, true)
-    //.addField('Shards', `${blah.blah}, true)
+    //.addField('Shards', `${blah.blah})
     .addField('Servers', `${client.guilds.size.toLocaleString()}`, true)
     .addField('Channels', `${client.channels.size.toLocaleString()}`, true)
     .addField('Users', `${client.users.size.toLocaleString()}`, true)
