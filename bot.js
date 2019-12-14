@@ -712,7 +712,7 @@ function setTalkChannelCommand(arguments, receivedMessage) {
     receivedMessage.channel.send(`Operation Completed.`)
 }
 function processTrigger(receivedMessage) {
-    if (receivedMessage.content.startsWith('<@!610070268198780947>') || receivedMessage.content.startsWith('<@610070268198780947>')) {
+    if (receivedMessage.content.startsWith(`<@!${client.user.id}>`) || receivedMessage.content.startsWith(`<@${client.user.id}>`)) {
         introTrigger(receivedMessage)
     } else if (receivedMessage.content.includes('@everyone') || receivedMessage.content.includes('@here')) {
         mentionEveryoneTrigger(receivedMessage)
