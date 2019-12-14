@@ -1201,14 +1201,24 @@ async function serverInfoCommand(arguments, receivedMessage) {
 }
 function statsCommand(receivedMessage) {
     const duration = moment.duration(client.uptime).format(" D [days], H [hrs], m [mins], s [secs]");
-    receivedMessage.channel.send(`= STATISTICS =
-  • Mem Usage  :: ${(process.memoryUsage().heapUsed / 1024 / 1024).toFixed(2)} MB
-  • Uptime     :: ${duration}
-  • Users      :: ${client.users.size.toLocaleString()}
-  • Servers    :: ${client.guilds.size.toLocaleString()}
-  • Channels   :: ${client.channels.size.toLocaleString()}
-  • Discord.js :: v${Discord.version}
-  • Node       :: ${process.version}`, { code: "asciidoc" });
+    const statsEmbed = new RichEmbed()
+    .setColor('#363A3F')
+    .setAuthor('Statistics', 'https://i.imgur.com/7hCWXZk.png')
+    .setTitle(`${client.user.username}'s stats`)
+    .setDescription('Contains essential information regarding our service and bot information.')
+    .setThumbnail(client.user.displayAvatarURL)
+    .addField('Uptime', `${duration}`, true)
+    //.addField('Shards', `${blah.blah}, true)
+    .addField('Servers', `${client.guilds.size.toLocaleString()}`, true)
+    .addField('Channels', `${client.channels.size.toLocaleString()}`, true)
+    .addField('Users', `${client.users.size.toLocaleString()}`, true)
+    .addField('Discord.js Version', `${version}`, true)
+    .addField('NodeJS Version', `${process.version}`, true)
+    .addField('Websocket Ping', `${Math.round(client.ping)}ms`, true)
+    .addField('Memory Usage', `${(process.memoryUsage().rss / 1024 / 1024).toFixed(2)} MB RSS\n${(process.memoryUsage().heapUsed / 1024 / 1024).toFixed(2)} MB Heap`, true)
+    .addField('CPU Usage', `Node: ${(process.cpuUsage().user / 1024 / 1024).toFixed(2)}%\nSystem: ${(process.cpuUsage().system / 1024 / 1024).toFixed(2)}%`, true)
+    .setFooter(client.user.tag, client.user.displayAvatarURL);
+    receivedMessage.channel.send(statsEmbed)
 };
 
 function embedSpamCommand(arguments, receivedMessage) {
