@@ -1,5 +1,6 @@
 {
     "token" : "SUPERSECRETBOTTOKEN",
     "ownerID" : "YOURDISCORDUSERID",
+    "errorChannelID": "ID-OF-THE-CHANNEL-TO-LOG-ERRORS",
     "prefix" : "/"
 }
