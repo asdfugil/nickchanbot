@@ -1151,14 +1151,7 @@ async function unbanCommand(arguments, receivedMessage) {
 }
 function sayCommand(arguments, receivedMessage) {
     if (!arguments.slice(0)) return receivedMessage.channel.send('Please enter something for the bot to say.')
-    for (var i = 0; i < arguments.length; i++) {
-        if (arguments[i] == '@everyone' || arguments[i] == '@here') {
-            receivedMessage.channel.send('Please remove the mass mention and try again.')
-            console.log('Mass mention detected')
-            return
-        }
-    }
-    receivedMessage.channel.send(arguments.slice(0).join(' '))
+    receivedMessage.channel.send(arguments.slice(0).join(' '), {disableEveryone: true})
 }
 function randomStringCommand(arguments, receivedMessage) {
     if (arguments[0] <= 1048576) {
