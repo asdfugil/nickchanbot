@@ -32,8 +32,8 @@ process.on('uncaughtException', (error) => {
     try {
         client.user.setActivity('❌ uncaughtExpection | Rebooting...')
         fs.writeFileSync('error.txt', error.stack)
-        client.channels.get('633686557580066866').send(`Uncaught expection \n \`\`\`${error.stack}\`\`\``)
-        client.channels.get('633686557580066866').send(new Discord.Attachment('error.txt'))
+        client.channels.get(config.errorChannelID).send(`Uncaught expection \n \`\`\`${error.stack}\`\`\``)
+        client.channels.get(config.errorChannelID).send(new Discord.Attachment('error.txt'))
     } catch (error) {
         console.error('Error!')
     } finally {
@@ -45,8 +45,8 @@ process.on('uncaughtException', (error) => {
 })
 process.on('exit', code => {
     console.log('Exit code:' + code)
-    client.channels.get('633686557580066866').send('Exiting... logs for this session:')
-    client.channels.get('633686557580066866').send(new Discord.Attachment('logs.txt'))
+    client.channels.get(config.errorChannelID).send('Exiting... logs for this session:')
+    client.channels.get(config.errorChannelID).send(new Discord.Attachment('logs.txt'))
 })
 process.on('unhandledRejection', (error, promise) => {
     client.user.setActivity('⚠️ unhandledRejection')
@@ -122,7 +122,7 @@ client.on('message', (receivedMessage) => {
             if (talkChannelOn && receivedMessage.channel.id == talkChannel) {
                 client.channels.get('626024979900923905').send(`**${receivedMessage.author.tag}** : ${receivedMessage.content}`)
             }
-            if (talkChannelOn && receivedMessage.channel.id == '626024979900923905' && !receivedMessage.content.startsWith('/set-talk-channel') && receivedMessage.author.id == '570634232465063967') {
+            if (talkChannelOn && receivedMessage.channel.id == '626024979900923905' && !receivedMessage.content.startsWith('/set-talk-channel') && receivedMessage.author.id == config.ownerID) {
                 client.channels.get(talkChannel).send(receivedMessage.content)
             }
             return
@@ -131,7 +131,7 @@ client.on('message', (receivedMessage) => {
             if (talkChannelOn && receivedMessage.channel.id == talkChannel) {
                 client.channels.get('626024979900923905').send(`**${receivedMessage.author.tag}** : ${receivedMessage.content}`)
             }
-            if (talkChannelOn && receivedMessage.channel.id == '626024979900923905' && !receivedMessage.content.startsWith('/set-talk-channel') && receivedMessage.author.id == '570634232465063967') {
+            if (talkChannelOn && receivedMessage.channel.id == '626024979900923905' && !receivedMessage.content.startsWith('/set-talk-channel') && receivedMessage.author.id == config.ownerID) {
                 client.channels.get(talkChannel).send(receivedMessage.content)
             }
             processCommand(receivedMessage, serverSettings, processStart)
@@ -139,7 +139,7 @@ client.on('message', (receivedMessage) => {
             if (talkChannelOn && receivedMessage.channel.id == talkChannel) {
                 client.channels.get('626024979900923905').send(`**${receivedMessage.author.tag}** : ${receivedMessage.content}`)
             }
-            if (talkChannelOn && receivedMessage.channel.id == '626024979900923905' && !receivedMessage.content.startsWith('/set-talk-channel') && receivedMessage.author.id == '570634232465063967') {
+            if (talkChannelOn && receivedMessage.channel.id == '626024979900923905' && !receivedMessage.content.startsWith('/set-talk-channel') && receivedMessage.author.id == config.ownerID) {
                 client.channels.get(talkChannel).send(receivedMessage.content)
             }
             processTrigger(receivedMessage, serverSettings)
@@ -680,7 +680,7 @@ function evalCommand(arguments, receivedMessage) {
         if (typeof evaled !== "string")
             evaled = require("util").inspect(evaled);
 
-            if(clean(evaled).length < 1980) receivedMessage.channel.send(clean(evaled), {code:"xl"})
+            if(clean(evaled).length < 1980) receivedMessage.channel.send(clean(evaled), {code:"js"})
             fs.writeFileSync('./temp/result.txt',clean(evaled))
             receivedMessage.channel.send(new Attachment('./temp/result.txt'))
     } catch (err) {
@@ -704,7 +704,7 @@ async function googleSearchCommand(arguments, receivedMessage) {
         });
 }
 function setTalkChannelCommand(arguments, receivedMessage) {
-    if (receivedMessage.author.id != '570634232465063967') {
+    if (receivedMessage.author.id != config.ownerID) {
         return
     }
     talkChannel = arguments[0]
@@ -733,7 +733,7 @@ function introTrigger(receivedMessage) {
     receivedMessage.channel.send(`Hi! my prefix is \`${config.prefix}\` \n To get started type \`/help\``)
 }
 async function reconnectCommand(receivedMessage) {
-    if (receivedMessage.author.id == "570634232465063967") {
+    if (receivedMessage.author.id == config.ownerID) {
         receivedMessage.channel.send('Reconnecting...')
             .then(() => {
                 client.destroy()
