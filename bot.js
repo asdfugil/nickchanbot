@@ -11,6 +11,7 @@ const client = new Discord.Client()
 const { Attachment, RichEmbed, version } = require('discord.js')
 const EventEmitter = require('events')
 const { YTSearcher } = require('ytsearcher')
+const util = require("util")
 const sercher = new YTSearcher(config.youTubeAPIKey)
 require('./config/http.js')
 const queue = new Map();
@@ -29,11 +30,11 @@ var talkChannel = 'off'
 client.login(config.token)
 process.on('uncaughtException', (error) => {
     console.error(error.stack)
-    try {
+    try { //This may error because it may not be logged so it must be in a try block
         client.user.setActivity('❌ uncaughtExpection | Rebooting...')
         fs.writeFileSync('error.txt', error.stack)
-        client.channels.get(config.errorChannelID).send(`Uncaught expection \n \`\`\`${error.stack}\`\`\``)
-        client.channels.get(config.errorChannelID).send(new Discord.Attachment('error.txt'))
+        client.channels.get(config.expectionChannelID).send(`Uncaught expection \n \`\`\`${error.stack}\`\`\``)
+        client.channels.get(config.expectionChannelID).send(new Discord.Attachment('error.txt'))
     } catch (error) {
         console.error('Error!')
     } finally {
@@ -44,16 +45,16 @@ process.on('uncaughtException', (error) => {
     }
 })
 process.on('exit', code => {
-    console.log('Exit code:' + code)
-    client.channels.get(config.errorChannelID).send('Exiting... logs for this session:')
-    client.channels.get(config.errorChannelID).send(new Discord.Attachment('logs.txt'))
+  if (code == 0)  console.log('Exit code:' + code)
+    else console.error('Exit code:' + code)
+    //no async function here
 })
 process.on('unhandledRejection', (error, promise) => {
     client.user.setActivity('⚠️ unhandledRejection')
-    console.warn(`Oops,the following promise rejection is not caught.\n${error.stack}\n${JSON.stringify(promise, null, 2)}`)
-    fs.writeFileSync('error.txt', error.stack)
-    client.channels.get('637839532976504869').send(`Unhandlled Expection \n \`\`\`${error.stack}\`\`\``)
-    client.channels.get('637839532976504869').send(new Discord.Attachment('error.txt'))
+    console.warn(`Oops,the following promise rejection is not caught.\n${error.stack}\n${util.inspect(promise)}`)
+    fs.writeFileSync('error.log', error.stack)
+    client.channels.get(config.rejectionChannelID).send(`Unhandlled Expection \n \`\`\`${error.stack}\`\`\``)
+    client.channels.get(config.rejectionChannelID).send(new Discord.Attachment('error.log'))
     setTimeout(function () {
         client.user.setActivity(`/help | ${client.guilds.size} server(s)`)
     }, 10000)
