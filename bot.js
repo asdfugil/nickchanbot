@@ -2683,7 +2683,7 @@ function queueCommand(receivedMessage, serverQueue, arguments) {
     if (typeof serverQueue != "undefined") {
       if (typeof serverQueue.songs != "undefined") {
         receivedMessage.channel.send(
-          `\`\`\`json\n${JSON.stringify(serverQueue.songs, null, 2)}\`\`\``
+          `${JSON.stringify(serverQueue.songs, null, 2)}`,{code:"json",split:true}
         );
       }
     } else {
