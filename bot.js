@@ -122,9 +122,6 @@ function noPermission(perms) {
         );
     return noPermission;
 }
-var talkChannelOn = false;
-var talkChannel = "off";
-
 process.on("uncaughtException", async error => {
     console.error(error.stack);
     try {
@@ -283,61 +280,9 @@ client.on("message", receivedMessage => {
                 processRank(receivedMessage);
             }
         } else {
-            var serverSettings = null;
+            let serverSettings = null;
         }
-        if (receivedMessage.author.bot == true) {
-            if (talkChannelOn && receivedMessage.channel.id == talkChannel) {
-                client.channels
-                    .get("626024979900923905")
-                    .send(
-                        `**${receivedMessage.author.tag}** : ${receivedMessage.content}`
-                    );
-            }
-            if (
-                talkChannelOn &&
-                receivedMessage.channel.id == "626024979900923905" &&
-                !receivedMessage.content.startsWith("/set-talk-channel") &&
-                receivedMessage.author.id == "570634232465063967"
-            ) {
-                client.channels.get(talkChannel).send(receivedMessage.content);
-            }
-            return;
-        }
-        if (receivedMessage.content.startsWith(config.prefix)) {
-            if (talkChannelOn && receivedMessage.channel.id == talkChannel) {
-                client.channels
-                    .get("626024979900923905")
-                    .send(
-                        `**${receivedMessage.author.tag}** : ${receivedMessage.content}`
-                    );
-            }
-            if (
-                talkChannelOn &&
-                receivedMessage.channel.id == "626024979900923905" &&
-                !receivedMessage.content.startsWith("/set-talk-channel") &&
-                receivedMessage.author.id == "570634232465063967"
-            ) {
-                client.channels.get(talkChannel).send(receivedMessage.content);
-            }
-            processCommand(receivedMessage, serverSettings, processStart);
-        } else {
-            if (talkChannelOn && receivedMessage.channel.id == talkChannel) {
-                client.channels
-                    .get("626024979900923905")
-                    .send(
-                        `**${receivedMessage.author.tag}** : ${receivedMessage.content}`
-                    );
-            }
-            if (
-                talkChannelOn &&
-                receivedMessage.channel.id == "626024979900923905" &&
-                !receivedMessage.content.startsWith("/set-talk-channel") &&
-                receivedMessage.author.id == "570634232465063967"
-            ) {
-                client.channels.get(talkChannel).send(receivedMessage.content);
-            }
-            processTrigger(receivedMessage, serverSettings);
-        }
+        processCommand(receivedMessage, serverSettings, processStart);
     } catch (error) {
         sendError(error, receivedMessage);
     }
@@ -1210,8 +1155,6 @@ function processCommand(receivedMessage, serverSettings, processStart) {
             statsCommand(receivedMessage);
         } else if (primaryCommand == "googlesearch") {
             googleSearchCommand(arguments, receivedMessage);
-        } else if (primaryCommand == "set-talk-channel") {
-            setTalkChannelCommand(arguments, receivedMessage);
         } else if (primaryCommand == "eval") {
             evalCommand(arguments, receivedMessage);
         } else if (primaryCommand == "config") {
@@ -1287,14 +1230,6 @@ async function googleSearchCommand(arguments, receivedMessage) {
         .catch(error => {
             sendError(error, receivedMessage);
         });
-}
-function setTalkChannelCommand(arguments, receivedMessage) {
-    if (receivedMessage.author.id != "570634232465063967") {
-        return;
-    }
-    talkChannel = arguments[0];
-    talkChannelOn = true;
-    receivedMessage.channel.send(`Operation Completed.`);
 }
 function processTrigger(receivedMessage) {
     if (
@@ -2174,20 +2109,8 @@ async function unbanCommand(arguments, receivedMessage) {
     }
 }
 function sayCommand(arguments, receivedMessage) {
-    if (!arguments.slice(0))
-        return receivedMessage.channel.send(
-            "Please enter something for the bot to say."
-        );
-    for (var i = 0; i < arguments.length; i++) {
-        if (arguments[i] == "@everyone" || arguments[i] == "@here") {
-            receivedMessage.channel.send(
-                "Please remove the mass mention and try again."
-            );
-            console.log("Mass mention detected");
-            return;
-        }
-    }
-    receivedMessage.channel.send(arguments.slice(0).join(" "));
+    if (!arguments.slice(0)) return receivedMessage.channel.send("Please enter something for the bot to say.");
+    receivedMessage.channel.send(arguments.slice(0).join(" "), { disableEveryone: true });
 }
 function randomStringCommand(arguments, receivedMessage) {
     if (arguments[0] <= 1048576) {
