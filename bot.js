@@ -22,7 +22,6 @@ if (fs.existsSync("./node_modules/npm/")) npm = require("npm"); //devdependencie
 const ytdl = require("ytdl-core");
 function map2json(map) {
     const obj = {};
-
     for (const key of map.keys()) {
         const child = map.get(key);
         if (child instanceof Map) {
@@ -31,13 +30,11 @@ function map2json(map) {
             obj[key] = child;
         }
     }
-
     return obj;
 }
 
 function json2map(obj) {
     const map = new Map();
-
     for (const key of Object.keys(obj)) {
         const child = obj[key];
 
@@ -49,7 +46,6 @@ function json2map(obj) {
             }
         }
     }
-
     return map;
 }
 function collection2json(collection) {
@@ -63,16 +59,13 @@ function collection2json(collection) {
             obj[key] = child;
         }
     }
-
     return obj;
 }
 
 function json2collection(obj) {
     const collection = new Collection();
-
     for (const key of Object.keys(obj)) {
         const child = obj[key];
-
         if (child != null) {
             if (typeof child === "object") {
                 collection.set(key, json2collection(child));
@@ -81,7 +74,6 @@ function json2collection(obj) {
             }
         }
     }
-
     return collection;
 }
 class Rank {
@@ -133,17 +125,19 @@ function noPermission(perms) {
 var talkChannelOn = false;
 var talkChannel = "off";
 
-process.on("uncaughtException", error => {
+process.on("uncaughtException", async error => {
     console.error(error.stack);
     try {
         client.user.setActivity("❌ uncaughtExpection | Rebooting...");
-        fs.writeFileSync("error.txt", error.stack);
-        client.channels
-            .get("633686557580066866")
-            .send(`Uncaught expection \n \`\`\`${error.stack}\`\`\``);
-        client.channels
-            .get("633686557580066866")
-            .send(new Discord.Attachment("error.txt"));
+        fs.writeFileSync("error.log", error.stack);
+        if (client.status === 0) {
+            await client.channels
+                .get(config.expectionChannelID)
+                .send(`Uncaught expection \n \`\`\`${error.stack}\`\`\``);
+            await client.channels
+                .get(config.expectionChannelID)
+                .send(new Attachment("error.log"));
+        }
     } catch (error) {
         console.error("Error!");
     } finally {
@@ -156,23 +150,19 @@ process.on("uncaughtException", error => {
 
 process.on("exit", code => {
     console.log("Exit code:" + code);
-    client.channels
-        .get("633686557580066866")
-        .send("Exiting... logs for this session:");
-    client.channels
-        .get("633686557580066866")
-        .send(new Discord.Attachment("logs.txt"));
-});
+})
 process.on("unhandledRejection", (error, promise) => {
-    fs.writeFileSync("error.txt", error.stack);
+    fs.writeFileSync("error.log", error.stack);
     if (client.status === 0) {
         client.user.setActivity("⚠️ unhandledRejection");
         client.channels
-            .get("637839532976504869")
-            .send(`Unhandlled Rejection \n \`\`\`${error.stack}\`\`\``);
+            .get(config.rejectionChannelID)
+            .send(`Unhandlled Rejection \n \`\`\`prolog\n${error.stack}\`\`\`
+            Promise: \`\`\`xl\n${util.inspect(promise)}\`\`\`
+            `);
         client.channels
-            .get("637839532976504869")
-            .send(new Discord.Attachment("error.txt"));
+            .get(config.rejectionChannelID)
+            .send(new Attachment("error.log"));
         setTimeout(function () {
             client.user.setActivity(`/help | ${client.guilds.size} server(s)`);
         }, 10000);
@@ -180,7 +170,7 @@ process.on("unhandledRejection", (error, promise) => {
     console.warn(
         `Oops,the following promise rejection is not caught.\n${
         error.stack
-        }\n${JSON.stringify(promise, null, 2)}`
+        }\n${promise}`
     );
 });
 
@@ -225,18 +215,18 @@ bot.on("missingLogChannel", (channelID, guild, logType) => {
     }
 });
 client.on("message", receivedMessage => {
-    var processStart = performance.now();
+    const processStart = performance.now();
     try {
         if (receivedMessage.author == client.user) {
             // Prevent bot from responding to its own messages
             return;
         }
         if (receivedMessage.guild) {
-            var settingsExist = fs.existsSync(
+            const settingsExist = fs.existsSync(
                 `./data/${receivedMessage.guild.id}.json`
             );
             if (settingsExist) {
-                var serverSettings = JSON.parse(
+                let serverSettings = JSON.parse(
                     fs.readFileSync(
                         "./data/" + receivedMessage.guild.id + ".json",
                         "utf8"
@@ -1268,8 +1258,8 @@ async function evalCommand(arguments, receivedMessage) {
 
         if (clean(evaled).length < 1980)
             receivedMessage.channel.send(clean(evaled), { code: "xl" });
-        fs.writeFileSync("./temp/result.log", clean(evaled));
-        receivedMessage.channel.send(new Attachment("./temp/result.txt"));
+        fs.writeFileSync("../tmp/result.log", clean(evaled));
+        receivedMessage.channel.send(new Attachment("../tmp/result.log"));
     } catch (err) {
         receivedMessage.channel.send(`\`ERROR\` \`\`\`xl\n${clean(err)}\n\`\`\``);
     }
@@ -1330,7 +1320,7 @@ function mentionEveryoneTrigger(receivedMessage) {
     receivedMessage.channel.send(
         `${receivedMessage.author.toString()},don't tell me that you think this would work.`
     );
-    var youTried = client.emojis.get("640441711704801290");
+    const youTried = client.emojis.get(config.youTriedEmojiID);
     receivedMessage.react(youTried);
 }
 function introTrigger(receivedMessage) {
@@ -2416,41 +2406,33 @@ async function serverInfoCommand(arguments, receivedMessage) {
         await receivedMessage.channel.send(`**Server Info** \n \n` + info);
     }
 }
-function statsCommand(receivedMessage) {
+async function statsCommand(receivedMessage) {
     const duration = moment.duration(client.uptime).format(" D [days], H [hrs], m [mins], s [secs]");
-    client.shard.broadcastEval('this.guilds.size').then(servers => {
-        client.shard.broadcastEval('this.users.size').then(users => {
-            client.shard.broadcastEval('this.channels.size').then(channels => {
-                client.shard.broadcastEval('process.memoryUsage().rss').then(rssUsage => {
-                    client.shard.broadcastEval('process.memoryUsage().heapUsed').then(heapUsage => {
-                        client.shard.broadcastEval('(process.cpuUsage().user / 1024 / 1024).toFixed(2)').then(nodeCPUUsage => {
-                            client.shard.broadcastEval('(process.cpuUsage().system / 1024 / 1024).toFixed(2)').then(sysCPUUsage => {
-                                const statsEmbed = new RichEmbed()
-                                    .setColor('#363A3F')
-                                    .setAuthor('Statistics', 'https://i.imgur.com/7hCWXZk.png')
-                                    .setTitle(`${client.user.username}'s stats`)
-                                    .setDescription('Contains essential information regarding our service and bot information.')
-                                    .setThumbnail(client.user.displayAvatarURL)
-                                    .addField('Uptime', `${duration}`, true)
-                                    .addField('Shards', `${client.shard.count}`, true)
-                                    .addField('Servers', `${servers.reduce((previous, count) => previous + count, 0)}`, true)
-                                    .addField('Channels', `${channels.reduce((previous, count) => previous + count, 0)}`, true)
-                                    .addField('Users', `${users.reduce((previous, count) => previous + count, 0)}`, true)
-                                    .addField('Discord.js Version', `${version}`, true)
-                                    .addField('NodeJS Version', `${process.version}`, true)
-                                    .addField('Websocket Ping', `${Math.round(client.ping)}ms`, true)
-                                    .addField('Memory Usage', `${rssUsage.reduce((previous, count) => previous + count, 0)} MB RSS\n${heapUsage.reduce((previous, count) => previous + count, 0)} MB Heap`, true)
-                                    .addField('CPU Usage', `Node: ${nodeCPUUsage.reduce((previous, count) => previous + count, 0)}%\nSystem: ${sysCPUUsage.reduce((previous, count) => previous + count, 0)}%`, true)
-                                    .setFooter(client.user.tag, client.user.displayAvatarURL);
-                                receivedMessage.channel.send(statsEmbed)
-                            })
-                        })
-                    })
-                })
-            })
-
-        })
-    })
+    const servers = await client.shard.broadcastEval('this.guilds.size')
+    const users = await client.shard.broadcastEval('this.users.size')
+    const channels = await client.shard.broadcastEval('this.channels.size')
+    const rssUsage = await client.shard.broadcastEval('process.memoryUsage().rss/1024/1024')
+    const heapUsage = await client.shard.broadcastEval('process.memoryUsage().heapUsed/1024/1024')
+    const nodeCPUUsage = await client.shard.broadcastEval('process.cpuUsage().user')
+    const sysCPUUsage = await client.shard.broadcastEval('process.cpuUsage().system')
+    const statsEmbed = new RichEmbed()
+        .setColor('#363A3F')
+        .setAuthor('Statistics', 'https://i.imgur.com/7hCWXZk.png')
+        .setTitle(`${client.user.username}'s stats`)
+        .setDescription('Contains essential information regarding our service and bot information.')
+        .setThumbnail(client.user.displayAvatarURL)
+        .addField('Uptime', `${duration}`, true)
+        .addField('Shards', `${client.shard.count}`, true)
+        .addField('Servers', `${servers.reduce((previous, count) => previous + count, 0)}`, true)
+        .addField('Channels', `${channels.reduce((previous, count) => previous + count, 0)}`, true)
+        .addField('Users', `${users.reduce((previous, count) => previous + count, 0)}`, true)
+        .addField('Discord.js Version', `${version}`, true)
+        .addField('NodeJS Version', `${process.version}`, true)
+        .addField('Websocket Ping', `${Math.round(client.ping)}ms`, true)
+        .addField('Memory Usage', `${rssUsage.reduce((previous, count) => previous + count, 0).toFixed(2)} MB RSS\n${heapUsage.reduce((previous, count) => previous + count, 0).toFixed(2)} MB Heap`, true)
+        .addField('CPU Usage', `Node: ${(nodeCPUUsage.reduce((previous, count) => previous + count, 0) / 1048576).toFixed(2)}%\nSystem: ${(sysCPUUsage.reduce((previous, count) => previous + count, 0) / 1048576).toFixed(2)}%`, true)
+        .setFooter(client.user.tag, client.user.displayAvatarURL);
+    receivedMessage.channel.send(statsEmbed)
 }
 
 function embedSpamCommand(arguments, receivedMessage) {
