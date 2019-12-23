@@ -231,7 +231,7 @@ client.on("message", receivedMessage => {
                 );
                 if (typeof serverSettings.logChannels.message != "undefined") {
                     if (receivedMessage.content) {
-                        const embed = new Discord.RichEmbed()
+                        const embed = new RichEmbed()
                             .setTitle("Message Log")
                             .setAuthor(
                                 receivedMessage.author.tag,
@@ -255,11 +255,15 @@ client.on("message", receivedMessage => {
                         client.channels.get(serverSettings.logChannels.message).send(embed);
                     }
                 }
+                if (!receivedMessage.author.bot) {
+                    processRank(receivedMessage);
+                    processCommand(receivedMessage, serverSettings, processStart);
+                }
             } else {
-                var rawData = JSON.parse(
+                const rawData = JSON.parse(
                     fs.readFileSync("defaultServerSettings.json", "utf8")
                 );
-                var data = JSON.stringify(rawData, null, 2);
+                const data = JSON.stringify(rawData, null, 2);
                 fs.writeFile(
                     "./data/" + receivedMessage.guild.id + ".json",
                     data,
@@ -275,14 +279,16 @@ client.on("message", receivedMessage => {
                         }
                     }
                 );
-            }
-            if (!receivedMessage.author.bot) {
-                processRank(receivedMessage);
+                if (!receivedMessage.author.bot) {
+                    processRank(receivedMessage);
+                    processCommand(receivedMessage, serverSettings, processStart);
+                }
             }
         } else {
+            if (receivedMessage.author.bot) return
             let serverSettings = null;
+            processCommand(receivedMessage, serverSettings, processStart);
         }
-        processCommand(receivedMessage, serverSettings, processStart);
     } catch (error) {
         sendError(error, receivedMessage);
     }
