@@ -1620,7 +1620,7 @@ async function configCommand(arguments, receivedMessage, settings) {
                 settings.others.leavingMessage = arguments.slice(2).join(" ");
             }
         }
-    } else if (arguments[0] == "rank-settings") {
+    } else if (arguments[0] == "rank-settings") {/*
         if (typeof settings.rankSettings === "undefined")
             settings.rankSettings = {};
         if (arguments[1] == "blacklist-channel") {
@@ -1718,7 +1718,9 @@ async function configCommand(arguments, receivedMessage, settings) {
                     })();
             }
             settings.rankSettings.rewards = map2json(settings.rankSettings.rewards);
+            
         }
+        */
     } else {
         return receivedMessage.channel.send("Unknown config");
     }
