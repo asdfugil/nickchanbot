@@ -148,6 +148,11 @@ process.on("uncaughtException", async error => {
 process.on("exit", code => {
     console.log("Exit code:" + code);
 })
+process.on('SIGHUP', () => {
+    if (client.status === 0) client.destroy().then(() => {
+        process.exit()
+    })
+})
 process.on("unhandledRejection", (error, promise) => {
     fs.writeFileSync("error.log", error.stack);
     if (client.status === 0) {
@@ -218,11 +223,14 @@ client.on("message", receivedMessage => {
             // Prevent bot from responding to its own messages
             return;
         }
+        if (!receivedMessage.guild) return
         if (receivedMessage.guild) {
+            //If in a server....
             const settingsExist = fs.existsSync(
                 `./data/${receivedMessage.guild.id}.json`
             );
             if (settingsExist) {
+                //If settings exist
                 let serverSettings = JSON.parse(
                     fs.readFileSync(
                         "./data/" + receivedMessage.guild.id + ".json",
@@ -257,7 +265,7 @@ client.on("message", receivedMessage => {
                 }
                 if (!receivedMessage.author.bot) {
                     processRank(receivedMessage);
-                    processCommand(receivedMessage, serverSettings, processStart);
+                    if (receivedMessage.content.startsWith(config.prefix)) processCommand(receivedMessage, serverSettings, processStart);
                 }
             } else {
                 const rawData = JSON.parse(
@@ -281,13 +289,13 @@ client.on("message", receivedMessage => {
                 );
                 if (!receivedMessage.author.bot) {
                     processRank(receivedMessage);
-                    processCommand(receivedMessage, serverSettings, processStart);
+                    if (receivedMessage.content.startsWith(config.prefix)) processCommand(receivedMessage, serverSettings, processStart);
                 }
             }
         } else {
             if (receivedMessage.author.bot) return
             let serverSettings = null;
-            processCommand(receivedMessage, serverSettings, processStart);
+            if (receivedMessage.content.startsWith(config.prefix)) processCommand(receivedMessage, serverSettings, processStart);
         }
     } catch (error) {
         sendError(error, receivedMessage);
@@ -1035,43 +1043,53 @@ client.on("roleCreate", role => {
     }
 })
 client.on("roleUpdate", (oldRole, newRole) => {
-    const settingsExist = fs.existsSync(`./data/${oldRole.guild.id}.json`)
+    const settingsExist = fs.existsSync(`./data/${newRole.guild.id}.json`)
     if (settingsExist) {
         const settings = JSON.parse(fs.readFileSync(`./data/${oldRole.guild.id}.json`, "utf8"))
         if (typeof settings.logChannels.roleUpdate != "undefined") {
             const oldPerms = new Permissions(oldRole.permissions).serialize()
             const newPerms = new Permissions(newRole.permissions).serialize()
-            let changes = new String()
+            let changes = 'None'
             let changesInPermission = new String("None")
-            for (const oldKey in newRole) {
-                if (["name", "mentionable", "hoist", "hexColor", "position"].some(x => x === oldKey)) {
-                    for (const newKey in oldRole) {
-                        if (["name", "mentionable", "hoist", "hexColor", "position"].some(x => x === newKey)) {
-                            if (oldRole[oldKey] === newRole[newKey]) return
-                            changes += `\n${newKey}:${oldRole[oldKey]} --> ${newRole[newKey]}`
-                        }
-                    }
-                }
+            for (const [oldKey, oldValue] of Object.entries(oldRole)) {
+                if (!['name', 'mentionable', 'hoist', 'color', 'position'].includes(oldKey)) continue
+                if (oldValue === newRole[oldKey]) continue
+                changes += `\n${oldKey}: ${oldValue} --> ${newRole[oldKey]}`
             }
-            for (const oldPermsName in oldPerms) {
-                for (const newPermsName in newPerms) {
-                    if (oldPerms.hasOwnProperty(oldPermsName)) {
-                        if (oldPermsName[oldPerms] === newPermsName[newPerms])
-                            changesInPermission += `\n${oldPermsName}:${oldPermsName[oldPerms]} --> ${newPermsName[newPerms]}`
-                    }
-                }
+            for (const [oldPermsName, oldPermsValue] of Object.entries(oldPerms)) {
+                if (oldPermsValue === newPerms[oldPermsName]) continue
+                changesInPermission += `\n${oldPermsName}: ${oldPermsValue} --> ${newPerms[oldPermsName]}`
             }
             if (!changesInPermission.endsWith("None")) changesInPermission = changesInPermission.substr(5)
+            if (!changes.endsWith("None")) changes = changes.substr(5)
             const embed = new RichEmbed()
-                .setTitle("Role Updated")
-                .setAuthor(client.user.displayAvatarURL, client.user.displayAvatarURL)
-                .setDescription(`**Name**: ${newRole.toString()}, **ID** : ${newRole.id}`)
-                .addField("Changes", changes)
+                .setTitle(`Role "${oldRole.name}" Updated`)
+                .setAuthor(newRole.guild.name, newRole.guild.iconURL)
+                .setDescription(`${newRole.toString()}\n**Role ID** : ${newRole.id}`)
+                .addField("Changes (expect permissions)", changes)
                 .addField("Chnages in permissions", changesInPermission)
+                .setColor('#b7eb34')
                 .setTimestamp()
                 .setFooter(client.user.tag, client.user.displayAvatarURL)
             if (!client.channels.has(settings.logChannels.roleUpdate)) return bot.emit("missingLogChannel", settings.logChannels.roleUpdate, role.guild, "roleUpdate")
             client.channels.get(settings.logChannels.roleUpdate).send(embed)
+        }
+    }
+})
+client.on("roleDelete", role => {
+    if (fs.existsSync(`./data/${role.guild.id}.json`)) {
+        const settings = JSON.parse(fs.readFileSync(`./data/${role.guild.id}.json`, 'utf8'))
+        if (typeof settings.logChannels.roleDelete !== 'undefined') {
+            const embed = new RichEmbed()
+                .setColor('#ff0000')
+                .setAuthor(role.guild.name, role.guild.iconURL)
+                .setTitle(`Role "${role.name}" deleted`)
+                .addField('Role ID', role.id)
+                .addField('Auto-managed', role.managed)
+                .setTimestamp()
+                .setFooter(client.user.tag, client.user.displayAvatarURL)
+            if (!client.channels.has(settings.logChannels.roleUpdate)) return bot.emit("missingLogChannel", settings.logChannels.roleDelete, role.guild, "roleDelete")
+            client.channels.get(settings.logChannels.roleDelete).send(embed)
         }
     }
 })
@@ -1106,10 +1124,10 @@ function botError(message) {
 }
 function processCommand(receivedMessage, serverSettings, processStart) {
     try {
-        var fullCommand = receivedMessage.content.substr(1); // Remove the prefix
-        var splitCommand = fullCommand.split(" "); // Split the message up in to pieces for each space
-        var primaryCommand = splitCommand[0]; // The first word directly after the exclamation is the command
-        var arguments = splitCommand.slice(1); // All other words are arguments/parameters/options for the command
+        const fullCommand = receivedMessage.content.substr(1); // Remove the prefix
+        const splitCommand = fullCommand.split(" "); // Split the message up in to pieces for each space
+        const primaryCommand = splitCommand[0]; // The first word directly after the exclamation is the command
+        const arguments = splitCommand.slice(1); // All other words are arguments/parameters/options for the command
         let serverQueue = null;
         if (receivedMessage.guild)
             serverQueue = queue.get(receivedMessage.guild.id); //Music queue
@@ -1117,75 +1135,42 @@ function processCommand(receivedMessage, serverSettings, processStart) {
         console.log(" Command received: " + primaryCommand);
         console.log(" Arguments: " + arguments); // There may not be any arguments
 
-        if (primaryCommand == "help") {
-            helpCommand(arguments, receivedMessage);
-        } else if (primaryCommand == "multiply") {
-            multiplyCommand(arguments, receivedMessage);
-        } else if (primaryCommand == "spam") {
-            spamCommand(arguments, receivedMessage);
-        } else if (primaryCommand == "spam-ping") {
-            spamPingCommand(arguments, receivedMessage);
-        } else if (primaryCommand == "changelogs") {
-            ChangelogsCommand(receivedMessage);
-        } else if (primaryCommand == "kick") {
-            kickCommand(arguments, receivedMessage);
-        } else if (primaryCommand == "about") {
-            aboutCommand(receivedMessage);
-        } else if (primaryCommand == "ping") {
-            pingCommand(receivedMessage, processStart);
-        } else if (primaryCommand == "ban") {
-            banCommand(arguments, receivedMessage);
-        } else if (primaryCommand == "purge") {
-            purgeCommand(arguments, receivedMessage);
-        } else if (primaryCommand == "reconnect") {
-            reconnectCommand(receivedMessage);
-        } else if (primaryCommand == "8ball") {
-            eightBallCommand(arguments, receivedMessage);
-        } else if (primaryCommand == "dog") {
-            dogCommand(receivedMessage);
-        } else if (primaryCommand == "unban") {
-            unbanCommand(arguments, receivedMessage);
-        } else if (primaryCommand == "say") {
-            sayCommand(arguments, receivedMessage);
-        } else if (primaryCommand == "cat") {
-            catCommand(receivedMessage);
-        } else if (primaryCommand == "randomstring") {
-            randomStringCommand(arguments, receivedMessage);
-        } else if (primaryCommand == "randomelement") {
-            randomElementCommand(receivedMessage);
-        } else if (primaryCommand == "server-info") {
-            serverInfoCommand(arguments, receivedMessage);
-        } else if (primaryCommand == "logs") {
-            logsCommand(receivedMessage);
-        } else if (primaryCommand == "stats") {
-            statsCommand(receivedMessage);
-        } else if (primaryCommand == "googlesearch") {
-            googleSearchCommand(arguments, receivedMessage);
-        } else if (primaryCommand == "eval") {
-            evalCommand(arguments, receivedMessage);
-        } else if (primaryCommand == "config") {
-            configCommand(arguments, receivedMessage, serverSettings);
-        } else if (primaryCommand == "embed-spam") {
-            embedSpamCommand(arguments, receivedMessage);
-        } else if (primaryCommand == "user-info") {
-            userInfoCommand(arguments, receivedMessage);
-        } else if (primaryCommand == "nekos-life") {
-            nekosLifeCommand(arguments, receivedMessage);
-        } else if (primaryCommand == `play`) {
-            execute(receivedMessage, serverQueue);
-        } else if (primaryCommand == `skip`) {
-            skip(receivedMessage, serverQueue);
-        } else if (primaryCommand == `stop`) {
-            stop(receivedMessage, serverQueue);
-        } else if (primaryCommand == `queue`) {
-            queueCommand(receivedMessage, serverQueue, arguments);
-        } else if (primaryCommand == `now-playing`) {
-            nowPlaying(receivedMessage, serverQueue);
-        } else if (primaryCommand == "errors") {
-            errorsCommand(arguments, receivedMessage);
-        } else if (primaryCommand == "rank") {
-            rankCommand(arguments, receivedMessage);
-        }
+        if (primaryCommand === "help") helpCommand(arguments, receivedMessage)
+        else if (primaryCommand === "multiply") multiplyCommand(arguments, receivedMessage)
+        else if (primaryCommand === "spam") spamCommand(arguments, receivedMessage)
+        else if (primaryCommand === "spam-ping") spamPingCommand(arguments, receivedMessage)
+        else if (primaryCommand === "changelogs") ChangelogsCommand(receivedMessage)
+        else if (primaryCommand === "kick") kickCommand(arguments, receivedMessage)
+        else if (primaryCommand === "about") aboutCommand(receivedMessage)
+        else if (primaryCommand === "ping") pingCommand(receivedMessage, processStart)
+        else if (primaryCommand === "ban") banCommand(arguments, receivedMessage)
+        else if (primaryCommand === "purge") purgeCommand(arguments, receivedMessage)
+        else if (primaryCommand === "reconnect") reconnectCommand(receivedMessage)
+        else if (primaryCommand === "8ball") eightBallCommand(arguments, receivedMessage)
+        else if (primaryCommand === "dog") dogCommand(receivedMessage)
+        else if (primaryCommand === "unban") unbanCommand(arguments, receivedMessage)
+        else if (primaryCommand === "say") sayCommand(arguments, receivedMessage)
+        else if (primaryCommand === "cat") catCommand(receivedMessage)
+        else if (primaryCommand === "randomstring") randomStringCommand(arguments, receivedMessage)
+        else if (primaryCommand === "randomelement") randomElementCommand(receivedMessage)
+        else if (primaryCommand === "server-info") serverInfoCommand(arguments, receivedMessage)
+        else if (primaryCommand === "logs") logsCommand(receivedMessage)
+        else if (primaryCommand === "stats") statsCommand(receivedMessage)
+        else if (primaryCommand === "googlesearch") googleSearchCommand(arguments, receivedMessage)
+        else if (primaryCommand === "eval") evalCommand(arguments, receivedMessage)
+        else if (primaryCommand === "config") configCommand(arguments, receivedMessage, serverSettings)
+        else if (primaryCommand === "embed-spam") embedSpamCommand(arguments, receivedMessage)
+        else if (primaryCommand === "user-info") userInfoCommand(arguments, receivedMessage)
+        else if (primaryCommand === "nekos-life") nekosLifeCommand(arguments, receivedMessage)
+        else if (primaryCommand === `play`) execute(receivedMessage, serverQueue)
+        else if (primaryCommand === `skip`) skip(receivedMessage, serverQueue)
+        else if (primaryCommand === `stop`) stop(receivedMessage, serverQueue)
+        else if (primaryCommand === `queue`) queueCommand(receivedMessage, serverQueue, arguments)
+        else if (primaryCommand === `now-playing`) nowPlaying(receivedMessage, serverQueue)
+        else if (primaryCommand === "errors") errorsCommand(arguments, receivedMessage)
+        else if (primaryCommand === "rank") rankCommand(arguments, receivedMessage)
+
+
     } catch (error) {
         sendError(error, receivedMessage);
     }
@@ -1288,6 +1273,9 @@ async function reconnectCommand(receivedMessage) {
         receivedMessage.channel.send("Only the bot onwer can reload the bot");
     }
 }
+/**
+ * Provides help to the end user.
+*/
 function helpCommand(arguments, receivedMessage) {
     if (arguments == "multiply") {
         receivedMessage.channel.send(
@@ -1376,7 +1364,32 @@ function helpCommand(arguments, receivedMessage) {
         );
     } else if (arguments == "config") {
         receivedMessage.channel.send(
-            "Description:Change server settings\nUsage `config <config category> <config item> <new value>`\nUse `none` as the <new value> argument to remove the config item.\n\n**__Category:`log-channels`__** Sets the log channels\nIn this category `<new value>` must be a channel mention. \nList of `<config item>`s\n\n`startTyping` Logged when someone starts typing\n`stopTyping` Logged when someone stops typing\n`message` Logged when someone sends a message\n`messageDelete` Logged when someone deletes a message\n`messageDeleteBulk` Logged when someone bulk delete messages\n`messageUpdate` Logged when a message is updated\n`channelCreate` Logged when a channel is created\n`channelDelete` Logged when achannel is deleted\n`channelUpdate` Logged when a channel is updated\n`guildBanAdd` Logged when someone is banned\n`guildBanRemove` Logged when someone is unbanned\n`guildMemberAdd` Logged when someone joins the server\n`guildMemebrRemove` Logged when someone leaves the server.\n`error` Logged when the bot encouters an error wjile doing something on the server.\n`emojiCreate` Logged when a emoji is craeted.\n`emojiDelete`Logged when an emoji is deleted\n`emojiUpdate`Logged when an emoji is updated."
+            "Description:Change server settings\n\
+            Usage `config <config category> <config item> <new value>`\n\
+            Use `none` as the <new value> argument to remove the config item.\
+            \n\n**__Category:`log-channels`__**\n\
+             Sets the log channels\
+             \nIn this category `<new value>` must be a channel mention. \
+             \nList of `<config item>`s\n\n\
+`startTyping` Logged when someone starts typing\n\
+`stopTyping` Logged when someone stops typing\n\
+`message` Logged when someone sends a message\n\
+`messageDelete` Logged when someone deletes a message\n\
+`messageDeleteBulk` Logged when someone bulk delete messages\n\
+`messageUpdate` Logged when a message is updated\n\
+`channelCreate` Logged when a channel is created\n\
+`channelDelete` Logged when achannel is deleted\n\
+`channelUpdate` Logged when a channel is updated\n\
+`guildBanAdd` Logged when someone is banned\n\
+`guildBanRemove` Logged when someone is unbanned\n\
+`guildMemberAdd` Logged when someone joins the server\n\
+`guildMemebrRemove` Logged when someone leaves the server.\n\
+`error` Logged when the bot encouters an error wjile doing something on the server.\n\
+`emojiCreate` Logged when a emoji is craeted.\n`emojiDelete`Logged when an emoji is deleted\n\
+`emojiUpdate`Logged when an emoji is updated.\n\
+`roleCreate` Logged when a role is created\n\
+`roleUpdate` Logged when a role is updated\n\
+`roleDelete` Logged when a role is deleted"
         );
     } else if (arguments == "stats") {
         receivedMessage.channel.send(
@@ -1752,25 +1765,20 @@ function spamCommand(arguments, receivedMessage) {
     }
     var i;
     var spamCount = 1;
-    var spamming = true;
+    const collector = receivedMessage.channel.createMessageCollector(m => m.content.startsWith(config.prefix+"stop-spamming"),{time:null})
+    collector.on("collect",m => {
+        if (!receivedMessage.channel.permissionsFor(m.member).serialize().MANAGE_MESSAGES) return noPermission('Manage Messages')
+        i = num1
+        collector.stop()
+        receivedMessage.channel.send("Stopped!")
+    })
     for (i = 0; i < num1; i++) {
-        if (spamming) {
-            client.on("message", stopMessage => {
-                try {
-                    if (stopMessage.author.bot) return;
-                    if (stopMessage.content == "/stop")
-                        throw botError("Command is force stopped.");
-                } catch (error) {
-                    sendError(error, receivedMessage);
-                    return;
-                }
-            });
-        }
         receivedMessage.channel.send(
             "Spamming...  count:" +
             spamCount +
             "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n."
         );
+        if (i >= num1) collector.stop()
         spamCount += 1;
     }
 }
@@ -1798,7 +1806,13 @@ function spamPingCommand(arguments, receivedMessage) {
     }
     var i;
     var spamCount = 1;
-    var spamming = true;
+    const collector = receivedMessage.channel.createMessageCollector(m => m.content.startsWith(config.prefix+"stop-spamming-everyone"),{time:null})
+    collector.on("collect",m => {
+        if (!receivedMessage.channel.permissionsFor(m.member).serialize().MANAGE_MESSAGES) return noPermission('Manage Messages')
+        i = num1
+        collector.stop()
+        receivedMessage.channel.send("Stopped!")
+    })
     for (i = 0; i < num1; i++) {
         receivedMessage.channel
             .send("Spamming...  count:" + spamCount + "\n @everyone")
@@ -1806,24 +1820,13 @@ function spamPingCommand(arguments, receivedMessage) {
                 console.error(error.stack);
                 return;
             });
-        if (spamming) {
-            client.on("message", stopMessage => {
-                try {
-                    if (stopMessage.author.bot) return;
-                    if (stopMessage.content == "/stop")
-                        throw botError("Command is force stopped.");
-                } catch (error) {
-                    sendError(error, receivedMessage);
-                    return;
-                }
-            });
-        }
+            if (i >= num1) collector.stop()
         spamCount += 1;
     }
 }
 function ChangelogsCommand(receivedMessage) {
     receivedMessage.channel.send(
-        "Nick Chan Bot Beta 1.0.0 - pre13 \n **CHANGELOGS** \n ```-Added /rank,/errors\n-Added a ranking system (level rewards later)```"
+        "Nick Chan Bot Beta 1.0.0 - pre14 \n **CHANGELOGS** \n ```-Added role logs\n-Bug fixes```"
     );
 }
 function kickCommand(arguments, receivedMessage) {
@@ -2481,7 +2484,7 @@ async function userInfoCommand(arguments, receivedMessage) {
 }
 async function nekosLifeCommand(arguments, receivedMessage) {
     receivedMessage.channel.startTyping();
-    var api = "https://nekos.life/api/v2/img/";
+    const api = "https://nekos.life/api/v2/img/";
     const SFWImages = [
         "smug",
         "baka",
@@ -2520,68 +2523,12 @@ async function nekosLifeCommand(arguments, receivedMessage) {
         "blowjob",
         "pussy"
     ];
-    let i = true
-    let sfw = false
-    if (!SFWImages.includes(arguments[0])) sfw = false
-    if (!NSFWImages.includes(arguments[0])) i = null
-    if (i !== null && sfw) {
-        const file = await fetch(api + arguments[0]).then(response => response.json());
-        try {
-            if (typeof file.msg != "undefined") {
-                var error = new Error(file.msg);
-                error.name = "nekos.lifeAPIError";
-                throw error;
-            }
-        } catch (error) {
-            sendError(error, receivedMessage).then(() =>
-                receivedMessage.channel.stopTyping()
-            );
-        }
-        receivedMessage.channel
-            .send(new Attachment(file.url))
-            .then(() => receivedMessage.channel.stopTyping());
-        return;
-    }
-    if (i !== null && !sfw) {
-        if (
-            receivedMessage.channel.nsfw == false ||
-            receivedMessage.channel.type == "dm"
-        ) {
-            receivedMessage.channel
-                .send("Please use NSFW arguments in NSFW channel only.")
-                .then(() => receivedMessage.channel.stopTyping());
-            return;
-        }
-        const file = await fetch(api + arguments[0]).then(response => response.json());
-        try {
-            if (typeof file.msg != "undefined") {
-                var error = new Error(file.msg);
-                error.name = "nekos.lifeAPIError";
-                throw error;
-            }
-        } catch (error) {
-            sendError(error, receivedMessage).then(() =>
-                receivedMessage.channel.stopTyping()
-            );
-        }
-        receivedMessage.channel
-            .send(new Attachment(file.url))
-            .then(() => receivedMessage.channel.stopTyping());
-        return;
-    }
-    if (i == null) {
-        receivedMessage.channel.send("Invalid arguments,available arguments:");
-        receivedMessage.channel
-            .send(
-                "SFW:\n`" +
-                SFWImages.join("` `") +
-                "`" +
-                "\nNSFW:\n`" +
-                NSFWImages.join("` `") +
-                "`"
-            )
-            .then(() => receivedMessage.channel.stopTyping());
-    }
+    if (SFWImages.includes(arguments[0])) return receivedMessage.channel.send(new Attachment((await fetch(api + arguments[0]).then(response => response.json())).url)).then(() => receivedMessage.channel.stopTyping())
+    else if (NSFWImages.includes(arguments[0])) {
+        if (receivedMessage.channel.nsfw) return receivedMessage.channel.send(new Attachment((await fetch(api + arguments[0]).then(response => response.json())).url)).then(() => receivedMessage.channel.stopTyping())
+        else receivedMessage.reply("NSFW arguments can only be used in NSFW channels.").then(() => receivedMessage.channel.stopTyping())
+    } else return receivedMessage.reply("Invalid arguments,available arguments:\nSFW:\n`" + SFWImages.join("` `")
+        + "`\n\nNSFW:\n`" + NSFWImages.join("` `") + "`").then(() => receivedMessage.channel.stopTyping())
 }
 function nowPlaying(receivedMessage, serverQueue) {
     if (typeof serverQueue != "undefined") {
