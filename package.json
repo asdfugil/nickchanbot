@@ -1,51 +1,70 @@
+
 {
-    "name": "nick-chan-bot",
-    "version": "1.0.0",
-    "description": "foo",
-    "repository": {},
-    "author": {
-        "name": "Nick Chan#0001",
-        "email": "towinchenmi@gmail.com",
-        "discord_user_id": "570634232465063967"
+  "name": "nick-chan-bot",
+  "version": "1.0.0",
+  "description": "foo",
+  "repository": {},
+  "author": {
+    "name": "Nick Chan#0001",
+    "email": "towinchenmi@gmail.com",
+    "discord_user_id": "570634232465063967"
+  },
+  "contributors": [
+    {
+      "name": "「FΛV」#8324",
+      "discord_user_id": "400581909912223744"
     },
-    "contributors": [
-        {
-            "name": "「FΛV」#8324",
-            "discord_user_id": "400581909912223744"
-        },
-        {
-            "name": "RandomPerson0244#0244",
-            "discord_user_id": "549471563616092171"
-        }
-    ],
-    "keywords": [
-        "nick chan bot",
-        "discord bot"
-    ],
-    "homepage": "https://nick-chan-bot.glitch.me",
-    "config": {},
-    "main": "./index.js",
-    "bugs": "https://github.com/Assfugil/nickchanbot/issues",
-    "dependencies": {
-        "@tokkiyaa/map2json": "^1.2.0",
-        "discord.js": "^11.5.1",
-        "google-it": "^1.2.1",
-        "keyv": "^3.1.0",
-        "moment": "^2.24.0",
-        "moment-duration-format": "^2.3.2",
-        "nekos.life": "^2.0.4",
-        "node-fetch": "^2.6.0",
-        "npm": "^6.13.4",
-        "opusscript": "0.0.7",
-        "ytdl-core": "^1.0.0",
-        "ytsearcher": "^1.2.2"
-    },
-    "scripts": {
-        "test": "@echo off && echo STARTING THE TEST... && node bot.js"
-    },
-    "engines": {
-        "node": ">= 6.0.0",
-        "ffmpeg": ">= 4.2"
-    },
-    "license": "LGPL"
+    {
+      "name": "RandomPerson0244#0244",
+      "discord_user_id": "549471563616092171"
+    }
+  ],
+  "keywords": [
+    "nick chan bot",
+    "discord bot"
+  ],
+  "homepage": "https://nick-chan-bot.glitch.me",
+  "config": {},
+  "main": "./index.ts",
+  "bugs": "https://github.com/Assfugil/nickchanbot/issues",
+  "type": "module",
+  "dependencies": {
+    "@keyv/sqlite": "^2.0.2",
+    "@tokkiyaa/map2json": "^1.2.0",
+    "canvas": "^2.6.1",
+    "discord.js": "github:discordjs/discord.js#11.5-dev",
+    "erlpack": "^0.1.3",
+    "everything": "^1.1.7",
+    "express": "^4.17.1",
+    "google-it": "^1.4.2",
+    "keyv": "^4.0.0",
+    "moment": "^2.24.0",
+    "moment-duration-format": "^2.3.2",
+    "nekos.life": "^2.0.4",
+    "node-fetch": "^2.6.0",
+    "node-opus": "^0.3.3",
+    "opusscript": "0.0.7",
+    "pidusage": "^2.0.17",
+    "request": "^2.88.0",
+    "serialize-javascript": "^2.1.2",
+    "sodium": "^3.0.2",
+    "speedo-cli": "^2.4.0",
+    "ts-node": "^8.5.4",
+    "typescript": "^3.7.4",
+    "uws": "^99.0.0",
+    "ytdl-core": "^1.0.6",
+    "ytsearcher": "^1.2.2",
+    "vm2": "^3.8.4",
+    "is-url": "^1.2.4",
+    "bitly4api": "^1.0.0",
+    "bitlyurl": "^1.1.0"
+  },
+  "scripts": {
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": "12.x",
+    "ffmpeg": ">= 4.2"
+  },
+  "license": "LGPL"
 }
