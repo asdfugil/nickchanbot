@@ -1,17 +1,16 @@
 const math = require('mathjs')
 const { prefix } = require('../config/config.js')
-const types = ['evaluate','simplify','transform']
+const types = ['evaluate','simplify']
 module.exports = {
   name:'math',
   args:true,
   description:'a calculator',
   cooldown:1.5,
   aliases:['calc','calculator'],
-  usage:'<evaluate|simplify|transform> <expression>',
+  usage:' <evaluate|simplify> <expression>',
   info:`How to write expressions: https://mathjs.org/docs/expressions/syntax.html
 evalulate : a simple calculator
 simplify : simplify algebraic expressions
-transforom: rationalize
 `,
   execute:(message,args) => { 
     if (!types.includes(args[0])) return message.reply('Invalid argument given \n Usage:'+`${prefix}math${module.exports.usage}`)
