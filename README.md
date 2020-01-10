@@ -1,5 +1,8 @@
 <div align="center">
     <img src="https://i.imgur.com/YLjMTON.png"><br><br>
+</div>
+
+---
 
 # NICK CHAN # 5213 [BOT]
 
