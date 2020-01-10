@@ -1,10 +1,10 @@
 <div align="center">
     <img src="https://i.imgur.com/YLjMTON.png"><br><br>
-</div>
 
 ---
 
-<h2 align="center">NICK CHAN # 5213 [BOT]</h2>
+# NICK CHAN # 5213 [BOT]
+</div>
 
 ## About
 
