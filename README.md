@@ -4,7 +4,7 @@
 
 ---
 
-# NICK CHAN # 5213 [BOT]
+<h2 align="center">**NICK CHAN # 5213 [BOT]**</h2>
 
 ## About
 
