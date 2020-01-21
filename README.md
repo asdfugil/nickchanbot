@@ -1,4 +1,10 @@
+<div align="center">
+    <img src="https://i.imgur.com/mAojAot.png"><br><br>
+
+---
+
 # NICK CHAN # 5213 [BOT]
+</div>
 
 ## About
 
