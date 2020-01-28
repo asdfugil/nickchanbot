@@ -5,7 +5,7 @@ module.exports = {
   cooldown: 10,
   aliases: ["guild-info", "guildinfo", "serverinfo"],
   description: "shows server info",
-  execute: (receivedMessage, args) => {
+  execute: async (receivedMessage, args) => {
     const client = receivedMessage.client;
     const g = receivedMessage.guild;
     const data = [];

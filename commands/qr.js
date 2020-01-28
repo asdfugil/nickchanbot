@@ -8,7 +8,7 @@ module.exports = {
   info: "Encodes data in a QR Code",
   args:true,
   cooldown: 30,
-  execute: (receivedMessage, args) => {
+  execute: async (receivedMessage, args) => {
     if(!fs.existsSync(`./temp`)) {
         fs.mkdirSync(`./temp`)
     }

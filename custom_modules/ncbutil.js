@@ -11,31 +11,36 @@ module.exports = {
     error.name = "NickChanBotError";
     return error;
   },
-  findMember: async (receivedMessage, string) => {
-    const client = receivedMessage.client;
-    let member;
-    if (receivedMessage.mentions.members.first())
-      return receivedMessage.mentions.members.first();
-    try {
-      member = await receivedMessage.guild.fetchMember(
-        await client.fetchUser(string)
-      );
-      return member;
-    } catch (error) {
-      if (receivedMessage.guild.members.find(x => x.user.tag.includes(string)))
-        return receivedMessage.guild.members.find(x =>
-          x.user.tag.includes(string)
-        );
-      if (
-        receivedMessage.guild.members.find(x => x.displayName.includes(string))
-      )
-        return receivedMessage.guild.members.find(x =>
-          x.displayName.includes(string)
-        );
-    }
-    return false
+  findMember: async (message, string) => {
+    if (message.mentions.members.first()) return message.mentions.members.first()
+    else if (message.guild.members.find(x => x.user.tag.includes(string))) return message.guild.members.find(x => x.user.tag.includes(string))
+    else if (message.guild.members.find(x => x.displayName.includes(string))) return message.guild.members.find(x => x.displayName.includes(string))
+    else if (await message.guild.fetchMember(string)) return await message.guild.fetchMember(string)
   },
-  deserialize:(str) => eval(`(${str})`),
+  findUser: async (message,string) => {
+    if (message.mentions.members.first()) return message.mentions.members.first().user
+    else if (message.guild.members.find(x => x.user.tag.includes(string))) return message.guild.members.find(x => x.user.tag.includes(string)).user
+    else if (message.guild.members.find(x => x.displayName.includes(string))) return message.guild.members.find(x => x.displayName.includes(string)).user
+    else if (await message.client.fetchUser(string)) return await message.client.fetchUser(string)
+  },
+  findRole: (message,string) => {
+    const { guild } = message
+    let role = message.mentions.roles.first()
+    if (role) return role
+    else role = guild.roles.find(x => x.name.includes(string))
+    if (role) return role
+    else role = guild.roles.find(x => x.hexColor === string)
+    if (role) return role
+    else return guild.roles.get(string)
+  },
+  findBannedUser:async (message,string) => {
+    const bans = await message.guild.fetchBans()
+    let user = bans.find(x => x.tag.includes(string))
+    if (user) return user
+    user = bans.find(x => string.includes(x.id)) //@memntions and ids
+    return user
+  },
+  deserialize: str => eval(`(${str})`),
   /**
    * Converts Collection into JSON.
    * @param collection A Collection in which all keys are strings
@@ -96,7 +101,7 @@ module.exports = {
       .setDescription(
         `You don't have the permissions to use this command.\nOnly members with **${perms}** permission(s) can use this command`
       );
-    return c.send(noPermission);
+    return c.send(noPermission)
   },
   noBotPermission: async (perms, c) => {
     const noPermission = new RichEmbed()
@@ -107,7 +112,7 @@ module.exports = {
         `The Bot does not have enough permissions
             Permissions required:\`${perms}\``
       );
-    return c.send(noPermission);
+    return c.send(noPermission)
   },
   /**
    * @constructor Provides functionality needed a Discord Leveling System.

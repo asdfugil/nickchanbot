@@ -1,7 +1,7 @@
 const { exec } = require("child_process");
 const Discord = require("discord.js");
 const fs = require("fs");
-const config = require("../config/config.js");
+const devsID = process.env.DEVS_ID.split(",")
 const { Attachment, RichEmbed, Permissions } = Discord;
 const EventEmitter = require("events");
 const util = require("util");
@@ -15,7 +15,7 @@ module.exports = {
   description: "Run bash or command on terminal (bot developers only)",
   usage: "<terminal-command>",
   execute: async (receivedMessage, args) => {
-    if (!config.devsID.includes(receivedMessage.author.id)) return;
+    if (!devsID.includes(receivedMessage.author.id)) return;
     if (!args.join(" "))
       return receivedMessage.reply("Please give the parameter to execute.");
     const mu = Date.now();

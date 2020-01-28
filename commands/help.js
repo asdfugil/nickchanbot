@@ -1,11 +1,20 @@
-const { prefix } = require("../config/config.js");
+const prefix = process.env.PREFIX
+const Keyv = require("keyv");
+const prefixs = new Keyv("sqlite://.data/database.sqlite", {
+  namespace: "prefixs"
+});
 module.exports = {
   name: "help",
   description: "List all of my commands or info about a specific command.",
   aliases: ["commands"],
   usage: "[command name]",
   cooldown: 5,
-  execute(message, args) {
+  execute: async (message, args) => {
+    let actualPrefix = prefix;
+    if (message.guild) {
+      if (await prefixs.get(message.guild.id))
+        actualPrefix = await prefixs.get(message.guild.id);
+    }
     const data = [];
     const { commands } = message.client;
 
@@ -13,7 +22,7 @@ module.exports = {
       data.push("Here's a list of all my commands:");
       data.push(commands.map(command => "`" + command.name + "`").join(", "));
       data.push(
-        `\nYou can send \`${prefix}help [command name]\` to get info on a specific command!`
+        `\nYou can send \`${actualPrefix}help [command name]\` to get info on a specific command!`
       );
       return message.channel.send(data, { split: true, disableEveryone: true });
     }
@@ -33,7 +42,7 @@ module.exports = {
     if (command.description)
       data.push(`**Description:** ${command.description}`);
     if (command.usage)
-      data.push(`**Usage:** ${prefix}${command.name} ${command.usage}`);
+      data.push(`**Usage:** ${actualPrefix}${command.name} ${command.usage}`);
     if (command.nsfw) data.push("**NSFW:** " + command.nsfw);
     if (command.cooldown)
       data.push(`**Cooldown:** ${command.cooldown || 3} second(s)`);

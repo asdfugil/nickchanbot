@@ -6,7 +6,7 @@ module.exports = {
   usage: "<query>",
   aliases: ["pnpm"],
   description: "search a package on npm",
-  execute: (message, args) => {
+  execute: async (message, args) => {
     message.channel.startTyping();
     message.channel.send(
       `Searching \`${args

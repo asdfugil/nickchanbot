@@ -1,7 +1,13 @@
 console.log('Launching shard manager...')
-require('./config/http.js')
+require('dotenv').config()
 const { ShardingManager } = require('discord.js')
-const config = require('./config/config.json')
-const manager = new ShardingManager('./bot.js', {token:config.token})
-manager.spawn();
+const { TOKEN } = process.env
+const manager = new ShardingManager('./bot.js', {token:TOKEN})
+manager.spawn(1,4000);
 manager.on('launch', shard => console.log(`Launched shard ${shard.id}.`));
+manager.on("message",(shard,receivedMessage) => {
+  console.log("Message received from shard " + shard.id)
+  console.log(receivedMessage._eval)
+  console.log(receivedMessage._result)
+})
+

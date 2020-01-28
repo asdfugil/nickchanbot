@@ -1,0 +1,22 @@
+//require any files here if needed
+/*if there are variables other than receivedMessage and args that need to be imported
+In bot.js do `client.property = variable-value`
+Access it in here by receivedMEssage.client.property
+*/
+/*similarly, to export variables
+do `recivedMessage.cleint.property = variable-value`
+Access it in other files by <the-client-object>.property
+*/
+module.exports = {
+    name: 'command-name',
+    args:7//boolean or number
+    guildOnly:true //whether the command is server-only
+    description: 'some short description',
+    info:'',//additional info
+    nsfw:true//whether the command is *fully* NSFW
+    aliases: ['pong'],
+    cooldown: 5, //command cooldown in seconds
+    execute: async (receivedMessage, args) => {
+    //actual code
+    }
+}

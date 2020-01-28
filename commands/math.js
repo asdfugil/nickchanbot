@@ -1,5 +1,6 @@
+require('dotenv').config()
 const math = require('mathjs')
-const { prefix } = require('../config/config.js')
+const prefix = process.env.PREFIX
 const types = ['evaluate','simplify']
 module.exports = {
   name:'math',
@@ -12,7 +13,7 @@ module.exports = {
 evalulate : a simple calculator
 simplify : simplify algebraic expressions
 `,
-  execute:(message,args) => { 
+  execute:async (message,args) => { 
     if (!types.includes(args[0])) return message.reply('Invalid argument given \n Usage:'+`${prefix}math${module.exports.usage}`)
     try {
     const result = math[args[0]](args.slice(1).join(" "))

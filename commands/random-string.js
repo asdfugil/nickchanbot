@@ -17,7 +17,7 @@ module.exports = {
     }
     return result;
   },
-  execute: (receivedMessage, args) => {
+  execute:async (receivedMessage, args) => {
     if (args[0] <= 1048576) {
       const str = module.exports.random(args[0]);
       if (args[0] <= 2000 && args[0] > 0) {

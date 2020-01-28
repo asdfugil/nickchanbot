@@ -1,11 +1,12 @@
 'use strict'
+require('dotenv').config()
 console.log("Starting...");;
 const Discord = require('discord.js')
 const fs = require('fs')
-const config = require('./config/config.js')
+const { BOT_TOKEN,PREFIX } = process.env
 const serialize = require("serialize-javascript")
 const { deserialize } = require("./custom_modules/ncbutil.js")
-const prefix = config.prefix
+const prefix = PREFIX
 const { Collection } = Discord
 Discord.Guild.prototype.xpCooldowns = new Collection()
 const client = new Discord.Client()
@@ -16,7 +17,9 @@ client.loggers = new Collection()
 const ranks = new Keyv("sqlite://.data/database.sqlite",{namespace:'ranks'})
 const check = require('./custom_modules/check.js')
 const commandFiles = fs.readdirSync('./commands').filter(file => (file.endsWith('.js') || file.endsWith('.ts')));
+const loggerFiles = fs.readdirSync('./loggers').filter(file => (file.endsWith('.js') || file.endsWith('.ts')));
 const processRank = require('./custom_modules/ranks.js')
+const mutedutil = require("./custom_modules/muted.js")
 for (const file of commandFiles) {
   try {
 	const command = require(`./commands/${file}`);
@@ -26,9 +29,21 @@ for (const file of commandFiles) {
     console.error(`Unable to load ${file}, reason:\n${error.stack}`)
   }
 }
+for (const file of loggerFiles) {
+  try {
+    const logger = require(`./loggers/${file}`)
+    client.loggers.set(logger.name,logger)
+    console.log(`Loaded '${logger.name}' logger.`)
+  } catch (error) {
+    console.error(`Unable to load ${file}, reason:\n${error.stack}`)
+  }
+}
+require('./custom_modules/loggers.js')(client)
 const cooldowns = new Collection();
 client.once('ready', () => {
 	console.log('Ready!');
+  mutedutil.mutedTimers(client)
+  mutedutil.updateMutedRoles(client)
 });
 client.on('ready',() => check(client,ranks))
 ranks.on('error',console.error)
@@ -84,11 +99,16 @@ arguments:${args}`)
 	setTimeout(() => timestamps.delete(message.author.id), cooldownAmount);
 
 	try {
-		await command.execute(message, args);
+		await command.execute(message, args)
+    .catch(error => {
+      console.error(error);
+		if (!error.code) message.reply('there was an error trying to execute that command!');
+    else  message.reply(`there was an error trying to execute that command! (${error.code})`);
+    })
 	} catch (error) {
 		console.error(error);
 		if (!error.code) message.reply('there was an error trying to execute that command!');
     else  message.reply(`there was an error trying to execute that command! (${error.code})`);
 	}
 });
-client.login(config.token)
+client.login(BOT_TOKEN)
