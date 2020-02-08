@@ -1,5 +1,7 @@
 # NICK CHAN # 5213 [BOT]
 
+# ON REWRITE, WE'LL BE BACK SOON!
+
 ## About
 
 Nick Chan#5213 [BOT] (Nick Chan Bot) is a private Discord bot written by Nick Chan#0001 (Owner) using the discord.js library ([website](https://discord.js.org)) .
