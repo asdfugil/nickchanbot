@@ -1,5 +1,33 @@
-const { Collection, RichEmbed } = require("discord.js");
+const { Collection, RichEmbed,TextBasedChannel,Message,GuildMember,WebhookClient,Guild } = require("discord.js");
+const Keyv = require('keyv')
+const globalLogHooks = new Keyv("sqlite://.data/database.sqlite", {
+  namespace: "log-hooks"
+});
 module.exports = {
+  /**
+   * @param { Guild | null } guild
+   * @param { string } logType - The type of log
+   * @typedef { Promise<void | 'BREAK'> | void | 'BREAK' } idk
+   * @param { (embed:RichEmbed) => idk } callback
+   */
+  postLog:async function(logType,guild,callback) {
+    if (!guild) return
+    const data = await globalLogHooks.get(guild.id)
+    if (!data) return
+    const hookData = data[logType]
+    if (!hookData) return
+    const hook = new WebhookClient(hookData.id,hookData.token)
+    const embed = new RichEmbed()
+    const term = await callback(embed)
+    if (term === 'BREAK') return
+    hook.send(embed)
+    .catch(error => {
+      if (error.code === 10015) {
+        delete data[logType]
+        globalLogHooks.set(channel.guild.id, data);
+      } else throw error;
+    })
+  },
   sendError: function(info) {
     info.client.channels
       .get(info.channelID)
@@ -11,6 +39,11 @@ module.exports = {
     error.name = "NickChanBotError";
     return error;
   },
+  /**
+   * @param { Message } message
+   * @param { string } string 
+   * @returns { Promise<GuildMember> }
+   */
   findMember: async (message, string) => {
     if (message.mentions.members.first()) return message.mentions.members.first()
     else if (message.guild.members.find(x => x.user.tag.includes(string))) return message.guild.members.find(x => x.user.tag.includes(string))
@@ -18,10 +51,12 @@ module.exports = {
     else if (await message.guild.fetchMember(string)) return await message.guild.fetchMember(string)
   },
   findUser: async (message,string) => {
-    if (message.mentions.members.first()) return message.mentions.members.first().user
+    if (message.guild) {
+    if (message.mentions.members.first()) return message.mentions.users.first()
     else if (message.guild.members.find(x => x.user.tag.includes(string))) return message.guild.members.find(x => x.user.tag.includes(string)).user
     else if (message.guild.members.find(x => x.displayName.includes(string))) return message.guild.members.find(x => x.displayName.includes(string)).user
-    else if (await message.client.fetchUser(string)) return await message.client.fetchUser(string)
+    } else if (message.mentions.users.first()) return message.mentions.users.first()
+    if (await message.client.fetchUser(string)) return await message.client.fetchUser(string)
   },
   findRole: (message,string) => {
     const { guild } = message
@@ -93,6 +128,11 @@ module.exports = {
     }
     return true;
   },
+  /**
+   * @param { string } perms
+   * @param { TextBasedChannel } c
+   * @returns { Promise<Message> }
+   */
   noPermission: async (perms, c) => {
     const noPermission = new RichEmbed()
       .setColor("#ffff00")
@@ -103,6 +143,31 @@ module.exports = {
       );
     return c.send(noPermission)
   },
+  Tag:class {
+    /**
+     * Construct a tag
+     * @param { string } name - The name of the tag
+     * @param { string } content - The content of the tag
+     * @param { boolean? } nsfw - Whether this tag is nsfw
+     * @param { string? } description - The description of the tag
+     * @param { number? } count - How many times this tag has been triggered
+     * @returns The tag
+     */
+    constructor(name,content,nsfw,description,count) {
+      this.name = name
+      this.content = content
+      this.nsfw = nsfw
+      this.description = description
+      this.count = count
+      if (typeof this.count === "undefined") this.count = 0
+      return this
+    }
+  },
+  /**
+   * @param { string } perms
+   * @param { TextBasedChannel } c
+   * @returns { Promise<Message> }
+   */
   noBotPermission: async (perms, c) => {
     const noPermission = new RichEmbed()
       .setColor("#ffff00")

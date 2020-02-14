@@ -1,7 +1,12 @@
 require('dotenv').config()
-const http = require('http')
-http.createServer((request,response) => {
-  response.write('OK')
-  response.end()
-}).listen(process.env.PORT || 3000)
+const express = require('express');
+const app = express();
+app.use(express.static('public'));
+app.get('/', function (req, res) {
+  res.send('OK');
+});
+app.listen(process.env.PORT, function () {
+  console.log('Example app listening on port' + process.env.PORT+"!");
+});
+app.use(express.static('public'));
 require('./index.js')

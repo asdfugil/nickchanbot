@@ -1,11 +1,6 @@
-#/
-.config/
-.data/
-.git/
-.npm/
-.pnpm-store
+./*
 temp/
-.bash_history
-.env
-CODE_OF_CONDUCT.md
+\#/
 *.log
+!/.gitignore
+CODE_OF_CONDUCT.md

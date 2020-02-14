@@ -9,10 +9,10 @@ module.exports = {
   args: true,
   usage: "<invite>",
   execute: async (message, args) => {
-    message.channel.startTyping()
+    message.channel.startTyping();
     message.client
       .fetchInvite(args.join(" "))
-      .then(invite => {
+      .then(async invite => {
         const embed = new RichEmbed()
           .setTitle(invite.guild.name)
           .setURL(`https://discord.gg/${invite.code}`)
@@ -24,6 +24,7 @@ id:${invite.guild.id}
 icon hash (if any):${invite.guild.icon}
 splash hash (if any):${invite.guild.splash}`
           );
+        if (invite.guild.icon)  embed.setThumbnail(`https://cdn.discordapp.com/${invite.guild.id}/${invite.guild.icon}`);
         if (invite.channel)
           embed.addField(
             "Target channel info",
@@ -62,12 +63,12 @@ User ID:${invite.inviter.id}
           embed.addField("Total Members", invite.memberCount);
         fetch("https://api.gaminggeek.dev/gstats/" + invite.code).then(
           response => {
-            message.channel.send("", {
-              embed: embed,
-              files: [
-                { attachment:response.body,name:'invite.png' }
-              ]
-            }).then(() => message.channel.stopTyping())
+            message.channel
+              .send("", {
+                embed: embed,
+                files: [{ attachment: response.body, name: "invite.png" }]
+              })
+              .then(() => message.channel.stopTyping());
           }
         );
       })
@@ -75,7 +76,7 @@ User ID:${invite.inviter.id}
         if (error.code === 40007)
           message.reply("The bot is banned from that server.");
         else message.reply("That's not a valid invite.");
-          message.channel.stopTyping()
+        message.channel.stopTyping();
       });
   }
 };

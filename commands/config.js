@@ -77,12 +77,12 @@ ${loggers.map(x => `\`${x.name}\` Logged when ${x.logged}`).join("\n")}`+
         )
           noBotPermission("manage webhooks");
         const webhooks = await channel.fetchWebhooks();
-        let hook = webhooks.find(x => x.name === "Nick Chan Bot Logging");
+        let hook = webhooks.find(x => x.name === client.user.username.substring(0,23) + " Logging");
         let data = await globalLogHooks.get(channel.guild.id);
         if (!data) data = {};
         if (!hook)
           hook = await channel.createWebhook(
-            "Nick Chan Bot Logging",
+            client.user.username.substring(0,23) + " Logging",
             client.user.displayAvatarURL
           );
         data[args[1]] = {};
@@ -95,7 +95,7 @@ ${loggers.map(x => `\`${x.name}\` Logged when ${x.logged}`).join("\n")}`+
           }\` logger will start logging in ${channel.toString()}`
         );
       } else {
-        let data = await globalLogHooks.get(channel.guild.id);
+        let data = await globalLogHooks.get(message.guild.id);
         if (!data) {
           data = {};
           return message.reply(

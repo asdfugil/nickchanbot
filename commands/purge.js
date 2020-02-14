@@ -29,9 +29,9 @@ module.exports = {
     let rounded = Math.floor(num / 100) * 100;
     const diff = num - rounded;
 
-    if (num > 999 || num < 2)
+    if (num > 1000 || num < 2)
       return receivedMessage.reply(
-        `Please use a value that's between 2 and 999 inclusive`
+        `Please use a value that's between 2 and 1000 inclusive`
       );
     let deletedMsgs = [];
     let notPinneda = [];

@@ -1,0 +1,65 @@
+```
+List of tags (custom commands) variables
+=========================================
+Tags can get complicated so please read this in detail.
+
+Member - The member that triggered the tag
+-------------------------------------------
+ ${member.id} - The id of the member
+ ${member.mention} - The mention of the member
+ ${member.highestRole.mention} - The mention of the member's highest role
+ ${member.highestRole.name} - The name of the member's highest role.
+ ${member.highestRole.hexColor} - The hex color of the member's highest role
+ ${member.hoistRole.mention} - The mention of the member's hoist role
+ ${member.hoistRole.name} - The name of the member's hoist role.
+ ${member.hoistRole.hexColor} - The hex color of the member's hoist role
+ ${member.voiceChannel.name} - the voice channel's name the member is in.
+ ${member.voiceChannel.id} - The voice chnanel's the member is in.
+ ${member.joinedAt} - The date & time the member joined the server.
+Guild - The message's server
+-----------------------------
+ ${guild.name} - the name of the server
+ ${guild.memberCount} - number of member in the server
+ ${guild.owner.*} - The server owner
+  Please see the documentation on the member variable and use guild.owner in place of member.
+ ${guild.owner.user.*} - The server's owner's user
+  Please see the documentation on the author variable and uses guild.owner.user in place of author.
+ ${guild.rolesCount} - Role count of the server
+ ${guild.channelCount} - Channel count of the server
+Author - The user that triggered the tag
+-----------------------------------------
+ ${author.tag} - The `User#0001` tag of the author.
+ ${author.username} - The username of the author
+ ${author.discriminator} - The discriminator of the author
+ ${author.id} - The id of the author.
+ ```
+ ‍  ‍  ‍  ‍  ‍  ‍  ‍  ‍  ‍  ‍  ‍  ‍  ‍  ‍  ‍  ‍  ‍  ‍  ‍  ‍  ‍  ‍  ‍  ‍  ‍  ‍  ‍  ‍  ‍  
+ ```
+ ${author.presence.game.name} - The name of the game the author is playing.
+ ${author.createdAt} - The date & time the user created their account
+ ${author.displayAvatarURL} - The url to the author's avatar,or their default avatarvif they don't have one.
+ ${author.bot} - Whether the author is a bot
+Tag - the tag that is triggered
+--------------------------------
+ ${tag.content} - The unparsed tag
+ ${tag.name} - The name of the tag
+ ${tag.count} - The number of times the tag has been triggered.
+ ${tag.nsfw} - Whether this tag is a NSFW tag.
+ ${tag.description} - The description of the tag.
+Argumnets - arguments that are passed when the tag is triggered
+-----------------------------------------------------------------
+ ${<argument number>} - The number <argumeng number> argument. (e.g. ${1}, ${2}...)
+ ${&} - all arguments
+Channel - message channel
+-------------------------
+${channel.name} - The name of the channel.
+${channel.topic} - The topic of the channel.
+${channel.slowModeTime} - The slow mode time of the channel in seconds,0 if none.
+${channel.type} - The type of this channel. (usually text)
+${channel.mention} - The mention of this channel
+${channel.nsfw} - Whether this is a NSFW channel
+Utilities - various tools
+--------------------------
+ ${math(<exprssion>)} - do some math (variables can be used)
+ ${RANDOM_NUMBER} - A pseudorandom number between 0 and 1
+ ```

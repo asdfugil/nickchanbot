@@ -4,7 +4,7 @@ const moment = require("moment");
 require("moment-duration-format");
 module.exports = {
   name: "stats",
-  aliases: ["statistics"],
+  aliases: ["statistics", "botinfo", "botstats"],
   description: "Display bot statisics",
   cooldown: 20,
   execute: async (receivedMessage, args) => {   
@@ -13,7 +13,7 @@ module.exports = {
       .duration(client.uptime)
       .format(" D [days], H [hrs], m [mins], s [secs]");
     const processDuration = moment
-      .duration(process.uptume)
+      .duration(process.uptime())
       .format(" D [days], H [hrs], m [mins], s [secs]");
     const servers = await client.shard.broadcastEval("this.guilds.size");
     const users = await client.shard.broadcastEval("this.users.size");

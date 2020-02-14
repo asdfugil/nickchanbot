@@ -1,19 +1,24 @@
+require('dotenv').config()
 const { exec } = require("child_process");
-const { RichEmbed } = require("discord.js");
+const { RichEmbed, Message } = require("discord.js");
 module.exports = {
   name: "npm",
   args: true,
   usage: "<query>",
   aliases: ["pnpm"],
   description: "search a package on npm",
+/**
+  * @param { Message } message 
+  * @param { Array<string> } args
+ */
   execute: async (message, args) => {
     message.channel.startTyping();
     message.channel.send(
       `Searching \`${args
         .join(" ")
         .replace(/\n/g, " ")}\` on ${message.client.emojis.get(
-        "665113243425177601"
-      )}...`,
+         process.env.NPM_EMOJI_ID
+        )}...`,
       { disableEveryone: true }
     );
     exec(
@@ -26,7 +31,7 @@ module.exports = {
           message.channel
             .send(
               "Type the number to see the details (10 seconds)\n" +
-                res.join("\n"),
+              res.join("\n"),
               { code: "xl", split: true }
             )
             .then(m => {
@@ -65,12 +70,12 @@ module.exports = {
                         .map(x => x.name || x.username)
                         .join(",")
                     );
-                if (result.contributors)  embed.addField(
-                      "Contributors",
-                      result.contributors
-                        .map(x => x.name || x.username)
-                        .join(",")
-                    );
+                  if (result.contributors) embed.addField(
+                    "Contributors",
+                    result.contributors
+                      .map(x => x.name || x.username)
+                      .join(",")
+                  );
                   const data = [];
                   for (const key of Object.keys(result.links)) {
                     data.push(`${key}: ${result.links[key]}`);

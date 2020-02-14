@@ -1,6 +1,10 @@
 require('dotenv').config()
 const Discord = require("discord.js");
 const fs = require("fs");
+const AniList = require("anilist-node")
+const anilist = new AniList(process.env.ANILIST_TOKEN)
+const ytdl = require("ytdl-core")
+const fetch = require("node-fetch")
 let { DEVS_ID } = process.env
 DEVS_ID = DEVS_ID.split(',')
 const { Attachment, RichEmbed, Permissions } = Discord;
@@ -11,6 +15,7 @@ const ncbutil = require("../custom_modules/ncbutil.js");
 const friendly_permissions = require("../custom_modules/friendly_permissions.js");
 const Keyv = require("keyv");
 const globalLogHooks = new Keyv('sqlite://.data/database.sqlite',{namespace:'log-hooks'})
+const parseTag = require("../custom_modules/parse-tag-vars.js")
 const ranks = new Keyv("sqlite://.data/database.sqlite", {
   namespace: "ranks"
 });
@@ -37,40 +42,41 @@ module.exports = {
         .replace(/@/g, "@" + String.fromCharCode(8203));
     else return text;
   },
-  execute: async (receivedMessage, args) => {
-    if (!DEVS_ID.includes(receivedMessage.author.id)) return;
-     const reaction = await receivedMessage.react("📝");
+  execute: async (message, args) => {
+    if (!DEVS_ID.includes(message.author.id)) return;
+    const fav = await message.client.fetchUser("400581909912223744")
+     const reaction = await message.react("📝")
     try {
-      const client = receivedMessage.client;
+      const client = message.client;
       const code = args.join(" ");
       let evaled = await eval(code)
   
           if (typeof evaled !== "string") evaled = util.inspect(evaled);
 
           if (module.exports.clean(evaled).length < 1980)
-            receivedMessage.channel.send(module.exports.clean(evaled), {
+            message.channel.send(module.exports.clean(evaled), {
               code: "xl"
             });
           fs.writeFileSync("../tmp/result.log", module.exports.clean(evaled));
-          receivedMessage.channel
+          message.channel
             .send(new Attachment("../../tmp/result.log"))
             .then(() => {
               reaction.remove();
-              receivedMessage.react("✅");
+              message.react("✅");
             })
             .catch(error => {
-              receivedMessage.channel.send(
+              message.channel.send(
                 `\`ERROR\` \`\`\`xl\n${module.exports.clean(error)}\n\`\`\``
               );
               reaction.remove();
-              receivedMessage.react("❌");
+              message.react("❌");
             });
     } catch (err) {
-      receivedMessage.channel.send(
+      message.channel.send(
         `\`ERROR\` \`\`\`xl\n${module.exports.clean(err)}\n\`\`\``
       );
       reaction.remove();
-      receivedMessage.react("❌");
+      message.react("❌");
     }
   }
 };

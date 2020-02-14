@@ -1,12 +1,13 @@
-const prefix = process.env.PREFIX
+const prefix = process.env.PREFIX;
 const Keyv = require("keyv");
 const prefixs = new Keyv("sqlite://.data/database.sqlite", {
   namespace: "prefixs"
 });
+const { Message } = require('discord.js')
 module.exports = {
   name: "help",
   description: "List all of my commands or info about a specific command.",
-  aliases: ["commands"],
+  aliases: ["commands","man"],
   usage: "[command name]",
   cooldown: 5,
   execute: async (message, args) => {
@@ -19,8 +20,19 @@ module.exports = {
     const { commands } = message.client;
 
     if (!args.length) {
+      data.push("**Command count:** " + commands.size);
       data.push("Here's a list of all my commands:");
-      data.push(commands.map(command => "`" + command.name + "`").join(", "));
+      data.push(
+        commands
+          .map(command => {
+           if (!command.hidden) return "`" +
+              command.name +
+              "` -- " +
+              (command.description || "**Documentation missing.**")
+            else return "*(hidden command placeholder)*"
+          })
+          .join("\n")
+      );
       data.push(
         `\nYou can send \`${actualPrefix}help [command name]\` to get info on a specific command!`
       );

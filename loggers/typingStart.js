@@ -18,6 +18,11 @@ module.exports = {
     .setTimestamp()
     .setFooter(channel.client.user.tag,channel.client.user.displayAvatarURL)
     hook.send(embed)
-    .catch(console.error)
+      .catch(async error => {
+      if (error.code === 10015) {
+       const data = delete (await globalLogHooks.get(channel.guild.id)).typingStart
+       globalLogHooks.set(channel.guild.id,data)
+      } else throw error
+    })
   }
 }

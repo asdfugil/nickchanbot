@@ -9,6 +9,6 @@ module.exports = (client) => {
   check for deleted guilds etc.
   */
   client.guilds.forEach(guild => {
-      if (!ranks.get(guild.id)) ranks[guild.id]
+      if (!ranks.get(guild.id)) ranks.set(guild.id,Object.create(null))
   })
 }

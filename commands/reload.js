@@ -13,12 +13,16 @@ module.exports = {
 			|| message.client.commands.find(cmd => cmd.aliases && cmd.aliases.includes(commandName));
 
 		if (!command) return message.channel.send(`There is no command with name or alias \`${commandName}\`, ${message.author}!`);
-
-
-		delete require.cache[require.resolve(`./${commandName}.js`)];
+        let type = 'js'
+        try {
+			delete require.cache[require.resolve(`./${commandName}.js`)];
+		} catch (error) {
+			delete require.cache[require.resolve(`./${commandName}.mjs`)]
+			type = 'mjs'
+		}
 
 		try {
-			const newCommand = require(`./${commandName}.js`);
+			const newCommand = require(`./${commandName}.${type}`);
 			message.client.commands.set(newCommand.name, newCommand);
 		} catch (error) {
 			console.log(error);

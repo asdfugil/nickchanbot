@@ -8,7 +8,7 @@ module.exports = {
   name: "ban",
   cooldown: 5,
   args: true,
-  descripton: "bans a user/member from the server",
+  description: "bans a user/member from the server",
   guildOnly: true,
   usage: "<user> [days delete] [reason]",
   info:

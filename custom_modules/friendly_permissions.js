@@ -1,3 +1,8 @@
+const { Collection } = require('discord.js')
+/**
+ * Frieldly permissions Collection
+ * @type { Collection<string,string> } 
+ */
 const permissions =  new (require('discord.js')).Collection()
 .set('ADMINISTRATOR','Administrator')
 .set('CREATE_INSTANT_INVITE','Create Invites')
@@ -28,4 +33,8 @@ const permissions =  new (require('discord.js')).Collection()
 .set('MANAGE_ROLES','Manage Roles')
 .set('MANAGE_WEBHOOKS','Manage Webhooks')
 .set('MANAGE_EMOJIS','Manage Emojis')
+//Deprecated
+.set("EXTERNAL_EMOJIS","external emojis")
+.set("READ_MESSAGES","Read Messages")
+.set("MANAGE_ROLES_OR_PERMISSIONS",'Manage Roles or Permissions')
 module.exports = permissions
