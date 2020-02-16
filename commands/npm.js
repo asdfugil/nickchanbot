@@ -48,7 +48,9 @@ module.exports = {
                   const embed = new RichEmbed()
                     .setColor("#ff0000")
                     .setTitle(result.name)
-                    .setURL(result.links.npm)
+                  if (result.links)
+                    embed.setURL(result.links.npm)
+                  embed
                     .setAuthor(
                       "npm",
                       "https://static.npmjs.com/338e4905a2684ca96e08c7780fc68412.png"
@@ -77,10 +79,10 @@ module.exports = {
                       .join(",")
                   );
                   const data = [];
-                  for (const key of Object.keys(result.links)) {
+                  for (const key of Object.keys(result.links || {})) {
                     data.push(`${key}: ${result.links[key]}`);
                   }
-                  embed.addField("Links", data.join("\n"));
+                  embed.addField("Links", data.join("\n") || "N/A");
                   message.channel.send(embed);
                 });
             });

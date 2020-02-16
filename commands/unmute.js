@@ -27,12 +27,12 @@ module.exports = {
     async execute (message,args) {
         if (!message.member.hasPermission("MANAGE_MESSAGES")) return noPermission('Manage Messages',message.channel)
         if (!message.member.hasPermission("MANAGE_MESSAGES")) return noBotPermission("Manage Roles",message.channel)
-        const role = message.guild.roles.get(mutedRoles.get(guild.id))
+        const role = message.guild.roles.get(await mutedRoles.get(message.guild.id))
         if (!role) return message.reply("Muted role is not set.")
         const member = await findMember(message,args[0]).catch(error => message.reply("That's not a valid member!"))
         if (!member.removeRole) return
-        if (!member.roles.has(role)) return message.reply("That member is not muted.")
-        const data = await mutedMembers.get(message.gulid.id) || Object.create(null)
+        if (!member.roles.has(role.id)) return message.reply("That member is not muted.")
+        const data = await mutedMembers.get(message.guild.id) || Object.create(null)
         delete data[member.id]
         mutedMembers.set(message.guild.id,data)
         await member.removeRole(role,args.slice(1).join(' '))

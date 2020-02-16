@@ -8,7 +8,6 @@ module.exports = {
     if (!serverQueue) return message.reply("There is nothing playing.")
     if (!serverQueue.connection.dispatcher.stream) return message.reply("You cannot pause when the bot is processing audio.")
     if (!serverQueue.connection.dispatcher.paused) return message.reply("Not paused.")
-    serverQueue.connection.dispatcher.stream.resume()
     serverQueue.connection.dispatcher.resume()
     message.channel.send("**Resumed**")
   }
