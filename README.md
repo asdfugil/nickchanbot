@@ -169,3 +169,11 @@ If you see `Ready!` on your screen,you are done.
 `volume` -- set/show volume
 
 `xp-leaderboard` -- Shows xp leaderboard
+
+## API
+
+API base URL `https://nickchanbot-server/api/v0`
+
+### GET /ranks?guild_id=${guild_id}
+ 
+ Returns the ranks data of the specified server
