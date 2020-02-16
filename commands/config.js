@@ -63,6 +63,7 @@ ${loggers.map(x => `\`${x.name}\` Logged when ${x.logged}`).join("\n")}`+
           `Requested by ${message.author.tag}`,
           message.author.displayAvatarURL
         );
+      if (await mutedRoles.get(message.guild.id)) embed.addField("Moderation",`Muted Role => <@&${await mutedRoles.get(message.guild.id)}>`)
       message.channel.send(embed);
       return;
     } else if (args[0] === "log-channels") {

@@ -5,7 +5,7 @@ const {
 } = require("../custom_modules/ncbutil.js");
 module.exports = {
   name: "kick",
-  description: "kick members (under development)",
+  description: "kick members",
   args: true,
   guildOnly: true,
   usage: "<member> [reason]",
