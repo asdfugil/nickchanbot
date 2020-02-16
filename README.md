@@ -1,4 +1,3 @@
-
 <div align="center">
     <img src="https://i.imgur.com/mAojAot.png"><br><br>
 ---
@@ -15,7 +14,7 @@ Nick Chan#5213 [BOT] (Nick Chan Bot) is a private Discord bot written by Nick Ch
 
 **Tag**: Nick Chan#5213
 
-**Default Prefix** : !
+**Default Prefix** : /
 
 ## Support
 
