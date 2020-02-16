@@ -26,7 +26,7 @@ Node.js v10 required (Must be v10,not 11 ,12 etc.)
 `nano`,`git` required.
 
 ```bash
-$ git clone https://26f8eb92-819c-46b8-b117-319e33f583d3@api.glitch.com/git/nickchanbot-server 
+$ git clone https://26f8eb92-819c-46b8-b117-319e33f583d3@api.glitch.com/git/nickchanbot-server
 $ cd nickchanbot-server
 $ mv .env.example .env
 $ mv .database.sqlite.example database.sqlite
