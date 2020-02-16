@@ -1,6 +1,10 @@
+<div align="center">
+    <img src="https://i.imgur.com/mAojAot.png"><br><br>
+---
+
 # NICK CHAN # 5213 [BOT]
 
-# ON REWRITE, WE'LL BE BACK SOON!
+</div>
 
 ## About
 
@@ -10,271 +14,158 @@ Nick Chan#5213 [BOT] (Nick Chan Bot) is a private Discord bot written by Nick Ch
 
 **Tag**: Nick Chan#5213
 
-**Prefix** : /
+**Default Prefix** : !
 
 ## Support
 
 [Support server link](https://discord.gg/kPMK3K5)
 
+## Self-hosting
+We don't provide self-hosting support,but if you want to:
+Node.js v10 required (Must be v10,not 11 ,12 etc.)
+`nano`,`git` required.
 
+```bash
+$ git clone https://26f8eb92-819c-46b8-b117-319e33f583d3@api.glitch.com/git/nickchanbot-server 
+$ cd nickchanbot-server
+$ mv .env.example .env
+$ mv .database.sqlite.example database.sqlite
+$ nano .env
+```
+Now insert the required information,then press ^X (Ctrl + X) to exit
+```bash
+$ npm install
+$ npm start
+```
+If you see `Ready!` on your screen,you are done.
 ## Commands
 
-Note: arguments in `()` is optional
+**Command count:** 64
 
-### Help
+`about` -- shows bot information
 
-Description :Get help about the bot
+`addtag` -- add/overwrite a tag (custom commands)
 
-Usage: `help [command]`
+`anime-byid` -- GET an anime by its anilist id
 
-### Spam
+`anime-manga-character-byid` -- GET anime or manga characters by its AniList ID
 
-Description: Spam a specified number of messages
+`anime-manga-character` -- Search for a anime or manga character on AniList
 
-Usage : `Spam <count>`
+`anime` -- Search anime on AniList.
 
-Note: `<count>` cannot be higher than 50000
+`background` -- set the background image in the rank command
 
-### embed-spam
+`ban` -- bans a user/member from the server
 
-Description: Spam a specified number of embeds
+`bio` -- Displays a profile from discord.bio (globally).
 
-Usage : `embed-spam <count>`
+`changelogs` -- Shows bot changelogs
 
-Note: `<count>` cannot be higher than 300
+`config` -- Do some configuration.
 
-### Multiply
+`setdeaf` -- Deafen a member
 
-Description : Multiply two or more numbers together
+`delete-tag` -- deletes a tag
 
-Usage: `multiply <number> <number> [number]...`
+`disconnect` -- Make the bot leave voice chnanel
 
-### Changelogs
+`random-element` -- retruns a random element.
 
-Description : latest change logs of the bot
+`embed` -- sends a custom embed (INDEV)
 
-Usage: `changelogs`
+`eval` -- Execute code (bot developers only)
 
-### Spam-ping
+`exec` -- Run bash or command on terminal (bot developers only)
 
-Description: Spam ping everyone a specified number of messages
+`help` -- List all of my commands or info about a specific command.
 
-Usage : `Spam-ping <count>`
+`invite-info` -- Show information about a discord invite
 
-Note:` <count>` cannot be higher than 50000
+`kick` -- kick members
 
-### Kick
+`listTags` -- list tags(custom commands)
 
-Description: Kicks a member
+`loop` -- set music loop mode
 
-Usage: `kick <mention> [reason]`
+`manga-byid` -- GET manga by id on AniList
 
-Note: Does not support reasoning for now. The reason will be `Requested by [command invoker]`
+`manga` -- Search manga on AniList.
 
-### About
+`math` -- a calculator
 
-Description : Sends this file in chat
+`member-info` -- Shows information about a server member
 
-Usage : `About`
+`mute` -- mute a member
 
-### Ping
+`nekos-life` -- Fetch a image from https://nekos.life
 
-Description : returns latency
+`nick` -- give yourself a new,random nickname
 
-Usage : `Ping`
+`nowplaying` -- Get the song that is playing.
 
-### Ban
+`npm` -- search a package on npm
 
-Description: bans a member
+`parse-tag-source` -- **Documentation missing.**
 
-Usage: `ban <mention> [reason]`
+`pause` -- Pauses the music
 
-### Unban
+`ping` -- returns latency
 
-Description: unbans a member
+`play` -- plays music
 
-Usage: `unban <UserID> [reason]`
+`prefix` -- Sets a new prefix
 
-### Purge 
+`purge` -- Mass delete messages,pinned messages will not be deleted.
 
-Description: Bulk delete messages
+`qr` -- Encodes data in a QR Code
 
-Usage : `purge <count>`
+`queue` -- shows music queue.
 
-### 8ball
+`randomstring` -- **Documentation missing.**
 
-Description: Ask 8ball a question
+`randomping` -- Randomly pings people
 
-Usage:`8ball [question]`
+`rank` -- shows you or a member's level
 
-### Dog/Cat
+`reload` -- Reloads a command (bot developers only)
 
-Description: return an image of a dog/cat
+`remove-song` -- removes a song from queue
 
-Usage `dog`/ `cat`
+`resume` -- resumes the music
 
-### Say
+`say` -- Make the bot say something
 
-Description :Use the bot to say something
+`server-info` -- shows server info
 
-Usage: `say <message>`
+`set-muted-role` -- Set the role to be used in the mute command
 
-### Randomstring
+`skip` -- Skip a song!
 
-Description: return an random string.
+`stats` -- Display bot statisics
 
-Usage: `randomstring <length>`
+`stop` -- Stop all songs in the queue and disconnect!
 
-Note: The characters can be: 
+`stoptyping` -- makes the bot stops typing
 
-`A-Z` ,`a-z` ,`0-9` and `_`
+`summon` -- make the bot join a voice channel
 
-### Randomelement
+`tag-info` -- shows tag info
 
-Description: returns an random element
+`unban` -- unbans a user
 
-Usage: `randomelement`
+`unmute` -- unmute a member
 
-### Logs
+`uptime-robot-page` -- Shows a link to the bot's uptime robot status page
 
-Description: returns bot runtime log
+`urban` -- Look up a word on urban dictionary.
 
-Usage: `logs`
+`userinfo` -- shows user info
 
-### Server-info
+`vm` -- execute code in a sandbox
 
-Description: returns server info
+`voicemute` -- Voice mute a member
 
-Usage: `server-info [detailed|json]`
+`volume` -- set/show volume
 
-### googlesearch
-
-Description: google something
-
-Usage:`googlesearch <query>`
-
-### Eval
-
-Description: Evaluates the arguments
-
-Usage: `eval <code>`
-
-Note: Bot owner only
-
-Execution environment : 
-
-```JavaScript
-const Discord = require('discord.js')
-const fs = require('fs')
-const moment = require(`moment`)
-const googleIt = require('google-it');
-const config = require('./config.json')
-const client = new Discord.Client()
-const avatar = new Discord.Attachment('./attachments/Avatar.png')
-var talkChannelOn = false
-var talkChannel = 'off'
-try {
-client.on('message', (receivedMessage) => {
-    var serverSettings = JSON.parse(fs.readFileSync('./data/'+receivedMessage.guild.id+'.json','utf8'))
-    try {
-    eval('<code> //code goes into here')
-    } catch(error) {
-        receivedMessage.channel.send(`An Error occured.. \n\n \`${error.name}:${error.message}\``)
-        console.log('Error while executing eval command: \n' + error))
-    }
-})
-client.login(config.token)
-```
-
-### Reconnect
-
-Description: Make the bot log out,then log in .
-
-Usage: `reconnect`
-
-Note: Bot owner only
-
-### Set-talk-channel
-
-Description: none
-
-### play
-
-Description: plays music
-
-Usage: `play <youtube url>`
-
-### skip
-
-Description: skips the current song
-
-usage: `skip`
-
-### stop
-
-Description: ends all music 
-
-Usage: `stop`
-
-### now-playing
-
-Description: shows the currently playing song
-
-Usage: `now-playing`
-
-### queue
-
-Description: Shows the server queue,or a song with a specific position in queue
-
-Usage : `queue [position]`
-
-### nekos-life
-
-Description : fetch a image form nekos.life
-
-Usage: `nekos-life <argument>`
-
-Available arguments:
-
-SFW: `smug` `baka` `tickle` `slap` `poke` `pat` `neko` `nekoGif` `meow` `lizard` `kiss` `hug` `foxGirl` `feed` `cuddle` 
-
-NSFW: `lewdkemo` `lewdk` `keta` `hololewd` `holoero` `hentai` `futanari` `femdom` `feetg` `erofeet` `feet` `ero` `erok` `erokemo` `eron` `eroyuri` `cum_jpg` `blowjob` `pussy` 
-
-### config
-
-Description:Change server settings
-
-Usage `config <config category> <config item> <new value>`
-
-**__Category:`log-channels`__** Sets the log channels
-In this category `<new value>` must be a channel mention. 
-List of `<config item>`s
-`startTyping` Logged when someone starts typing
-`stopTyping` Logged when someone stops typing
-`message` Logged when someone sends a message
-`messageDelete` Logged when someone deletes a message
-`messageDeleteBulk` Logged when someone bulk delete messages
-`messageUpdate` Logged when a message is updated
-`channelCreate` Logged when a channel is created
-`channelDelete` Logged when achannel is deleted
-`channelUpdate` Logged when a channel is updated
-`guildBanAdd` Logged when someone is banned
-`guildBanRemove` Logged when someone is unbanned
-`guildMemberAdd` Logged when someone joins the server
-`guildMemebrRemove` Logged when someone leaves the server.
-`error` Logged when the bot encouters an error wjile doing something on the server.
-`emojiCreate` Logged when a emoji is craeted.
-`emojiDelete`Logged when an emoji is deleted
-`emojiUpdate`Logged when an emoji is updated.
-
-### rank
-
-Description : Shows the rank of a member
-
-Usage : `rank [member]`
-
-### errors
-
-Description: Shows the bot's errors
-
-Usage: `errors`
+`xp-leaderboard` -- Shows xp leaderboard

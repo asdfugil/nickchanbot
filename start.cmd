@@ -1,6 +1,0 @@
-@echo off
-echo STARTING THE BOT...
-:START
-node --max_old_space_size=4000 index 
-echo RESTARTING...
-goto START
