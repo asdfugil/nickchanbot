@@ -39,9 +39,9 @@ module.exports = {
       ctx.strokeStyle = "#74037b";
       ctx.strokeRect(0, 0, canvas.width, canvas.height);
 
-      ctx.font = module.exports.applyText(canvas, member.displayName);
+      ctx.font = module.exports.applyText(canvas, member.user.tag);
       ctx.fillStyle = "#ffffff";
-      ctx.fillText(member.displayName, canvas.width / 4.9, canvas.height / 3);
+      ctx.fillText(member.user.tag, canvas.width / 4.9, canvas.height / 3);
       ctx.fillStyle = "white";
       ctx.fillRect(280, 100, 1080, 40);
       ctx.fillStyle = "#03f0fc";
