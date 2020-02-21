@@ -51,7 +51,7 @@ module.exports = {
       const code = args.join(" ");
       let evaled = await eval(code)
   
-          if (typeof evaled !== "string") evaled = util.inspect(evaled);
+          if (typeof evaled !== "string") evaled = util.inspect(evaled,{depth:4});
 
           if (module.exports.clean(evaled).length < 1980)
             message.channel.send(module.exports.clean(evaled), {
