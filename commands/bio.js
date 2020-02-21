@@ -128,8 +128,5 @@ module.exports = {
       bioEmbed.addField(connection.connection_type, data.join("\n"));
     }
     message.channel.send(bioEmbed);
-    console.log(
-      bioDetails.settings.gender ? bioDetails.settings.gender : "Not Set."
-    );
   }
 };
