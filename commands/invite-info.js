@@ -10,6 +10,12 @@ module.exports = {
   usage: "<invite>",
   execute: async (message, args) => {
     message.channel.startTyping();
+    const directFetch = await fetch("https://discordapp.com/api/v7/invites/"+args.join()+"?with_counts=true",{
+      'Content-Type':"application/json",
+      authroization:message.client.token
+    }).then(r => r.json())
+    if (directFetch.code === 10006) return message.reply("That's not a valid invite!")
+    if (directFetch.guild) {
     message.client
       .fetchInvite(args.join(" "))
       .then(async invite => {
@@ -78,5 +84,11 @@ User ID:${invite.inviter.id}
         else message.reply("That's not a valid invite.");
         message.channel.stopTyping();
       });
+    } else {
+      const embed = new RichEmbed()
+      .setTitle(directFetch.channel.name || 'N/A')
+      .setURL(`https://discord.gg/${directFetch.code}`)
+      
+    }
   }
 };
