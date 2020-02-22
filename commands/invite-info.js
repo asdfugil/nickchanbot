@@ -86,13 +86,14 @@ User ID:${invite.inviter.id}
           message.channel.stopTyping();
         });
     } else {
+      console.log(directFetch)
       const embed = new RichEmbed()
         .setTitle(directFetch.channel.name || directFetch.recipients.map(x => x.username).join(','))
         .setURL(`https://discord.gg/${directFetch.code}`)
         .addField("Member Count", directFetch.approximate_member_count)
         .addField("Group DM Info", `**Name**:${directFetch.channel.name || "N/A"}
 **ID:** ${directFetch.channel.id}
-**recipients:** ${directFetch.recipients.map(x => x.username).join(",")}`)
+**recipients:** ${directFetch.channel.recipients.map(x => x.username).join(",")}`)
         .addField("Inviter Tag", `${directFetch.inviter.username}#${directFetch.inviter.discriminator}`)
         .addField("Inviter ID", directFetch.inviter.id)
         .setColor("RANDOM")
