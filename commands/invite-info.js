@@ -14,7 +14,6 @@ module.exports = {
       'Content-Type': "application/json",
       authroization: message.client.token
     }).then(r => r.json())
-    console.log(directFetch)
     if (directFetch.code === 10006) return message.reply("That's not a valid invite!")
     if (directFetch.guild) {
       message.client
@@ -86,7 +85,6 @@ User ID:${invite.inviter.id}
           message.channel.stopTyping();
         });
     } else {
-      console.log(directFetch)
       const embed = new RichEmbed()
         .setTitle(directFetch.channel.name || directFetch.recipients.map(x => x.username).join(','))
         .setURL(`https://discord.gg/${directFetch.code}`)
@@ -97,7 +95,7 @@ User ID:${invite.inviter.id}
         .addField("Inviter Tag", `${directFetch.inviter.username}#${directFetch.inviter.discriminator}`)
         .addField("Inviter ID", directFetch.inviter.id)
         .setColor("RANDOM")
-      if (directFetch.inviter.avatar) embed.addField("Invite avatar URL", `**Avatar URL:** https://cdn.discordapp.com/avatars/${directFetch.inviter.id}/${directFetch.inviter.avatar})`)
+      if (directFetch.inviter.avatar) embed.addField("Invite avatar URL", `**Avatar URL:** https://cdn.discordapp.com/avatars/${directFetch.inviter.id}/${directFetch.inviter.avatar}`)
     message.channel.send(embed)
     }
   }
