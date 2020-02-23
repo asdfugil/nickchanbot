@@ -5,7 +5,7 @@ module.exports = {
 	name: '8ball',
 	description: 'Ask your questions to the magical 8ball .',
   aliases: ['8-ball', 'eightball', 'eight-ball'],
-  cooldown: 0.1,
+  cooldown: 3,
 	execute(message, args) {
     (async () => {
       const { response } = await fetch('https://nekos.life/api/v2/8ball').then(response => response.json());
