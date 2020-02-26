@@ -30,5 +30,5 @@ anime-manga-character,anime-manga-character-byid command
 - Added qr command
 - Used SQLite as database,all previous data is deleted (That won't happen again).
 - Added tags (custom commands) system
-- Aailable commands:list-tag,tag-info,addtag,delete-tag
+- Available commands:list-tag,tag-info,addtag,delete-tag
 - Use help addtag to view the documentation on tags
