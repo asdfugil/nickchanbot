@@ -28,7 +28,7 @@ module.exports = {
           .setDescription("```bash\n" + message.client.commands.get("eval").clean(stdout)+"```")
           .setFooter(`${time}ms`)
           .attachFile("/tmp/stdout.log")
-          return message.channels.end(embed)
+          return message.channel.send(embed)
       } else if (stderr) {
         fs.writeFileSync("/tmp/stderr.log",stdout)
         embed
