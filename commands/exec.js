@@ -14,36 +14,39 @@ module.exports = {
   cooldown: 0.1,
   description: "Run bash or command on terminal (bot developers only)",
   usage: "<terminal-command>",
-  execute: async (receivedMessage, args) => {
-    if (!devsID.includes(receivedMessage.author.id)) return;
-    if (!args.join(" "))
-      return receivedMessage.reply("Please give the parameter to execute.");
-    const mu = Date.now();
-    const bashEmbed = new RichEmbed().setColor("#363A3F");
-    exec(args.join(" "), async (error, stdout, stderr) => {
+  execute: async (message, args) => {
+    if (!devsID.includes(message.author.id)) return;
+   const mu = Date.now()
+   exec(args.join(" "),(error,stdout,stderr) => {
+     const time = Date.now() - mu
+     const embed = new RichEmbed()
       if (stdout) {
-        let output = `\`\`\`bash\n${stdout}\`\`\``;
-        if (stdout.length > 2047) {
-          output = await fs.writeFileSync("../tmp/result.log", stdout);
-        }
-        bashEmbed.setDescription(output);
+        fs.writeFileSync("/tmp/stdout.log",stdout)
+          embed
+          .setColor("#00ff00")
+          .setTitle("Output")
+          .setDescription("```bash\n" + message.client.commands.get("eval").clean(stdout)+"```")
+          .setFooter(`${time}ms`)
+          .attachFile("/tmp/stdout.log")
+          return message.channels.end(embed)
       } else if (stderr) {
-        bashEmbed.setColor("#FF0000");
-        bashEmbed.setTitle("Error");
-        let error = `\`\`\`bash\n${stderr}\`\`\``;
-        if (stderr.length > 2047) {
-          error = await fs.WriteFileSync("../tmp/result.log", stderr);
-        }
-        bashEmbed.setDescription(error);
+        fs.writeFileSync("/tmp/stderr.log",stdout)
+        embed
+        .setColor("#ff0000")
+        .setTitle("Error")
+        .setDescription("```bash\n" + message.client.commands.get("eval").clean(stdout)+"```")
+        .setFooter(`${time}ms`)
+        .attachFile("/tmp/stderr.log")
+        return message.channel.send(embed)
       } else {
-        bashEmbed.setDescription(
-          "```bash\n# Command executed successfully but returned no output.```"
-        );
+        embed
+        .setColor("#00ff00")
+        .setTitle("Output")
+        .setDescription("```bash\n# Command executed successfully but returned no output```")
+        .setFooter(`${time}ms`)
+        .attachFile("/tmp/stdout.log")
+        return message.channel.send(embed)
       }
-      return receivedMessage.channel.send("", {
-        embed: bashEmbed.setFooter(`${Date.now() - mu}ms`),
-        files:[new Attachment('../tmp/result.log')]
-      });
-    });
+   })
   }
 };
