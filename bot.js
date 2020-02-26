@@ -110,7 +110,7 @@ client.on("message", async message => {
   if (!message.content.startsWith(actualPrefix) || message.author.bot) return;
   const args = message.content
     .slice(actualPrefix.length)
-    .split(/(?<![\\])[\s](?![\\])/);
+    .split(' ');
   const commandName = args.shift().toLowerCase();
   const command =
     client.commands.get(commandName) ||

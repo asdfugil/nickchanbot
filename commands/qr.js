@@ -8,25 +8,25 @@ module.exports = {
   description: "Encodes data in a QR Code",
   args: true,
   cooldown: 30,
-  execute: async (receivedMessage, args) => {
+  execute: async (message, args) => {
     if (!fs.existsSync(`./temp`)) {
       fs.mkdirSync(`./temp`);
     }
 
-    if (!fs.existsSync(`./temp/${receivedMessage.guild.id}`)) {
-      fs.mkdirSync(`./temp/${receivedMessage.guild.id}`);
+    if (!fs.existsSync(`./temp/${message.guild.id}`)) {
+      fs.mkdirSync(`./temp/${message.guild.id}`);
     }
 
     let e = -1;
 
-    let data = receivedMessage.content
+    let data = message.content
       .split(" ")
       .slice(1)
       .join(" ");
 
     let encoderAPI =
       "https://chart.apis.google.com/chart?cht=qr&chs=547x547&choe=UTF-8&chld=H%7C0&chl=";
-    let tooLong = async function () {receivedMessage.reply(
+    let tooLong = async function () {message.reply(
       "Character Length Error\nCharacter Length >896 is not supported. Please try to shorten your string."
     );}
 
@@ -41,7 +41,7 @@ module.exports = {
       });
     };
 
-    let Attachment = receivedMessage.attachments.array();
+    let Attachment = message.attachments.array();
 
     Attachment.forEach(function(attachment) {
       e = 1;
@@ -49,11 +49,11 @@ module.exports = {
         attachment.url.lastIndexOf("/") + 1
       );
       const t = Date.now();
-      const lf = `/tmp/${receivedMessage.guild.id}/${receivedMessage.author.id}-file${t}.png`;
+      const lf = `/tmp/${message.guild.id}/${message.author.id}-file${t}.png`;
       let fileDL = `${encoderAPI}${attachment.url}`;
       console.log(fileDL);
       download(fileDL, lf, function() {
-        return receivedMessage.channel.send(filename, { file: lf });
+        return message.channel.send(filename, { file: lf });
       });
 
       return;
@@ -62,21 +62,21 @@ module.exports = {
     if (e < 1 && data.length > 1) {
       encoderAPI = `${encoderAPI}${data}`;
       try {
-        if (receivedMessage.content.length > 896) return tooLong()
+        if (message.content.length > 896) return tooLong()
 
         download(
           encoderAPI,
-          `./temp/${receivedMessage.guild.id}/${receivedMessage.author.id}.png`,
+          `./temp/${message.guild.id}/${message.author.id}.png`,
           function() {
-            receivedMessage.channel.send({
-              file: `./temp/${receivedMessage.guild.id}/${receivedMessage.author.id}.png`
+            message.channel.send({
+              file: `./temp/${message.guild.id}/${message.author.id}.png`
             });
           }
         );
         e = 2;
         return;
       } catch (ex) {
-        receivedMessage.channel.send(ex);
+        message.channel.send(ex);
       }
       return;
     }

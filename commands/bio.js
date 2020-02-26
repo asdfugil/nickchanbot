@@ -36,13 +36,13 @@ module.exports = {
       message.client.users.get(message.author.id);
     const userID = user.id || slugArg;
     const bioDetails = await fetch(
-      `https://api.discord.bio/v1/getUserDetails/${userID}`
+      `https://api.discord.bio/v1/UserDetails/${userID}`
     ).then(res => res.json());
     const bioDiscordConnections = await fetch(
-      `https://api.discord.bio/v1/getDiscordConnections/${userID}`
+      `https://api.discord.bio/v1/DiscordConnections/${userID}`
     ).then(res => res.json());
     const bioConnections = await fetch(
-      `https://api.discord.bio/v1/getUserConnections/${userID}`
+      `https://api.discord.bio/v1/UserConnections/${userID}`
     ).then(res => res.json());
     if (bioDetails.success === false) {
       return message.channel.send(
@@ -128,8 +128,5 @@ module.exports = {
       bioEmbed.addField(connection.connection_type, data.join("\n"));
     }
     message.channel.send(bioEmbed);
-    console.log(
-      bioDetails.settings.gender ? bioDetails.settings.gender : "Not Set."
-    );
   }
 };
