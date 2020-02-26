@@ -1,21 +1,8 @@
-const moment = require("moment");
 const fetch = require("node-fetch");
-const { Attachment, RichEmbed } = require("discord.js");
-
 module.exports = {
-  name: "bio",
-  description: "Displays a profile from discord.bio (globally).",
-  aliases: [
-    "biography",
-    "aboutme",
-    "about-me",
-    "dsc.bio",
-    "discord-profile",
-    "discord.bio",
-    "discord-bio",
-    "discord-biography"
-  ],
-  guildOnly: true,
+  name: "8ball",
+  description: "Ask your questions to the magical 8ball .",
+  aliases: ["8-ball", "eightball", "eight-ball"],
   cooldown: 1,
   async execute(message, args) {
     // execute MUST return a promise
@@ -130,3 +117,5 @@ module.exports = {
     message.channel.send(bioEmbed);
   }
 };
+// Special thanks to FAV
+
