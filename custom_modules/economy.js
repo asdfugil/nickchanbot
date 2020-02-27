@@ -19,5 +19,10 @@ module.exports = {
                 "bankrob": 1
             }
         }
+        /**
+         * Give the user an item
+         * @param { string } name - Name of the item
+         */
+        giveItem(name) { this.inv['name'] ? this.inv['name']++ : this.inv['name'] = 1 }
     }
 }
