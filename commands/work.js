@@ -15,7 +15,7 @@ module.exports = {
     //Load guild economy data
     /**
      * Guild Economy Data
-     * @property { userData } Object
+     * @property { object } user
      */
     const economy = await gEconcomy.get(message.guild.id)
 
