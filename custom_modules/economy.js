@@ -23,6 +23,6 @@ module.exports = {
          * Give the user an item
          * @param { string } name - Name of the item
          */
-        giveItem(name) { this.inv['name'] ? this.inv['name']++ : this.inv['name'] = 1 }
+        giveItem(name) { this.inv[name] ? this.inv['name']++ : this.inv['name'] = 1 }
     }
 }

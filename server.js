@@ -18,6 +18,7 @@ app.get('/api/v0/ranks',async (req,res) => {
     if (!guild_id) {
       res.send('{"message":"guild_id is a required argument that is missing"}')
       res.end()
+      return
     }
   const data = await ranks.get(guild_id)
   res.send(data)
