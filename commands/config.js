@@ -33,8 +33,8 @@ module.exports = {
     "Type `none` into <new value> to remove it.\nUse `config view` to view the configuration\nConfig category:`log-channels`" +
     `
 ${loggers.map(x => `\`${x.name}\` Logged when ${x.logged}`).join("\n")}` +
-    "\nConfig Category:`moderation`\n`muted-role` set the muted role" + 
-    "\nConfig Category:`rank_rewards` set rank role rewards"+ 
+    "\nConfig Category:`moderation`\n`muted-role` set the muted role" +
+    "\nConfig Category:`rank_rewards` set rank role rewards" +
     "\n`1` Role fo level 1\n`2` Role for level 2...\n`n` Role for level n",
   execute: async (message, args) => {
     if (!message.member.hasPermission("MANAGE_GUILD"))
@@ -42,10 +42,6 @@ ${loggers.map(x => `\`${x.name}\` Logged when ${x.logged}`).join("\n")}` +
     const { client } = message;
     if (args[0] === "view") {
       const data = await globalLogHooks.get(message.guild.id);
-      if (!data)
-        return message.reply(
-          "There are no set configurations for this server."
-        );
       const man = new Collection();
       for (const key of Object.keys(data)) {
         try {
@@ -63,12 +59,20 @@ ${loggers.map(x => `\`${x.name}\` Logged when ${x.logged}`).join("\n")}` +
         .setAuthor(message.guild.name, message.guild.iconURL)
         .setColor("#34aeeb")
         .setTitle("Configurations")
-        .addField("Log Channels", configs)
+        .addField("Log Channels", configs || "none")
         .setFooter(
           `Requested by ${message.author.tag}`,
           message.author.displayAvatarURL
         );
       if (await mutedRoles.get(message.guild.id)) embed.addField("Moderation", `Muted Role => <@&${await mutedRoles.get(message.guild.id)}>`)
+      const rank_rewards = (await rankSettings.get(message.guild.id)).rewards
+      const rank_config = []
+      if (rank_rewards) {
+        for (const key of Object.keys(rank_rewards)) {
+          rank_config.push(`Level ${key}: <@&${rank_rewards[key]}>`)
+        }
+        if (rank_config.join("\n")) embed.addField("Rank rewards",rank_config.join("\n"))
+      }
       message.channel.send(embed);
       return;
     } else if (args[0] === "log-channels") {
@@ -133,9 +137,17 @@ ${loggers.map(x => `\`${x.name}\` Logged when ${x.logged}`).join("\n")}` +
         setMutedRole(role)
       } else message.reply("Unknown config item.")
     } else if (args[0] === "rank_rewards") {
-      const role = findRole(message,args.slice(2).join(" "))
-      if (!role) return message.reply("That is not a valid role.")
-      const level = args[1]
+      let role;
+      if (args[2].toLowerCase() !== 'none') {
+        role = findRole(message, args.slice(2).join(" "))
+        if (!role) return message.reply("That is not a valid role.")
+      }1)
+      if (isNalevel0])  level1] < 1) return message.reply("That is not a valid level!")
+      const { rewards } = await rankSettings.get(message.guild.id) || Object.create(null)
+      if (role) rewards[args[1]] = role.i      else delete rewards[args[1]]
+      await rankSettings.set(message.guild.id,{rewards : rewards}) 
+      message.channel.send("Configuration updated.")d
+
     }
     else message.reply("Invaild config category given.");
   }
