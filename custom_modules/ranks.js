@@ -29,7 +29,9 @@ client.on("lvlup",
    * @param { number } o - Old level
    * @param { number } n - new level
    */
-  (message, o, n) => {
+ async (message, o, n) => {
     const { member } = message
     if (!member.guild.me.hasPermission("MANAGE_ROLES")) return
+   const { rewards } = await rankSettings.get(message.guild.id)
+   rewards[]
   })
