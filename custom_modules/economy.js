@@ -22,7 +22,9 @@ module.exports = {
         /**
          * Give the user an item
          * @param { string } name - Name of the item
+         * @param { number? } amount amount of the item to be given to the user
          */
-        giveItem(name) { this.inv[name] ? this.inv['name']++ : this.inv['name'] = 1 }
+        giveItem(name,amount) { this.inv[name] ? this.inv[name] += (amount || 1) : this.inv[name] = (amount || 1) }
+
     }
 }
