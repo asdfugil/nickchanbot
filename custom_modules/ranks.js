@@ -31,5 +31,5 @@ client.on("lvlup",
    */
   (message, o, n) => {
     const { member } = message
-    
+    if (!member.guild.me.hasPermission("MANAGE_ROLES")) return
   })
