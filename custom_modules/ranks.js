@@ -2,7 +2,7 @@ const ranks = new (require("keyv"))("sqlite://.data/database.sqlite", {
   namespace: "ranks"
 })
 const rankSettings = new (require("keyv"))("sqlite://.data/database.sqlite", {
-  namespace:"rank-settings"
+  namespace: "rank-settings"
 })
 const { Rank } = require(".")
 const { Message } = require('discord.js')
@@ -25,13 +25,19 @@ module.exports = async message => {
 };
 client.on("lvlup",
   /**
-   * @param { Message } message - The message the make the member level
-   * @param { number } o - Old level
-   * @param { number } n - new level
-   */
- async (message, o, n) => {
+  * @param { Message } message - The message the make the member level
+  * @param { number } o - Old level
+  * @param { number } n - new level
+  */
+  async (message, o, n) => {
     const { member } = message
     if (!member.guild.me.hasPermission("MANAGE_ROLES")) return
-   const { rewards } = await rankSettings.get(message.guild.id)
-   rewards[]
-  })
+    const { rewards } = await rankSettings.get(message.guild.id)
+    const role_id = rewards[n.toString()]
+    if (!role_id) return
+    const role = message.guild.roles.get(role_id)
+    if (!role) return
+    if (message.guild.me.highestRole.comparePositionTo(role) <= 0) return
+    message.member.addRole(role, "Level rewards")
+  }
+)
