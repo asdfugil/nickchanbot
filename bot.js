@@ -28,6 +28,9 @@ const prefixs = new Keyv("sqlite://.data/database.sqlite", {
 const ranks = new Keyv("sqlite://.data/database.sqlite", {
   namespace: "ranks"
 });
+const snipe = new Keyv("sqlite://.data/database.sqlite", {
+  namespace: "snipe"
+});
 const parseTag = require("./custom_modules/parse-tag-vars.js");
 const tags = new Keyv("sqlite://.data/database.sqlite", { namespace: "tags" });
 const check = require("./custom_modules/check.js");
@@ -76,6 +79,17 @@ client.on("ready", () => {
   client.user.setActivity(`Use @${client.user.username} to get started!`);
 });
 ranks.on("error", console.error);
+client.on("messageDelete",message => {
+  snipe.set({
+    id:message.id,
+    author:{
+      tag:message.author.tag,
+      id:message.author.id,
+      avatarURL:message.author.avatarURL
+    },
+    create
+  })
+})
 async function processTag(commandName, message, args) {
   if (message.guild) {
     const guildTags = await tags.get(message.guild.id);
