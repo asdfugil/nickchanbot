@@ -22,12 +22,15 @@ const ranks = new Keyv("sqlite://.data/database.sqlite", {
 const prefixs = new Keyv("sqlite://.data/database.sqlite", {
   namespace: "prefixs"
 });
-const mutedRoles = new (require("keyv"))("sqlite://.data/database.sqlite", {
+const mutedRoles = new Keyv("sqlite://.data/database.sqlite", {
   namespace: "muted-roles"
 });
-const mutedMembers = new (require("keyv"))("sqlite://.data/database.sqlite", {
+const mutedMembers = new Keyv("sqlite://.data/database.sqlite", {
   namespace: "muted-members"
 });
+const __keys = new Keyv("sqlite://.data/database.sqlite",{
+  namespace:"api-keys"
+})
 module.exports = {
   args: true, //either boolean or number
   name: "eval",
