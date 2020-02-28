@@ -80,14 +80,12 @@ client.on("ready", () => {
 });
 ranks.on("error", console.error);
 client.on("messageDelete",message => {
-  snipe.set({
-    id:message.id,
+  snipe.set(message.channel.id,{
+    content:message.content,
     author:{
       tag:message.author.tag,
-      id:message.author.id,
-      avatarURL:message.author.avatarURL
-    },
-    create
+      displayAvatarURL:message.author.displayAvatarURL
+    },createdTimestamp:message.createdTimestamp
   })
 })
 async function processTag(commandName, message, args) {
