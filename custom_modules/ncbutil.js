@@ -62,7 +62,7 @@ module.exports = {
     const { guild } = message
     let role = message.mentions.roles.first()
     if (role) return role
-    else role = guild.roles.find(x => x.name.includes(string))
+    else role = guild.roles.find(x => x.name.toLownerCase().includes(string.toLowerCase()))
     if (role) return role
     else role = guild.roles.find(x => x.hexColor === string)
     if (role) return role
