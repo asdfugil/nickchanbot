@@ -114,9 +114,7 @@ client.on("message", async message => {
   const commandName = args.shift().toLowerCase();
   const command =
     client.commands.get(commandName) ||
-    client.commands.find(
-      cmd => cmd.aliases && cmd.aliases.includes(commandName)
-    ) ||
+    client.commands.find(cmd => cmd.aliases && cmd.aliases.includes(commandName)) ||
     client.commands.find(cmd => cmd.alias && cmd.alias.includes(commandName));
   processTag(commandName, message, args);
   if (!command) return;
