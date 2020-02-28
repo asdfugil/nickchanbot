@@ -13,7 +13,7 @@ module.exports = {
         keys[key] = message.author.id
         Nkeys.set("keys",keys)
         message.author.send(key)
-        .then(_ => message.react("❌"))
+        .then(_ => message.react("✅"))
         .catch(error => { 
             message.react("❌")
             if (error.code === 50007) message.reply("Please enable your DM.")
