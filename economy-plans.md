@@ -17,3 +17,10 @@ Example user
   }
 }
 ```
+```json
+{
+  "shop":{
+    
+  }
+}
+```
