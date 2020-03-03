@@ -16,8 +16,10 @@ module.exports = async message => {
   let oldRank;
   let newRank;
   if (data[message.member.id]) oldRank = new Rank(data[message.member.id])
+  else oldRank = new Rank(0)
   data[message.member.id] = (data[message.member.id] || 0) + xp
   newRank = new Rank(data[message.member.id])
+  
   if (newRank.getLevel() - oldRank.getLevel()) message.client.emit("lvlup", message, oldRank.getLevel(), newRank.getLevel())
   ranks.set(message.guild.id, data)
   xpCooldowns.set(message.member.id, Date.now())
