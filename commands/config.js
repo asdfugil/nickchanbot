@@ -141,8 +141,8 @@ ${loggers.map(x => `\`${x.name}\` Logged when ${x.logged}`).join("\n")}` +
       if (args[2].toLowerCase() !== 'none') {
         role = findRole(message, args.slice(2).join(" "))
         if (!role) return message.reply("That is not a valid role.")
-      }1)
-      if (isNalevel0])  level1] < 1) return message.reply("That is not a valid level!")
+      }
+      if (isNaN(args[0]) < 1) return message.reply("That is not a valid level!")
       const { rewards } = await rankSettings.get(message.guild.id) || Object.create(null)
       if (role) rewards[args[1]] = role.i      else delete rewards[args[1]]
       await rankSettings.set(message.guild.id,{rewards : rewards}) 
