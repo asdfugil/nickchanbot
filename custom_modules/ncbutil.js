@@ -44,20 +44,7 @@ module.exports = {
    * @param { string } string 
    * @returns { Promise<GuildMember> }
    */
-  findMember: async (message, string) => {
-    if (message.mentions.members.first()) return message.mentions.members.first()
-    else if (message.guild.members.find(x => x.user.tag.includes(string))) return message.guild.members.find(x => x.user.tag.includes(string))
-    else if (message.guild.members.find(x => x.displayName.includes(string))) return message.guild.members.find(x => x.displayName.includes(string))
-    else if (await message.guild.fetchMember(string)) return await message.guild.fetchMember(string)
-  },
-  findUser: async (message,string) => {
-    if (message.guild) {
-    if (message.mentions.members.first()) return message.mentions.users.first()
-    else if (message.guild.members.find(x => x.user.tag.includes(string))) return message.guild.members.find(x => x.user.tag.includes(string)).user
-    else if (message.guild.members.find(x => x.displayName.includes(string))) return message.guild.members.find(x => x.displayName.includes(string)).user
-    } else if (message.mentions.users.first()) return message.mentions.users.first()
-    if (await message.client.fetchUser(string)) return await message.client.fetchUser(string)
-  },
+  
   findRole: (message,string) => {
     const { guild } = message
     let role = message.mentions.roles.first()
