@@ -7,6 +7,7 @@ module.exports = {
   name: "urban",
   description:"Look up a word on urban dictionary.",
   aliases: ["ud"],
+  nsfw:true,
   async execute(message, args) {
     ud.term(args.join(" ") || "")
       .then(results => {
