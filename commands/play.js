@@ -31,7 +31,7 @@ module.exports = {
       title: songInfo.title,
       url: songInfo.video_url
     };
-
+    console.log(song)
     if (!serverQueue) {
       const queueContruct = {
         textChannel: message.channel,
