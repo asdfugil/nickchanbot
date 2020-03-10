@@ -22,7 +22,9 @@ module.exports = {
       .serialize();
     if (!CONNECT || !SPEAK)
       return noBotPermission("connect and speak", message.channel);
+  console.log(1)
     const result = (await searcher.search(args.join(" "))).first;
+   console.log(2)
     if (!result) return message.reply("No results");
     const songInfo = await ytdl.getInfo(result.url);
     const song = {
