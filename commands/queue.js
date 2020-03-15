@@ -10,7 +10,7 @@ module.exports = {
     if (!serverQueue) return message.reply("There is nothing in the queue")
     const formatted = serverQueue.songs.map((song,index) => {
       const position = index + 1
-      const item = `${position}; ${song.title}`
+      const item = `${position}.[${song.title}](${song.url})`
       return item
     }).join("\n")
     const embed = new RichEmbed()
