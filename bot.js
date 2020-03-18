@@ -71,10 +71,10 @@ client.once("ready", async () => {
   mutedutil.updateMutedRoles(client);
   mutedutil.autoReMute(client);
   mutedutil.autoUpdateDataBase(client);
-  client.owner = await client.fetchUser(process.env.OWNERID);
+  client.owner = await client.users.fetch(process.env.OWNERID);
   client.developers = [];
   DEVS_ID.split(",").forEach(dev =>
-    client.fetchUser(dev).then(user => client.developers.push(user))
+    client.users.fetch(dev).then(user => client.developers.push(user))
   );
 });
 client.on("lvlup",
@@ -86,7 +86,8 @@ client.on("lvlup",
   async (message, o, n) => {
     const { member } = message
     if (!member.guild.me.hasPermission("MANAGE_ROLES")) return
-    const { rewards } = await rankSettings.get(message.guild.id)
+    const { rewards } = await rankSettings.get(message.guild.id) || Object.create(null)
+    if (!rewards) return
     const role_id = rewards[n.toString()]
     if (!role_id) return
     const role = message.guild.roles.get(role_id)
@@ -111,8 +112,8 @@ client.on("messageDelete",message => {
 })
 async function processTag(commandName, message, args) {
   if (message.guild) {
-    const guildTags = await tags.get(message.guild.id);
-    const triggered = guildTags[commandName];
+    const guildTags = await tags.get(message.guild.id) || Object.create(null)
+    const triggered = guildTags[commandName]; 
     if (triggered) {
       await message.channel.startTyping();
       try {

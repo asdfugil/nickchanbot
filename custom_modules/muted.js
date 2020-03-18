@@ -48,10 +48,10 @@ module.exports = {
    */
   mutedTimers: client => {
     setInterval(() => {
-      client.guilds.forEach(async guild => {
+      client.guilds.cache.forEach(async guild => {
         const role_id = await mutedRoles.get(guild.id)
         if (!role_id) return
-        const role = guild.roles.get(role_id)
+        const role = guild.roles.cache.get(role_id)
         if (!role) return
         const members = await mutedMembers.get(guild.id);
         if (!members) return
@@ -60,8 +60,8 @@ module.exports = {
           if ((members[member_id] - Date.now()) === -1) return
           delete members[member_id]
           mutedMembers.set(guild.id,members)
-          const user = await client.fetchUser(member_id)
-          const member = guild.member(user)
+          const user = await client.users.fetch(member_id)
+          const member = guild.members.resolve(user)
           if (!member) return
           if (role.comparePositionTo(guild.me.highestRole) >= 0) return
           member.removeRole(role,"Automatic un-mute (times up)")
@@ -76,7 +76,7 @@ module.exports = {
     client.on("guildMemberAdd",async member => {
       const members = await mutedMembers.get(member.guild.id)
       if (!members[member.id]) return
-      const role = member.guild.roles.get(await mutedRoles.get(member.guild.id)||"abc")
+      const role = member.guild.roles.cache.get(await mutedRoles.get(member.guild.id)||"abc")
       if (!role) return
       if (member.guild.me.highestRole.comparePositionTo(role) <= 0 || !member.guild.me.hasPermission("MANAGE_ROLES")) return
       member.addRole(role,"Automatic re-mute")

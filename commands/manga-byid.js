@@ -1,12 +1,12 @@
 require('dotenv').config()
 const anilist = new (require('anilist-node'))(process.env.ANILIST_TOKEN)
 const { writeFileSync } = require("fs")
-const { RichEmbed } = require("discord.js")
+const { MessageEmbed } = require("discord.js")
 module.exports = {
     name: 'manga-byid',
     aliases: ['mangabyid'],
     description: 'GET manga by id on AniList',
-    execute: async (message,args) => await module.exports.getManga(message,parseInt(args.join(' '))),
+    execute: async (message, args) => await module.exports.getManga(message, parseInt(args.join(' '))),
     async getManga(message, id) {
         anilist.media
             .manga(id)
@@ -18,12 +18,9 @@ module.exports = {
                     return message.reply(
                         "That anime contains NSFW content,please try again in a NSFW channel."
                     );
-                const character = await anilist.people.character(
-                    manga.characters[0].id
-                );
-                console.log(character);
-                const embed = new RichEmbed()
-                    .setAuthor(manga.staff[0].native || manga.staff[0].name)
+                    let character
+                    if (manga.characters) character = await anilist.people.character(manga.characters[0].id);
+                const embed = new MessageEmbed()
                     .setURL(manga.siteUrl)
                     .setTitle(
                         manga.title.romaji || manga.title.english || manga.title.native
@@ -34,23 +31,14 @@ module.exports = {
                     .addField("English title", manga.title.romaji || "N/A")
                     .addField(
                         "Links",
-                        manga.externalLinks
+                        (() => manga.externalLinks ? manga.externalLinks
                             .map((link, index) => `[${index}](${link})`)
-                            .join(",") || "N/A"
+                            .join(",") : "N/A")()
                     )
                     .addField("Country of origin", manga.countryOfOrigin)
                     .addField("Popularity", manga.popularity)
                     .addField("Format", manga.format)
                     .addField("Status", manga.status)
-                    .addField(
-                        "Tags",
-                        manga.tags
-                            .map(tag => {
-                                if (!tag.isMediaSpoiler) return tag.name;
-                                else return `||${tag.name}||`;
-                            })
-                            .join(", ")
-                    )
                     .addField("Season", manga.season)
                     .addField(
                         "Start Date",
@@ -59,10 +47,6 @@ module.exports = {
                     .addField(
                         "End date",
                         `${manga.endDate.day}-${manga.endDate.month}-${manga.endDate.year}`
-                    )
-                    .addField(
-                        "Characters",
-                        manga.characters.map(x => `${x.name}  (${x.id})`).join(", ")
                     )
                     .addField(
                         "Staff",
@@ -81,16 +65,10 @@ module.exports = {
                         `AniList ID: ${manga.id}
     MAL ID:${manga.idMal}`
                     )
-                    .attachFile(`/tmp/${manga.id}.json`)
+                    .attachFiles([`/tmp/${manga.id}.json`])
                     .setColor("RANDOM")
-                    .setFooter(
-                        `${character.name.native || ""}  (${
-                        character.name.first
-                        } ${character.name.last || ""})`,
-                        character.image.large
-                    )
                     .setImage(manga.bannerImage)
-                    .addField("Synonyms", manga.synonyms.join(", ") || "N/A")
+                    .addField("Synonyms", (() => manga.synonyms ? manga.synonyms.join(", ") : "N/A")())
                     .addField(
                         "Relations",
                         manga.relations
@@ -102,6 +80,26 @@ module.exports = {
                             .join(" ,") || "N/A"
                     )
                     .addField("Last updated", new Date(manga.updatedAt * 1000));
+                    if (character)                     embed.setFooter(
+                        `${character.name.native || ""}  (${
+                        character.name.first
+                        } ${character.name.last || ""})`,
+                        character.image.large
+                    )
+                    if (manga.tags) embed.addField(
+                        "Tags",
+                        manga.tags
+                            .map(tag => {
+                                if (tag.isMediaSpoiler) return `||${tag}||`
+                                else return tag
+                            })
+                            .join(", ")
+                    )
+                    if (mangaa.characters) embed.addField(
+                        "Characters",
+                        manga.characters.map(x => `${x.name}  (${x.id})`).join(", ") 
+                    )
+                    if (manga.staff)  embed.setAuthor(manga.staff[0].native || manga.staff[0].name)
                 await message.channel.send("", { embed: embed });
             })
             .catch(console.error);

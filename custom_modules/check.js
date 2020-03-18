@@ -8,7 +8,7 @@ module.exports = (client) => {
   run when the client has become ready
   check for deleted guilds etc.
   */
-  client.guilds.forEach(guild => {
+  client.guilds.cache.forEach(guild => {
       if (!ranks.get(guild.id)) ranks.set(guild.id,Object.create(null))
   })
 }

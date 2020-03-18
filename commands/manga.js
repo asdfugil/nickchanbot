@@ -1,8 +1,6 @@
 require("dotenv").config();
 const AniList = require("anilist-node");
 const anilist = new AniList(process.env.ANILIST_TOKEN);
-const { RichEmbed } = require("discord.js");
-const { writeFileSync } = require("fs");
 module.exports = {
   name: "manga",
   args: true,

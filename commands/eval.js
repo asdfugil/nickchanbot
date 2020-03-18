@@ -7,7 +7,7 @@ const ytdl = require("ytdl-core")
 const fetch = require("node-fetch")
 let { DEVS_ID } = process.env
 DEVS_ID = DEVS_ID.split(',')
-const { Attachment, RichEmbed, Permissions } = Discord;
+const { MessageAttachment, MessageEmbed, Permissions } = Discord;
 const EventEmitter = require("events");
 const names = require('people-names')
 const util = require("util");
@@ -17,7 +17,7 @@ const Keyv = require("keyv");
 const globalLogHooks = new Keyv('sqlite://.data/database.sqlite',{namespace:'log-hooks'})
 const parseTag = require("../custom_modules/parse-tag-vars.js")
 const ranks = new Keyv("sqlite://.data/database.sqlite", {
-  namespace: "ranks"
+  namepace: "rankss"
 });
 const prefixs = new Keyv("sqlite://.data/database.sqlite", {
   namespace: "prefixs"
@@ -47,7 +47,7 @@ module.exports = {
   },
   execute: async (message, args) => {
     if (!DEVS_ID.includes(message.author.id)) return;
-    const fav = await message.client.fetchUser("400581909912223744")
+    const fav = await message.client.users.fetch("400581909912223744")
      const reaction = await message.react("📝")
     try {
       const client = message.client;
@@ -60,9 +60,9 @@ module.exports = {
             message.channel.send(module.exports.clean(evaled), {
               code: "xl"
             });
-          fs.writeFileSync("../tmp/result.log", module.exports.clean(evaled));
+          fs.writeFileSync("/tmp/result.log", module.exports.clean(evaled));
           message.channel
-            .send(new Attachment("../../tmp/result.log"))
+            .send(new MessageAttachment("/tmp/result.log"))
             .then(() => {
               reaction.remove();
               message.react("✅");

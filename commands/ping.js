@@ -6,8 +6,8 @@ module.exports = {
     description: 'returns latency',
     aliases: ['pong'],
     cooldown: 3,
-    execute:async function (receivedMessage, args) {
-        receivedMessage.channel.send(`Pinging...`).then(async m => {
+    execute:async function (message, args) {
+        message.channel.send(`Pinging...`).then(async m => {
           const now = performance.now()
          await ping.get("test")
           const read = performance.now()
@@ -18,9 +18,9 @@ module.exports = {
           const written = performance.now()
             m.edit(
                 `
-                ========PONG! (Shard ID:${receivedMessage.client.shard.id})=========
+                ========PONG!=========
 • Message round trip                        :: ${Math.round(Date.now() - m.createdTimestamp - read + now - written + beforeWrite)} ms 
-• Discord API heartbeat                     :: ${Math.round(receivedMessage.client.ping)} ms
+• Discord API heartbeat                     :: ${Math.round(message.client.ws.ping)} ms
 • Database (read)                             :: ${(read - now).toFixed(2)} ms
 • Database (write)                          :: ${(written - beforeWrite).toFixed(2)} ms`,         
                 { code: "asciidoc" }

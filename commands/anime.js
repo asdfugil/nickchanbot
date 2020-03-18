@@ -1,7 +1,7 @@
 require("dotenv").config();
 const AniList = require("anilist-node");
 const anilist = new AniList(process.env.ANILIST_TOKEN);
-const { RichEmbed } = require("discord.js");
+const { MessageEmbed } = require("discord.js");
 const { writeFileSync } = require("fs");
 module.exports = {
   name: "anime",
@@ -59,7 +59,7 @@ ${content.join("\n")}`,
           anime.characters[0].id
         );
         console.log(character);
-        const embed = new RichEmbed()
+        const embed = new MessageEmbed()
           .setAuthor(anime.staff[0].native || anime.staff[0].name)
           .setURL(anime.siteUrl)
           .setTitle(
@@ -126,12 +126,12 @@ ${content.join("\n")}`,
             `AniList ID: ${anime.id}
 MAL ID:${anime.idMal}`
           )
-          .attachFile(`/tmp/${anime.id}.json`);
+          .attachFiles([`/tmp/${anime.id}.json`]);
         // 25 fields
         embed.setColor("RANDOM");
         if ([100977, 108631, 105662, 109085].includes(anime.id))
           embed.setColor("#E15d4a");
-        const embed2 = new RichEmbed()
+        const embed2 = new MessageEmbed()
           .setColor(embed.color)
           .setFooter(
             `${character.name.native || ""}  (${
@@ -140,7 +140,7 @@ MAL ID:${anime.idMal}`
             character.image.large
           )
           .setImage(anime.bannerImage)
-          .addField("Synonyms", anime.synonyms.join(", ") || "N/A")
+          .addField("Synonyms",(() => anime.synonyms ? anime.synonyms.join(", ") : "N/A")())
           .addField(
             "Relations",
             anime.relations

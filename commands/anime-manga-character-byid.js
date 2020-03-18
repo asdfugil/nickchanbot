@@ -22,7 +22,7 @@ module.exports = {
             const { romaji,english,native } = x.title
             return `**${romaji || english || native}** (${english || "N/A"}) - Format: ${x.format} (ID:${x.id})`
         }).join('\n' || 'N/A'))
-        .attachFile(`/tmp/${character.id}.json`)
+        .attachFiles([`/tmp/${character.id}.json`])
         .setFooter(`${character.favourites} ❤️`)
         .setColor("RANDOM")
         message.channel.send(embed)

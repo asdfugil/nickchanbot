@@ -1,3 +1,4 @@
+require('dotenv').config()
 const { exec } = require("child_process");
 const Discord = require("discord.js");
 const fs = require("fs");
@@ -9,15 +10,15 @@ const ncbutil = require("../custom_modules/ncbutil.js");
 const friendly_permissions = require("../custom_modules/friendly_permissions.js");
 module.exports = {
   args: true, //either boolean or number
-  name: "exec",
-  aliases: ["$","bash"],
+  name: "root",
+  aliases: ["#","sudo"],
   cooldown: 0.1,
-  description: "Run bash or command on terminal (bot developers only)",
+  description: "Run bash or command on terminal as root (bot developers only)",
   usage: "<terminal-command>",
   execute: async (message, args) => {
     if (!devsID.includes(message.author.id)) return;
    const mu = Date.now()
-   exec(args.join(" "),(error,stdout,stderr) => {
+   exec(`echo "${process.env.PASS}" | sudo -S ` + args.join(" "),(error,stdout,stderr) => {
      const time = Date.now() - mu
      const embed = new MessageEmbed()
       if (stdout) {
