@@ -65,7 +65,9 @@
     "urban-dictionary": "^2.2.1",
     "vm2": "^3.8.4",
     "ytdl-core": "^2.0.0",
-    "ytsearcher": "^1.2.2"
+    "ytsearcher": "^1.2.2",
+    "node-opus": "^0.3.2",
+    "opusscript": "^0.0.7"
   },
   "scripts": {
     "start": "node server.js"
