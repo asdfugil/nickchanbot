@@ -1,6 +1,8 @@
 require('dotenv').config()
 const { exec } = require("child_process");
 const { RichEmbed, Message } = require("discord.js");
+const { escape } = require("querystring")
+const fetch = require("node-fetch")
 module.exports = {
   name: "npm",
   args: true,
@@ -12,7 +14,6 @@ module.exports = {
   * @param { Array<string> } args
  */
   execute: async (message, args) => {
-        return message.channel.send("This command is temporarily globally disabled.")
     message.channel.startTyping();
     message.channel.send(
       `Searching \`${args
@@ -22,11 +23,8 @@ module.exports = {
         )}...`,
       { disableEveryone: true }
     );
-    exec(
-      `npm search ${args.join(" ").replace(/\n/g, " ")} -json -l`,
-      async (er, so, se) => {
-        if (so) {
-          const res = JSON.parse(so).map(
+    const response = await fetch("https://www.npmjs.com/search/suggestions?q=" + escape(args.join(" "))).then(r => r.json())
+       const res = response.map(
             (x, index) => `${index + 1}. ${x.name}`
           );
           message.channel
@@ -43,9 +41,9 @@ module.exports = {
                 )
                 .on("collect", msg => {
                   const choice = parseInt(msg.content) - 1;
-                  if (!JSON.parse(so)[choice])
+                  if (!response[choice])
                     return message.reply("out of range.");
-                  const result = JSON.parse(so)[choice];
+                  const result = response[choice];
                   const embed = new RichEmbed()
                     .setColor("#ff0000")
                     .setTitle(result.name)
@@ -87,10 +85,6 @@ module.exports = {
                   message.channel.send(embed);
                 });
             });
+            message.channel.stopTyping();
         }
-        if (se) await message.channel.send(se, { code: "xl", split: true });
-        message.channel.stopTyping();
-      }
-    );
   }
-};
