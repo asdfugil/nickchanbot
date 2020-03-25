@@ -12,6 +12,7 @@ module.exports = {
   * @param { Array<string> } args
  */
   execute: async (message, args) => {
+        return message.channel.send("This command is temporarily globally disabled.")
     message.channel.startTyping();
     message.channel.send(
       `Searching \`${args
