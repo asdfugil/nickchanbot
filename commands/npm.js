@@ -1,7 +1,7 @@
 require('dotenv').config()
 const { exec } = require("child_process");
 const { RichEmbed, Message } = require("discord.js");
-const { encode } = require("querystring")
+const { escape } = require("querystring")
 const fetch = require("node-fetch")
 module.exports = {
   name: "npm",
@@ -23,7 +23,7 @@ module.exports = {
         )}...`,
       { disableEveryone: true }
     );
-    const response = await fetch("https://www.npmjs.com/search/suggestions?q=" + encode(args.join(" "))).then(r => r.json())
+    const response = await fetch("https://www.npmjs.com/search/suggestions?q=" + escape(args.join(" "))).then(r => r.json())
        const res = response.map(
             (x, index) => `${index + 1}. ${x.name}`
           );
