@@ -41,9 +41,9 @@ module.exports = {
                 )
                 .on("collect", msg => {
                   const choice = parseInt(msg.content) - 1;
-                  if (!JSON.parse(so)[choice])
+                  if (!response[choice])
                     return message.reply("out of range.");
-                  const result = JSON.parse(so)[choice];
+                  const result = response[choice];
                   const embed = new RichEmbed()
                     .setColor("#ff0000")
                     .setTitle(result.name)
@@ -85,7 +85,6 @@ module.exports = {
                   message.channel.send(embed);
                 });
             });
+            message.channel.stopTyping();
         }
-        message.channel.stopTyping();
   }
-};
