@@ -1,6 +1,8 @@
 require('dotenv').config()
 const { exec } = require("child_process");
 const { RichEmbed, Message } = require("discord.js");
+const { encode } = require("querystring")
+const fetch = require("node-fetch")
 module.exports = {
   name: "npm",
   args: true,
@@ -21,11 +23,8 @@ module.exports = {
         )}...`,
       { disableEveryone: true }
     );
-    exec(
-      `npm search ${args.join(" ").replace(/\n/g, " ")} -json -l`,
-      async (er, so, se) => {
-        if (so) {
-          const res = JSON.parse(so).map(
+    const response = await fetch("https://www.npmjs.com/search/suggestions?q=" + encode(args.join(" "))).then(r => r.json())
+       const res = response.map(
             (x, index) => `${index + 1}. ${x.name}`
           );
           message.channel
@@ -87,9 +86,6 @@ module.exports = {
                 });
             });
         }
-        if (se) await message.channel.send(se, { code: "xl", split: true });
         message.channel.stopTyping();
-      }
-    );
   }
 };
