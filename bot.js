@@ -182,4 +182,4 @@ arguments:${args}`);
       );
   }
 });
-client.login(BOT_TOKEN);
+client.login(BOT_TOKEN).catch(error => process.exit(1))
