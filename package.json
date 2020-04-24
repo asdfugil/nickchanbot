@@ -70,7 +70,7 @@
     "opusscript": "^0.0.7"
   },
   "scripts": {
-    "start": "node server.js"
+    "start": "node"
   },
   "engines": {
     "node": "10.x",
