@@ -38,9 +38,10 @@
     "bufferutil": "^4.0.1",
     "canvas": "^2.6.1",
     "discord.bio": "^4.0.1",
-    "discord.js": "github:discordjs/discord.js#11.5-dev",
+    "discord.js": "^11.6.4",
     "dotenv": "^8.2.0",
     "erlpack": "^0.1.3",
+    "everything": "^1.1.7",
     "express": "^4.17.1",
     "google-it": "^1.5.0",
     "is-url": "^1.2.4",
@@ -52,8 +53,6 @@
     "moment-timezone": "^0.5.27",
     "nekos.life": "^2.0.5",
     "node-fetch": "^2.6.0",
-    "node-opus": "^0.3.3",
-    "opusscript": "^0.0.7",
     "parse-duration": "^0.2.1",
     "people-names": "^1.0.15",
     "pidusage": "^2.0.18",
@@ -66,7 +65,9 @@
     "urban-dictionary": "^2.2.1",
     "vm2": "^3.9.1",
     "ytdl-core": "^2.1.1",
-    "ytsearcher": "^1.2.2"
+    "ytsearcher": "^1.2.2",
+    "node-opus": "^0.3.3",
+    "opusscript": "^0.0.7"
   },
   "scripts": {
     "start": "node server.js"
