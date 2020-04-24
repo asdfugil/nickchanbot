@@ -44,11 +44,15 @@ module.exports = {
    * @param { string } string 
    * @returns { Promise<GuildMember> }
    */
-  findMember: async (message, string) => {
-    if (message.mentions.members.first()) return message.mentions.members.first()
-    else if (message.guild.members.find(x => x.user.tag.includes(string))) return message.guild.members.find(x => x.user.tag.includes(string))
-    else if (message.guild.members.find(x => x.displayName.includes(string))) return message.guild.members.find(x => x.displayName.includes(string))
-    else if (await message.guild.fetchMember(string)) return await message.guild.fetchMember(string)
+findMember: async (message, string) => {
+    if (message.mentions.members.first())
+      return message.mentions.members.first();
+    else if (message.guild.members.find(x => x.user.tag.includes(string)))
+      return message.guild.members.find(x => x.user.tag.includes(string));
+    else if (message.guild.members.find(x => x.displayName.includes(string)))
+      return message.guild.members.find(x => x.displayName.includes(string));
+    else if (await message.guild.fetchMember(string))
+      return await message.guild.fetchMember(string);
   },
   findUser: async (message,string) => {
     if (message.guild) {
