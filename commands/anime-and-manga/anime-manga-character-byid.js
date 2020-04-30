@@ -2,7 +2,7 @@ require("dotenv").config();
 const AniList = require("anilist-node");
 const anilist = new AniList(process.env.ANILIST_TOKEN);
 const { writeFileSync } = require("fs")
-const { RichEmbed } = require('discord.js')
+const { MessageEmbed } = require('discord.js')
 module.exports = {
     name:'anime-manga-character-byid',
     aliases:['anime-character-byid','manga-character-byid'],
@@ -12,8 +12,8 @@ module.exports = {
         const character = await anilist.people.character(parseInt(id) || -1)
         writeFileSync(`/tmp/${character.id}.json`,JSON.stringify(character,null,2))
         if (!character.siteUrl) return message.reply("That's not a valid character ID!")
-        const embed = new RichEmbed()
-        .setTitle(`${character.name.first} ${character.name.last||''} (${character.name.native})`)
+        const embed = new MessageEmbed()
+        .setTitle(`${character.name.first || "N/A"} ${character.name.last||''} (${character.name.native})`)
         .setURL(character.siteUrl)
         .setDescription(character.description.replace(/(<([^>]+)>)/ig,''))
         .setImage(character.image.large)

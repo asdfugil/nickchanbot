@@ -1,4 +1,4 @@
-const { Collection, RichEmbed,TextBasedChannel,Message,GuildMember,WebhookClient,Guild } = require("discord.js");
+const { Collection, MessageEmbed,TextBasedChannel,Message,GuildMember,WebhookClient,Guild } = require("discord.js");
 const Keyv = require('keyv')
 const globalLogHooks = new Keyv("sqlite://.data/database.sqlite", {
   namespace: "log-hooks"
@@ -8,7 +8,7 @@ module.exports = {
    * @param { Guild | null } guild
    * @param { string } logType - The type of log
    * @typedef { Promise<void | 'BREAK'> | void | 'BREAK' } idk
-   * @param { (embed:RichEmbed) => idk } callback
+   * @param { (embed:MessageEmbed) => idk } callback
    */
   postLog:async function(logType,guild,callback) {
     if (!guild) return
@@ -17,7 +17,7 @@ module.exports = {
     const hookData = data[logType]
     if (!hookData) return
     const hook = new WebhookClient(hookData.id,hookData.token)
-    const embed = new RichEmbed()
+    const embed = new MessageEmbed()
     const term = await callback(embed)
     if (term === 'BREAK') return
     hook.send(embed)
@@ -121,7 +121,7 @@ module.exports = {
    * @returns { Promise<Message> }
    */
   noPermission: async (perms, c) => {
-    const noPermission = new RichEmbed()
+    const noPermission = new MessageEmbed()
       .setColor("#ffff00")
       .setFooter(c.client.user.tag, c.client.user.displayAvatarURL)
       .setTimestamp()
@@ -156,7 +156,7 @@ module.exports = {
    * @returns { Promise<Message> }
    */
   noBotPermission: async (perms, c) => {
-    const noPermission = new RichEmbed()
+    const noPermission = new MessageEmbed()
       .setColor("#ffff00")
       .setFooter(c.client.user.tag, c.client.user.displayAvatarURL)
       .setTimestamp()

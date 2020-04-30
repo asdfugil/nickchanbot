@@ -86,7 +86,7 @@ module.exports = {
                         } ${character.name.last || ""})`,
                         character.image.large
                     )
-                    if (manga.tags) embed.addField(
+                    if (manga.tags[0]) embed.addField(
                         "Tags",
                         manga.tags
                             .map(tag => {
@@ -95,7 +95,7 @@ module.exports = {
                             })
                             .join(", ")
                     )
-                    if (mangaa.characters) embed.addField(
+                    if (manga.characters) embed.addField(
                         "Characters",
                         manga.characters.map(x => `${x.name}  (${x.id})`).join(", ") 
                     )

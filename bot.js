@@ -3,14 +3,17 @@ require("dotenv").config();
 console.log("Starting...");
 const Discord = require("discord.js");
 const fs = require("fs");
-const { BOT_TOKEN, PREFIX, DEVS_ID } = process.env;
+const { BOT_TOKEN, PREFIX, DEVS_ID,BOT_PORT } = process.env;
 const serialize = require("serialize-javascript");
+const t = require('./custom_modules/translate')
 const { deserialize } = require("./custom_modules/ncbutil.js");
+const fetch = require('node-fetch')
 const prefix = PREFIX;
 const { Collection } = Discord;
 const rankSettings = new (require("keyv"))("sqlite://.data/database.sqlite", {
   namespace: "rank-settings"
 })
+Discord.Guild.prototype.language = 'zh_Hant'
 Discord.Guild.prototype["xpCooldowns"] = new Collection();
 class NickChanBotClient extends Discord.Client {
   constructor(clientOptions) {
@@ -21,6 +24,7 @@ class NickChanBotClient extends Discord.Client {
     this.queue = new Collection();
     this.owner = undefined;
     this.developers = [];
+    this.modules = new Collection()
   }
 }
 const client = new NickChanBotClient();
@@ -37,23 +41,30 @@ const snipe = new Keyv("sqlite://.data/database.sqlite", {
 const parseTag = require("./custom_modules/parse-tag-vars.js");
 const tags = new Keyv("sqlite://.data/database.sqlite", { namespace: "tags" });
 const check = require("./custom_modules/check.js");
-const commandFiles = fs
-  .readdirSync("./commands")
-  .filter(file => file.endsWith(".js") || file.endsWith(".mjs"));
-const loggerFiles = fs
-  .readdirSync("./loggers")
-  .filter(file => file.endsWith(".js") || file.endsWith(".mjs"));
+const moduleDirs = fs
+  .readdirSync("./commands",{ withFileTypes:true })
+  .filter(x => x.isDirectory)
+  .filter(x => x.name !== 'index.js')
+  .map(x => x.name)
 const processRank = require("./custom_modules/ranks.js");
 const mutedutil = require("./custom_modules/muted.js");
-for (const file of commandFiles) {
-  try {
-    const command = require(`./commands/${file}`);
-    client.commands.set(command.name, command);
-    console.log(`Loaded '${command.name}' Command`);
-  } catch (error) {
-    console.error(`Unable to load ${file}, reason:\n${error.stack}`);
-  }
+for (let moduleName of moduleDirs) {
+    const module_ = require(`./commands/${moduleName}`)
+    module_.commands = new Collection()
+    const commandFiles = fs.readdirSync(`./commands/${moduleName}`)
+    .filter(file => file.endsWith(".js"))
+    for (const commandName of commandFiles) {
+      try {
+      const command = require(`./commands/${moduleName}/${commandName}`)
+      module_.commands.set(command.name,command)
+      client.commands.set(command.name,command)
+      } catch(error) {
+        console.log(error)
+      }
+    }
+  client.modules.set(module_.id,module_)
 }
+/*
 for (const file of loggerFiles) {
   try {
     const logger = require(`./loggers/${file}`);
@@ -63,6 +74,7 @@ for (const file of loggerFiles) {
     console.error(`Unable to load ${file}, reason:\n${error.stack}`);
   }
 }
+*/
 require("./custom_modules/loggers.js")(client);
 const cooldowns = new Collection();
 client.once("ready", async () => {
@@ -76,6 +88,16 @@ client.once("ready", async () => {
   DEVS_ID.split(",").forEach(dev =>
     client.users.fetch(dev).then(user => client.developers.push(user))
   );
+  client.guilds.cache.forEach(async guild => {
+    const res = await fetch(`http://localhost:3000/api/v1/guilds/${guild.id}/language`,{
+      method:"GET",
+      headers:{
+          authorization:process.env.API_KEY
+      }})
+      if (!res.ok) return
+      guild.language = await res.json()
+  })
+  require('express')().get('/',(req,res) => res.send('ok')).listen(BOT_PORT)
 });
 client.on("lvlup",
   /**

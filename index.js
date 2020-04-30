@@ -1,13 +1,18 @@
-console.log('Launching shard manager...')
-require('dotenv').config()
-const { ShardingManager } = require('discord.js')
-const { TOKEN } = process.env
-const manager = new ShardingManager('./bot.js', {token:TOKEN})
-manager.spawn(1,4000);
-manager.on('launch', shard => console.log(`Launched shard ${shard.id}.`));
-manager.on("message",(shard,receivedMessage) => {
-  console.log("Message received from shard " + shard.id)
-  console.log(receivedMessage._eval)
-  console.log(receivedMessage._result)
-})
-
+const { exec } = require('child_process')
+console.log('[Main] Starting...')
+const api = exec('node server/api/index.js')
+console.log('[Main] API server started.')
+const website = exec('node server/website/index.js')
+console.log('[Main] Website server started.')
+const proxy = exec('node server/index.js')
+console.log('[Main] Started proxy server.')
+const bot = exec('node manager.js')
+console.log('[Main] Started bot')
+api.stdout.on('data',data => process.stdout.write(`[API] ${data.toString()}`))
+api.stderr.on('data',data => process.stderr.write(`[API] ${data.toString()}`))
+website.stdout.on('data',data => process.stdout.write(`[Website] ${data.toString()}`))
+website.stderr.on('data',data => process.stderr.write(`[Website] ${data.toString()}`))
+proxy.stdout.on('data',data => process.stdout.write(`[Proxy] ${data.toString()}`))
+proxy.stderr.on('data',data => process.stderr.write(`[Proxy] ${data.toString()}`))
+bot.stdout.on('data',data => process.stdout.write(`[Bot] ${data.toString()}`))
+bot.stderr.on('data',data => process.stderr.write(`[Bot] ${data.toString()}`))

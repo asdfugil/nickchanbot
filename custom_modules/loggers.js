@@ -1,6 +1,7 @@
 module.exports = client => {
   const { loggers } = client;
   client
+  /*
     .on("typingStart", loggers.get("typingStart").execute)
     .on("typingStop", loggers.get("typingStop").execute)
     .on("message", loggers.get("message").execute)
@@ -23,4 +24,5 @@ module.exports = client => {
     .on("roleUpdate", loggers.get("roleUpdate").execute)
     .on("roleDelete", loggers.get("roleDelete").execute)
     .on("roleCreate", loggers.get("roleCreate").execute);
+    */
 };

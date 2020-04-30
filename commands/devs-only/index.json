@@ -1,0 +1,7 @@
+{
+    "name":{
+        "en":"devs-only"
+    },
+    "description":{ "en": "Bot developers only commands" },
+    "id":"devs-onl"
+} 

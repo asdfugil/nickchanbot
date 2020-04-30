@@ -1,0 +1,16 @@
+{
+    "permissions":{
+        "VIEW_CHANNEL":{
+            "en":"view channel"
+        },
+        "SEND_MESSAGES":{
+            "en":"send message"
+        }
+    },
+    "command_handling":{
+
+    },
+    "unknown":{
+        "en":"undefined"
+    }
+}

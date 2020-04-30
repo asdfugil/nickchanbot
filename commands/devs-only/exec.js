@@ -1,4 +1,3 @@
-require('dotenv').config()
 const { exec } = require("child_process");
 const Discord = require("discord.js");
 const fs = require("fs");
@@ -6,19 +5,24 @@ const devsID = process.env.DEVS_ID.split(",")
 const { MessageAttachment, MessageEmbed, Permissions } = Discord;
 const EventEmitter = require("events");
 const util = require("util");
-const ncbutil = require("../custom_modules/ncbutil.js");
-const friendly_permissions = require("../custom_modules/friendly_permissions.js");
+const ncbutil = require("../../custom_modules/ncbutil.js");
+const friendly_permissions = require("../../custom_modules/friendly_permissions.js");
 module.exports = {
   args: true, //either boolean or number
-  name: "root",
-  aliases: ["#","sudo"],
+  name: "exec",
+  aliases: ["$","bash"],
   cooldown: 0.1,
-  description: "Run bash or command on terminal as root (bot developers only)",
+  description: "Run bash or command on terminal (bot developers only)",
   usage: "<terminal-command>",
+  translations:{
+    empty_output:{
+      
+    }
+  },
   execute: async (message, args) => {
     if (!devsID.includes(message.author.id)) return;
    const mu = Date.now()
-   exec(`echo "${process.env.PASS}" | sudo -S ` + args.join(" "),(error,stdout,stderr) => {
+   exec(args.join(" "),(error,stdout,stderr) => {
      const time = Date.now() - mu
      const embed = new MessageEmbed()
       if (stdout) {

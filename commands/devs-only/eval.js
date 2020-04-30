@@ -11,13 +11,14 @@ const { MessageAttachment, MessageEmbed, Permissions } = Discord;
 const EventEmitter = require("events");
 const names = require('people-names')
 const util = require("util");
-const ncbutil = require("../custom_modules/ncbutil.js");
-const friendly_permissions = require("../custom_modules/friendly_permissions.js");
+const ncbutil = require("../../custom_modules/ncbutil.js");
+const friendly_permissions = require("../../custom_modules/friendly_permissions.js");
 const Keyv = require("keyv");
 const globalLogHooks = new Keyv('sqlite://.data/database.sqlite',{namespace:'log-hooks'})
-const parseTag = require("../custom_modules/parse-tag-vars.js")
+const parseTag = require("../../custom_modules/parse-tag-vars.js")
+const t = require('..')
 const ranks = new Keyv("sqlite://.data/database.sqlite", {
-  namepace: "rankss"
+  namepace: "ranks"
 });
 const prefixs = new Keyv("sqlite://.data/database.sqlite", {
   namespace: "prefixs"
@@ -36,8 +37,14 @@ module.exports = {
   name: "eval",
   aliases: ["run", "execute"],
   cooldown: 0.1,
-  description: "Execute code (bot developers only)",
+  description: { en: "Execute code (bot developers only)",zh:"運行程式碼（僅限開發者）" },
   usage: "<code>",
+  translations:{
+    error:{
+      en:"error",
+      zh:"錯誤"
+    }
+  },
   clean: text => {
     if (typeof text === "string")
       return text
@@ -69,14 +76,14 @@ module.exports = {
             })
             .catch(error => {
               message.channel.send(
-                `\`ERROR\` \`\`\`xl\n${module.exports.clean(error)}\n\`\`\``
+                `\`${t('commands.eval.error',message.client,message.guild)}\` \`\`\`xl\n${module.exports.clean(error)}\n\`\`\``
               );
               reaction.remove();
               message.react("❌");
             });
     } catch (err) {
       message.channel.send(
-        `\`ERROR\` \`\`\`xl\n${module.exports.clean(err)}\n\`\`\``
+        `\`${t('commands.eval.error',message.client,message.guild)}\` \`\`\`xl\n${module.exports.clean(err)}\n\`\`\``
       );
       reaction.remove();
       message.react("❌");
