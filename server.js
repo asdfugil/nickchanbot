@@ -14,9 +14,10 @@ app.listen(process.env.PORT, function () {
 });
 app.use(express.static('public'));
 app.get('/api/v0/ranks',async (req,res) => {
+  res.set("Content-Type","application/json; charset=utf-8")
     const guild_id = req.query.guild_id
     if (!guild_id) {
-      res.send('{"message":"guild_id is a required argument that is missing"}')
+      res.status(400).send('{"message":"guild_id is a required argument that is missing"}')
       res.end()
     }
   const data = await ranks.get(guild_id)
