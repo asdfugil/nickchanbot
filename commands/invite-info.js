@@ -86,7 +86,6 @@ User ID:${invite.inviter.id}
         });
     } else {
       const embed = new RichEmbed()
-        .setTitle(directFetch.channel.name || directFetch.recipients.map(x => x.username).join(','))
         .setURL(`https://discord.gg/${directFetch.code}`)
         .addField("Member Count", directFetch.approximate_member_count)
         .addField("Group DM Info", `**Name**:${directFetch.channel.name || "N/A"}
@@ -96,7 +95,8 @@ User ID:${invite.inviter.id}
         .addField("Inviter ID", directFetch.inviter.id)
         .setColor("RANDOM")
       if (directFetch.inviter.avatar) embed.addField("Invite avatar URL", `**Avatar URL:** https://cdn.discordapp.com/avatars/${directFetch.inviter.id}/${directFetch.inviter.avatar}`)
-    message.channel.send(embed)
+      if (directFetch.channel) embed.setTitle(directFetch.channel.name || directFetch.recipients.map(x => x.username).join(','))
+      message.channel.send(embed)
     }
   }
 }
