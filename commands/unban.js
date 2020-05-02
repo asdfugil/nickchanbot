@@ -21,7 +21,7 @@ module.exports = {
     if (!reason) reason = "No reason given";
     if (reason.length > 472)
       return message.reply("Reason too long.Must be less than 472 characters");
-    message.guild.unban(user,`${message.author.tag} - reason`)
+    message.guild.unban(user,`${message.author.tag} - $[reason}`)
     .then(u => message.reply(`Successfully unbanned ${user.tag}, reason:${reason}`))
   }
 };
