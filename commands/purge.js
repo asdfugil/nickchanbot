@@ -35,7 +35,7 @@ module.exports = {
       );
     let deletedMsgs = [];
     let notPinneda = [];
-    const notify = await receivedMessage.channel.send(`${receivedMessage.client.emojis.get("663337946027524108").toString()} Deleting messages...`)
+    const notify = await receivedMessage.channel.send(`${receivedMessage.client.emojis.get("704625871499296819")} Deleting messages...`)
     const fetcheda = await receivedMessage.channel.fetchMessages({
       limit: diff,
       before: receivedMessage.id

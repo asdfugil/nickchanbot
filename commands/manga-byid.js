@@ -32,13 +32,13 @@ module.exports = {
                     .addField("Native title", manga.title.native || manga.title.english)
                     .addField("Romaji Title", manga.title.romaji || "N/A")
                     .addField("English title", manga.title.romaji || "N/A")
-                    .addField(
+                   if (manga.externalLinks) embed.addField(
                         "Links",
                         manga.externalLinks
                             .map((link, index) => `[${index}](${link})`)
                             .join(",") || "N/A"
-                    )
-                    .addField("Country of origin", manga.countryOfOrigin)
+                    );
+                    embed.addField("Country of origin", manga.countryOfOrigin)
                     .addField("Popularity", manga.popularity)
                     .addField("Format", manga.format)
                     .addField("Status", manga.status)
@@ -90,8 +90,8 @@ module.exports = {
                         character.image.large
                     )
                     .setImage(manga.bannerImage)
-                    .addField("Synonyms", manga.synonyms.join(", ") || "N/A")
-                    .addField(
+                  if (manga.synonyms)  embed.addField("Synonyms", manga.synonyms.join(", ") )
+                    embed.addField(
                         "Relations",
                         manga.relations
                             .map(r => {

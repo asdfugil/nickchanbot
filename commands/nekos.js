@@ -42,6 +42,7 @@ module.exports = {
   name: "nekos-life",
   aliases: ["nekos", "neko", "nekoslife"],
   args: 1,
+  nsfw:true,
   usage: "<argument>",
   description: "Fetch a image from https://nekos.life",
   info:

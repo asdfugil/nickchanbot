@@ -3,7 +3,7 @@ require('dotenv').config()
 const { ShardingManager } = require('discord.js')
 const { TOKEN } = process.env
 const manager = new ShardingManager('./bot.js', {token:TOKEN})
-manager.spawn(1,4000);
+manager.spawn(1, 4000)
 manager.on('launch', shard => console.log(`Launched shard ${shard.id}.`));
 manager.on("message",(shard,receivedMessage) => {
   console.log("Message received from shard " + shard.id)
