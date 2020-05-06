@@ -1,1 +1,2 @@
+
 - Patched a vulnerability in the npm command (CVE-2020-5282)
