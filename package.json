@@ -67,7 +67,7 @@
     "@keyv/sqlite": "^2.0.2"
   },
   "scripts": {
-    "start": "node server.js"
+    "start": ".bash_profile node server.js"
   },
   "engines": {
     "node": "10.x",
