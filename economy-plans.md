@@ -1,0 +1,80 @@
+Example user 
+```json
+{
+  "bal":{
+    "cash":200,
+    "bank":467
+  },
+  "inv":{
+    "item1":2,
+    "item2":8,
+  },
+  "cooldowns":{
+    "work":1582767451000,
+    "rob":1582767451000,
+    "slut":1582767451000,
+    "bankrob":1582767451000
+  }
+}
+```
+```json
+{
+  "shop":{
+    "chicken":{
+      "price":33,
+      "stock":49,
+      "expiresAt":8347734,
+      "description":"duhhhhh",
+      "roleGiven":777777777,
+      "roleRemoved":45544,
+      "inventory":true
+    }
+  },
+  "commandsInfo":{
+    "work":{
+      "min":20,
+      "max":50,
+      "cooldown":100000
+    },
+      "slut":{
+      "min":45,
+      "max":455,
+      "cooldown":100000,
+      "successRate":0.8
+    },"crime":{
+      "min":455,
+      "max":600,
+      "cooldown":100000,
+      "successRate":0.4
+    },"rob":{
+      "cooldown":100000
+    },"bankrob":{
+      "cooldown":100000
+    }
+  },
+  "roleIncome":{
+    "123456789012345678":{
+      "amount":200,
+      "duration":5,
+      "type":"BANK"
+    }
+  },"members":{
+  "3454545":{
+    "bal":{
+      "cash":200,
+      "bank":467
+    },
+    "inv":{
+      "item1":2,
+      "item2":8,
+     },
+      "cooldowns":{
+        "work":1582767451000,
+        "rob":1582767451000,
+        "slut":1582767451000,
+        "bankrob":1582767451000
+      }
+    }
+  }
+}
+```

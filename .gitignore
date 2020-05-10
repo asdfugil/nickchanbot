@@ -1,0 +1,9 @@
+./*
+temp/
+\#/
+*.log
+!/.gitignore
+CODE_OF_CONDUCT.md
+!.data/database.sqlite.example
+.glitch-assets
+shrinkwrap.yaml
