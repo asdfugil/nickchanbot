@@ -176,12 +176,13 @@ arguments:${args}`);
       const normal_permissions = new Permissions(command.userPermissions)
       //strip non-text permissions
       text_perms.remove(2146436543)
+      //strip channel permissions
       normal_permissions.remove(66583872)
       if (!message.channel.permissionsFor(message.member).has(text_perms.bitfield) || !message.member.permissions.has(normal_permissions.bitfield)) {
         const perms_required = new Permissions(command.userPermissions)
         const required_array = []
         for (const [key,value] of Object.entries(perms_required.serialize())) { if (value) required_array.push(key) }
-        noPermission(required_array.map(item => `\`${t(`permissions.${item}`,client,message.guild)}\``).join(','),message.channel)
+        return noPermission(required_array.map(item => `\`${t(`permissions.${item}`,client,message.guild)}\``).join(','),message.channel)
       }
   }
   if (command.clientPermissions && message.guild) {
@@ -189,12 +190,14 @@ arguments:${args}`);
     const normal_permissions = new Permissions(command.clientPermissions)
     //strip non-text permissions
     text_perms.remove(2146436543)
+    //strip channel permissions
     normal_permissions.remove(66583872)
-    if (!message.channel.permissionsFor(message.guild.me).has(text_perms.bitfield) || message.guild.me.permissions.has(normal_permissions.bitfield)) {
+    if (!message.channel.permissionsFor(message.guild.me).has(text_perms.bitfield) || !message.guild.me.permissions.has(normal_permissions.bitfield)) {
       const perms_required = new Permissions(command.clientPermissions)
       const required_array = []
       for (const [key,value] of Object.entries(perms_required.serialize())) { if (value) required_array.push(key) }
-      noBotPermission(required_array.map(item => `\`${t(`permissions.${item}`,client,message.guild)}\``).join(','),message.channel)
+      console.log(required_array)
+      return noBotPermission(required_array.map(item => `\`${t(`permissions.${item}`,client,message.guild)}\``).join(','),message.channel)
     }
 }
   if (command.nsfw && !message.channel.nsfw)

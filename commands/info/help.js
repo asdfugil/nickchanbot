@@ -48,6 +48,7 @@ module.exports = {
             zh:"秒"
         }
     },
+    clientPermissions:16384,
     async execute(message, args) {
         let actualPrefix = prefix;
         if (message.guild) {

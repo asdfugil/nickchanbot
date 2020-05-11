@@ -63,7 +63,8 @@ module.exports = function t(phrase_id,client,guild) {
         }
         case 'permissions' : {
             const permissions = require('../documents/permissions.json')
-            return returns(permissions[phrase_id],language)
+            if (!permissions[phrase_id.split('.')[1]]) return 'undefined'
+            return returns(permissions[phrase_id.split('.')[1]],language)
         }
         default: {
             return 'undefined'
