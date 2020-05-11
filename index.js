@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 const { exec } = require('child_process')
 console.log('[Main] Starting...')
 const api = exec('node server/api/index.js')

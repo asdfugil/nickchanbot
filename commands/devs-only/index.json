@@ -1,7 +1,7 @@
 {
     "name":{
-        "en":"devs-only"
+        "en":"devs only"
     },
     "description":{ "en": "Bot developers only commands" },
-    "id":"devs-onl"
+    "id":"devs-only"
 } 

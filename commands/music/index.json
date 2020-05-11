@@ -1,6 +1,7 @@
 {
     "name":{
-        "en":"Music"
+        "en":"music"
     }
-    ,"description":{"en":"A music player"}
+    ,"description":{"en":"A music player" },
+    "id":"music"
 }

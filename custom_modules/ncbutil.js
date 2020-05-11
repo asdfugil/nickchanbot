@@ -28,17 +28,6 @@ module.exports = {
       } else throw error;
     })
   },
-  sendError: function(info) {
-    info.client.channels
-      .get(info.channelID)
-      .send(info.error.stack, { code: "prolog" });
-    console.log(info.error);
-  },
-  botError: function(message) {
-    var error = new Error(message);
-    error.name = "NickChanBotError";
-    return error;
-  },
   /**
    * @param { Message } message
    * @param { string } string 
@@ -63,58 +52,6 @@ module.exports = {
     return user
   },
   deserialize: str => eval(`(${str})`),
-  /**
-   * Converts Collection into JSON.
-   * @param collection A Collection in which all keys are strings
-   */
-  collection2json: function(collection) {
-    const obj = {};
-    if (collection instanceof Collection) {
-      for (const key of collection.keys()) {
-        const child = collection.get(key);
-        if (child instanceof Collection) {
-          obj[key] = this.collection2json(child);
-        } else {
-          obj[key] = child;
-        }
-      }
-    } else {
-      let error = new Error(
-        "Expected class Collection, received class " +
-          collection.constructor.name
-      );
-      throw error;
-    }
-    return obj;
-  },
-  /**
-   * Converts JSON into Collection
-   * @param obj Any javascript object
-   */
-  json2colllction: obj => {
-    const collection = new Collection();
-    for (const key of Object.keys(obj)) {
-      const child = obj[key];
-
-      if (child != null) {
-        if (typeof child === "object") {
-          collection.set(key, this.json2collection(child));
-        } else {
-          collection.set(key, child);
-        }
-      }
-    }
-    return collection;
-  },
-  arrayContainsArray: (superset, subset) => {
-    if (0 === subset.length || superset.length < subset.length) {
-      return false;
-    }
-    for (let i = 0; i < subset.length; i++) {
-      if (superset.indexOf(subset[i]) === -1) return false;
-    }
-    return true;
-  },
   /**
    * @param { string } perms
    * @param { TextBasedChannel } c

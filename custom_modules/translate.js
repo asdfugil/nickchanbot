@@ -1,4 +1,4 @@
-const { Guild } = require('discord.js')
+const { Guild,Client } = require('discord.js')
 const Opencc = require('opencc')
 const t2s = new Opencc('t2s.json')
 const s2t = new Opencc('s2t.json')
@@ -15,14 +15,15 @@ function returns(result, language) {
     }
 }
 /**
- * @param { string } string
+ * @param { string } phrase_id
  * @param { Guild | undefined } guild
+ * @param { Client } client
  * @returns { string }
  */
-module.exports = function t(string,client,guild) {
+module.exports = function t(phrase_id,client,guild) {
     if (!guild) guild = Object.create(null)
     const language = guild.language || 'en'
-    const array = string.split(".")
+    const array = phrase_id.split(".")
     switch (array[0]) {
         case "commands": {
             const source = client.commands.get(array[1]).translations
@@ -34,7 +35,7 @@ module.exports = function t(string,client,guild) {
             return returns(result, language)
         }
         case "modules": {
-            const source = client.modules.get(array[1]).translations
+            const source = client.modules.get(array[1])
             array.splice(0, 2)
             let result = source;
             for (const value of array) {
@@ -60,8 +61,12 @@ module.exports = function t(string,client,guild) {
             }
             return returns(result, language)
         }
+        case 'permissions' : {
+            const permissions = require('../documents/permissions.json')
+            return returns(permissions[phrase_id],language)
+        }
         default: {
-            return t("util.unknown")
+            return 'undefined'
         }
     }
 }
