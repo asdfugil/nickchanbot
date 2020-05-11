@@ -49,7 +49,7 @@ module.exports = {
     try {
       const client = message.client;
       const code = args.join(" ");
-      let evaled = await eval(code)
+      let evaled = await eval(code);
   
           if (typeof evaled !== "string") evaled = util.inspect(evaled);
 
