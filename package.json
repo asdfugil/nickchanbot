@@ -67,10 +67,10 @@
     "@keyv/sqlite": "^2.0.2"
   },
   "scripts": {
-    "start":"echo 'unset PREFIX && export NVM_DIR=\"/app/.nvm\" && [ -s \"$NVM_DIR/nvm.sh\" ] && \\. \"$NVM_DIR/nvm.sh\" && cd ~ && nvm use 14 &&  node server.js' | bash"
+    "start":"node server.js'"
   },
   "engines": {
-    "node": "14.x",
+    "node": "12.6",
     "ffmpeg": ">= 4.2",
     "pnpm": "2.x"
   },
