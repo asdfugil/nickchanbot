@@ -68,7 +68,7 @@
     "ytsearcher": "^1.2.2"
   },
   "scripts": {
-    "start": "node server.js"
+    "start": "node server.js --max_old_space_size=500"
   },
   "engines": {
     "node": "10.x",
