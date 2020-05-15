@@ -152,9 +152,6 @@ client.on("message", async message => {
     client.commands.find(cmd => cmd.alias && cmd.alias.includes(commandName));
   processTag(commandName, message, args);
   if (!command) return;
-  console.log(`Command received from ${message.author.tag}
-command name:${commandName}
-arguments:${args}`);
   if (command.guildOnly && message.channel.type !== "text")
     return message.reply("I can't execute that command inside DMs!");
 
