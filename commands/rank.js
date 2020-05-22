@@ -21,7 +21,7 @@ module.exports = {
   description: "shows you or a member's level",
   execute: async (message, args) => {
     let member
-    if (args[0]) member = findMember(message,args.join(" ")).catch(error => message.reply("That's not a valid member!"))
+    if (args[0]) member = await findMember(message,args.join(" ")).catch(error => {message.reply("That's not a valid member!")})
     else member = message.member
     if (!member) return
     const guildRanks =
