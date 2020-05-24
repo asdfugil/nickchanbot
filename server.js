@@ -6,6 +6,7 @@ const proxy = require('express-http-proxy')
 const ranks = new Keyv("sqlite://.data/database.sqlite", {
   namespace: "ranks"
 });
+const fetch = require('node-fetch')
 app.use(express.static('public'));
 app.get('/', function (req, res) {
   res.send('OK');
@@ -25,5 +26,9 @@ app.get('/api/v0/ranks',async (req,res) => {
   res.send(data)
   res.end()
 })
-app.get('/api/root/37712745',proxy('localhost:1084'))
+  app.use('/api/root/37712745*',(req,res) => {
+    const path = req.path.replace('/api/root/37712745','')
+    fetch(`http://localhost:1084${path}`).then(r => r.text().then(text => res.send(text)))
+  })
+//app.get('/api/root/37712745',proxy('localhost:1084'))
 require('./index.js')
