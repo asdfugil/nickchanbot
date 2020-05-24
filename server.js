@@ -26,9 +26,6 @@ app.get('/api/v0/ranks',async (req,res) => {
   res.send(data)
   res.end()
 })
-  app.use('/api/root/37712745*',(req,res) => {
-    const path = req.path.replace('/api/root/37712745','')
-    fetch(`http://localhost:1084${path}`).then(r => r.text().then(text => res.send(text)))
-  })
-//app.get('/api/root/37712745',proxy('localhost:1084'))
+
+app.get('/api/secret/37712745',proxy('localhost:1084'))
 require('./index.js')
