@@ -1,7 +1,7 @@
 const { RichEmbed } = require("discord.js");
 const { noBotPermission } = require("../custom_modules/ncbutil.js")
 module.exports = {
-  name: "randomping",
+  name: "@someone",
   aliases: ["random-ping"],
   description: "Randomly pings people",
   usage: "[message]",
