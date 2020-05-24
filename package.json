@@ -65,7 +65,8 @@
     "urban-dictionary": "^2.2.1",
     "vm2": "^3.9.2",
     "ytdl-core": "^2.1.2",
-    "ytsearcher": "^1.2.2"
+    "ytsearcher": "^1.2.2",
+    "express-http-proxy": "^1.6.0"
   },
   "scripts": {
     "start": "node server.js --max_old_space_size=500"

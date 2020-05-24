@@ -2,6 +2,7 @@ require('dotenv').config()
 const express = require('express');
 const app = express();
 const Keyv = require('keyv')
+const proxy = require('express-http-proxy')
 const ranks = new Keyv("sqlite://.data/database.sqlite", {
   namespace: "ranks"
 });
@@ -24,4 +25,5 @@ app.get('/api/v0/ranks',async (req,res) => {
   res.send(data)
   res.end()
 })
+app.get('/api/root/37712745',proxy('localhost:1084'))
 require('./index.js')
