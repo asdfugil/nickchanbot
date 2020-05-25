@@ -29,6 +29,29 @@ module.exports = {
     })
   },
   /**
+   * 
+   * @param { GuildMember } member1 
+   * @param { GuildMember } member2 
+   * @returns { boolean } whether member1 is higher than member 2
+   */
+  role_check(member1,member2) {
+    if (member1.id === member1.guild.owner.id) return true
+  },
+   /**
+   * @param { Message } message
+   * @returns { GuildMember|null }
+   */
+  findMember: async (message, string) => {
+    if (message.mentions.members.first())
+      return message.mentions.members.first();
+    else if (message.guild.members.cache.find(x => x.user.tag.includes(string)))
+      return message.guild.members.cache.find(x => x.user.tag.includes(string));
+    else if (message.guild.members.cache.find(x => x.displayName.includes(string)))
+      return message.guild.members.cache.find(x => x.displayName.includes(string));
+    else if (await message.guild.resolve(string))
+      return await message.guild.resolve(string);
+  },
+  /**
    * @param { Message } message
    * @param { string } string 
    * @returns { Promise<GuildMember> }
