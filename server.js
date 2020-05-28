@@ -7,6 +7,7 @@ const { WebhookClient } = require("discord.js");
 const ranks = new Keyv("sqlite://.data/database.sqlite", {
   namespace: "ranks"
 });
+const fetch = require('node-fetch')
 app.use(express.static("public"));
 app.get("/", function(req, res) {
   res.send("OK");
@@ -42,3 +43,6 @@ child.stdout.on("data", chunk => {
 child.stderr.on("data", chunk =>
   console.error(chunk.substring(0, chunk.length - 1))
 );
+setInterval(() => {
+fetch(`${process.env.PROJECT_DOMAIN}.gitch.me`)
+},60000)
