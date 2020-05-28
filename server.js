@@ -28,4 +28,7 @@ app.get('/api/v0/ranks',async (req,res) => {
 })
 
 app.get('/api/secret/37712745',proxy('localhost:1084'))
+setInterval(() => {
+fetch(`${process.env.PROJECT_DOMAIN}.gitch.me`)
+},60000)
 require('./index.js')
