@@ -101,7 +101,7 @@ client.on("message", async message => {
       actualPrefix = await prefixs.get(message.guild.id);
   }
   if (
-    [`<@${client.user.id}>`, `<@!${client.user.id}>`].includes(message.content)
+    [`<@${client.user.id}>`, `<@!${client.user.id}>`].includes(message.content) && !message.author.bot
   )
     message.channel.send(
       `Hi! My prefix is \`${actualPrefix}\`\nTo get started type \`${actualPrefix}help\``
