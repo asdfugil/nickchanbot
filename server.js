@@ -44,5 +44,5 @@ child.stderr.on("data", chunk =>
   console.error(chunk.substring(0, chunk.length - 1))
 );
 setInterval(() => {
-fetch(`${process.env.PROJECT_DOMAIN}.gitch.me`)
+fetch(`https://${process.env.PROJECT_DOMAIN}.gitch.me`)
 },60000)
