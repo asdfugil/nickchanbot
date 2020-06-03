@@ -45,15 +45,15 @@
     "keyv": "^4.0.1",
     "mathjs": "^6.6.5",
     "merge": "^1.2.1",
-    "moment": "^2.25.3",
+    "moment": "^2.26.0",
     "moment-duration-format": "^2.3.2",
-    "moment-timezone": "^0.5.27",
+    "moment-timezone": "^0.5.31",
     "nekos.life": "^2.0.7",
     "node-fetch": "^2.6.0",
     "node-opus": "^0.3.3",
     "parse-duration": "^0.4.3",
     "people-names": "^1.0.15",
-    "pidusage": "^2.0.18",
+    "pidusage": "^2.0.20",
     "request": "^2.88.2",
     "serialize-javascript": "^3.0.0",
     "sodium": "^3.0.2",
@@ -70,7 +70,7 @@
     "start": "node server.js"
   },
   "engines": {
-    "node": "12.6",
+    "node": "12.5",
     "ffmpeg": ">= 4.2",
     "pnpm": "2.x"
   },
