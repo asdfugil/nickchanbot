@@ -21,6 +21,7 @@ class NickChanBotClient extends Discord.Client {
   }
 }
 const client = new NickChanBotClient({ http:{ version:7 } });
+//client.on('debug',console.log)
 const Keyv = require("keyv");
 const prefixs = new Keyv("sqlite://.data/database.sqlite", {
   namespace: "prefixs"
