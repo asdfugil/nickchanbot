@@ -41,6 +41,7 @@
     "dotenv": "^8.2.0",
     "erlpack": "^0.1.3",
     "express": "^4.17.1",
+    "express-http-proxy": "^1.6.0",
     "google-it": "^1.5.0",
     "is-url": "^1.2.4",
     "isurl": "^4.0.1",
@@ -65,8 +66,7 @@
     "urban-dictionary": "^2.2.1",
     "vm2": "^3.9.2",
     "ytdl-core": "^2.1.2",
-    "ytsearcher": "^1.2.2",
-    "express-http-proxy": "^1.6.0"
+    "ytsearcher": "^1.2.2"
   },
   "scripts": {
     "start": "node server.js --max_old_space_size=500"
