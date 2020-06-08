@@ -181,7 +181,7 @@ client.on("message", async message => {
   console.log(`Command received from ${message.author.tag}
 command name:${commandName}
 arguments:${args}`);
-  if (command.devsOnly && !DEVS_ID.split(',').includes(message.author.id)) return message.channel.send(t('util.you_cannot_use_this_command', client, message.guild))
+  if ((command.devsOnly || command.module.id === 'devs-only') && !DEVS_ID.split(',').includes(message.author.id)) return message.channel.send(t('util.you_cannot_use_this_command', client, message.guild))
   if (command.guildOnly && message.channel.type !== "text")
     return message.reply("I can't execute that command inside DMs!");
   // Voice permissions are NOT checked

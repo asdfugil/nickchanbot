@@ -32,10 +32,12 @@ module.exports = {
    * 
    * @param { GuildMember } member1 
    * @param { GuildMember } member2 
-   * @returns { boolean } whether member1 is higher than member 2
+   * @returns { boolean } whether member1 is higher than or equal to member 2
    */
   role_check(member1,member2) {
     if (member1.id === member1.guild.owner.id) return true
+    if (member2.id === member2.guild.owner.id) return false
+    return member1.roles.highest.postiton > member2.roles.highest.position
   },
    /**
    * @param { Message } message
