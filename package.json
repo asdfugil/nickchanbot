@@ -24,7 +24,7 @@
   ],
   "homepage": "https://nick-chan-bot.glitch.me",
   "config": {},
-  "main": "server.js",
+  "main": "index.js",
   "bugs": "https://github.com/Assfugil/nickchanbot/issues",
   "type": "module",
   "dependencies": {
@@ -51,9 +51,10 @@
     "opencc": "^1.0.6",
     "parse-duration": "^0.1.1",
     "people-names": "^1.0.15",
+    "sequelize": "^5.21.12",
     "serialize-javascript": "^3.0.0",
     "sodium": "^3.0.2",
-    "speedo-cli": "^2.4.0",
+    "sqlite3": "^4.2.0",
     "urban-dictionary": "^2.2.1",
     "ytdl": "^1.3.0",
     "ytdl-core": "^2.0.0",
@@ -65,7 +66,7 @@
   "engines": {
     "node": "12.x",
     "ffmpeg": ">= 4.2",
-    "pnpm": "4.x"
+    "pnpm": "5.x"
   },
   "license": "MIT"
 }

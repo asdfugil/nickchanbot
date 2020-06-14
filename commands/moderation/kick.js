@@ -29,9 +29,6 @@ module.exprots = {
         cannot_kick: {
             en: "I can't kick that member."
         },
-        kick_successful: {
-
-        },
         kicked_reason:{
             en:" is kicked.\n**Reason:**"
         }

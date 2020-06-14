@@ -11,7 +11,6 @@ app.get('/', function (req, res) {
   res.send('OK');
 });
 app.listen(process.env.PORT, function () {
-  console.log('Example app listening on port' + process.env.PORT+"!");
 });
 app.use(express.static('public'));
 app.get('/api/v0/ranks',async (req,res) => {

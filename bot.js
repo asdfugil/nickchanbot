@@ -31,22 +31,16 @@ const client = new NickChanBotClient({
     api: 'https://discord.com/api'
   }
 });
-client.on('debug', console.log)
 const Keyv = require("keyv");
-const rankSettings = new Keyv("sqlite://.data/database.sqlite", { namespace: "rank-settings" })
 const prefixs = new Keyv("sqlite://.data/database.sqlite", { namespace: "prefixs" });
 const ranks = new Keyv("sqlite://.data/database.sqlite", { namespace: "ranks" });
 const snipe = new Keyv("sqlite://.data/database.sqlite", { namespace: "snipe" });
-const parseTag = require("./custom_modules/parse-tag-vars.js");
-const tags = new Keyv("sqlite://.data/database.sqlite", { namespace: "tags" });
-const check = require("./custom_modules/check.js");
 const moduleDirs = fs
   .readdirSync("./commands", { withFileTypes: true })
   .filter(x => x.isDirectory)
   .filter(x => x.name !== 'index.js')
   .map(x => x.name)
-console.log(moduleDirs)
-const processRank = require("./custom_modules/ranks.js");
+//console.log(moduleDirs)
 const mutedutil = require("./custom_modules/muted.js");
 for (let moduleName of moduleDirs) {
   const module_ = require(`./commands/${moduleName}`)
@@ -58,7 +52,7 @@ for (let moduleName of moduleDirs) {
       const command = require(`./commands/${moduleName}/${commandName}`)
       module_.commands.set(command.name, command)
       client.commands.set(command.name, command)
-      console.debug(`Loaded command "${command.name}".`)
+      //console.debug(`Loaded command "${command.name}".`)
     } catch (error) {
       console.error(error)
     }
@@ -101,27 +95,7 @@ client.once("ready", async () => {
   })
   require('express')().get('/', (req, res) => res.send('ok')).listen(BOT_PORT)
 });
-client.on("lvlup",
-  /**
-  * @param { Message } message - The message the make the member level
-  * @param { number } o - Old level
-  * @param { number } n - new level
-  */
-  async (message, o, n) => {
-    const { member } = message
-    if (!member.guild.me.hasPermission("MANAGE_ROLES")) return
-    const { rewards } = await rankSettings.get(message.guild.id) || Object.create(null)
-    if (!rewards) return
-    const role_id = rewards[n.toString()]
-    if (!role_id) return
-    const role = message.guild.roles.get(role_id)
-    if (!role) return
-    if (message.guild.me.highestRole.comparePositionTo(role) <= 0) return
-    message.member.addRole(role, "Level rewards")
-  }
-)
 client.on("ready", async () => {
-  check(client);
   client.user.setPresence({ activity: {
      name: `Use @${client.user.username} to get started!`,
      application:{ id:'612829569199767574' }
@@ -139,24 +113,6 @@ client.on("messageDelete", message => {
     }, createdTimestamp: message.createdTimestamp
   })
 })
-async function processTag(commandName, message, args) {
-  if (message.guild) {
-    const guildTags = await tags.get(message.guild.id) || Object.create(null)
-    const triggered = guildTags[commandName];
-    if (triggered) {
-      await message.channel.startTyping();
-      try {
-        const msg = parseTag(message, triggered, args);
-        await message.channel.send(msg, { split: true });
-      } catch (error) {
-        message.reply("This tag has/have syntax error(s),please fix it\n```" + error + "```");
-      }
-      message.channel.stopTyping();
-      triggered.count++;
-      tags.set(message.guild.id, guildTags);
-    }
-  }
-}
 client.on("message", async message => {
   let actualPrefix = prefix;
   if (message.guild) {
@@ -166,7 +122,6 @@ client.on("message", async message => {
   } else { if (message.channel.partial) message.channel = await message.channel.fetch() }
   if ([`<@${client.user.id}>`, `<@!${client.user.id}>`].includes(message.content))
     message.channel.send(`Hi! My prefix is \`${actualPrefix}\`\nTo get started type \`${actualPrefix}help\``);
-  processRank(message, ranks);
   if (!message.content.startsWith(actualPrefix) || message.author.bot) return;
   const args = message.content
     .slice(actualPrefix.length)
