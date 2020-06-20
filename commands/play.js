@@ -7,8 +7,8 @@ module.exports = {
   name: "play",
   description: "plays music",
   guildOnly: true,
-  aliases:["p"],
-  usage:"<search query or youtube url>",
+  aliases: ["p"],
+  usage: "<search query or youtube url>",
   args: true,
   cooldown: 2,
   execute: async (message, args) => {
@@ -29,7 +29,7 @@ module.exports = {
       title: songInfo.title,
       url: songInfo.video_url
     };
-    console.log(song)
+    console.log(song);
     if (!serverQueue) {
       const queueContruct = {
         textChannel: message.channel,
@@ -71,13 +71,17 @@ module.exports = {
     }
 
     const dispatcher = serverQueue.connection
-      .playStream(ytdl(song.url, { options: ["lowestvideo", "highestaudio"] }),{passes:10})
+      .playStream(
+        ytdl(song.url, { options: ["lowestvideo", "highestaudio"] }),
+        { passes: 10 }
+      )
       //3 times
       //Youtube intentionally rate limkt audio only downloads,so we use the worst video quality as possible instead of audio only
       .on("end", () => {
         console.log("Music ended!");
         if (serverQueue.looping !== "song") {
-          if (serverQueue.looping === "queue") serverQueue.songs.push(serverQueue.songs[0]);
+          if (serverQueue.looping === "queue")
+            serverQueue.songs.push(serverQueue.songs[0]);
           serverQueue.songs.shift();
         }
         module.exports.play(message, serverQueue.songs[0]);
