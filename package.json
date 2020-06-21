@@ -36,7 +36,7 @@
     "brains-api": "^1.0.8",
     "bufferutil": "^4.0.1",
     "canvas": "^2.6.1",
-    "discord.bio": "^6.2.0",
+    "discord.bio": "^6.2.1",
     "discord.js": "^11.6.4",
     "dotenv": "^8.2.0",
     "erlpack": "^0.1.3",
