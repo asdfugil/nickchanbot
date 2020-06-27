@@ -20,7 +20,7 @@ class NickChanBotClient extends Discord.Client {
     this.developers = [];
   }
 }
-const client = new NickChanBotClient({ http:{ version:7 } });
+const client = new NickChanBotClient({ http:{ version:7 },ws:{ intents:32767 } });
 //client.on('debug',console.log)
 const Keyv = require("keyv");
 const prefixs = new Keyv("sqlite://.data/database.sqlite", {
