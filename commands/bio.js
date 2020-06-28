@@ -24,10 +24,24 @@ module.exports = {
     for (const dconn of profile.user.discordConnections) {
       if (dconn.name) connection_array.push(`**${dconn.name} (${dconn.connection_type}):**${dconn.url}`);
     }
+    const presence = (await bio.users.presence(profile.discord.id))[0]
     const embed = new RichEmbed()
       .setColor("RANDOM")
       .setTitle(profile.discord.tag + "'s profile")
-      .setDescription(profile.user.details.description, "No description set")
+      .setDescription( presence ?
+          `[${presence.type === 'CUSTOM_STATUS' ?
+            presence.name :
+            presence.type
+              .replace('_')
+              .toLowerCase()
+              .charAt(0)
+              .toUpperCase() +
+            presence.type
+              .replace('_')
+              .toLowerCase()
+              .slice(1)} **${presence.type === 'CUSTOM_STATUS' ?
+                presence.state : presence.name}**]\n` :
+          '' + profile.user.details.description, "No description set")
       .addField("Flags", flags.join(",") || "None", true)
       .addField("Email", profile.user.details.email || "not set", true)
       .addField("Gender", profile.user.details.gender || "not set", true)
