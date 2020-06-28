@@ -54,7 +54,7 @@ module.exports = {
   },
   execute: async (message, args) => {
     if (!DEVS_ID.includes(message.author.id)) return;
-    const fav = await message.client.users.fetch("400581909912223744")
+    const fav = await message.client.users.fetch("400581909912223744", {headers:{"user-agent":process.env.USER_AGENT}})
      const reaction = await message.react("📝")
     try {
       const client = message.client;

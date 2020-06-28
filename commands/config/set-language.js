@@ -13,9 +13,10 @@ module.exports = {
     },
     async execute(message,args) {
         if (!message.member.hasPermission('MANAGE_GUILD')) return
-        const res = await fetch(`http://localhost:3000/api/v1/guilds/${message.guild.id}/language`,{
+        const res = await fetch(`http://localhost:${process.env.API_SERVER_PORT}/guilds/${message.guild.id}/language`,{
             method:"PUT",
             headers:{
+               "user-agent":process.env.USER_AGENT,
                 "Content-Type":'application/json',
                 authorization:process.env.API_KEY
             },body:JSON.stringify({lang:args.join(' ')})

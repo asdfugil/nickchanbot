@@ -34,7 +34,7 @@ const client = new NickChanBotClient({
 const Keyv = require("keyv");
 const prefixs = new Keyv("sqlite://.data/database.sqlite", { namespace: "prefixs" });
 const ranks = new Keyv("sqlite://.data/database.sqlite", { namespace: "ranks" });
-const snipe = new Keyv("sqlite://.data/database.sqlite", { namespace: "snipe" });
+const { snipe } = require('./sequelize')
 const moduleDirs = fs
   .readdirSync("./commands", { withFileTypes: true })
   .filter(x => x.isDirectory)
@@ -50,6 +50,7 @@ for (let moduleName of moduleDirs) {
   for (const commandName of commandFiles) {
     try {
       const command = require(`./commands/${moduleName}/${commandName}`)
+      command.module = module_
       module_.commands.set(command.name, command)
       client.commands.set(command.name, command)
       //console.debug(`Loaded command "${command.name}".`)
@@ -84,9 +85,10 @@ client.once("ready", async () => {
     client.users.fetch(dev).then(user => client.developers.push(user))
   );
   client.guilds.cache.forEach(async guild => {
-    const res = await fetch(`http://localhost:3000/api/v1/guilds/${guild.id}/language`, {
+    const res = await fetch(`http://localhost:${process.env.API_SERVER_PORT}/guilds/${guild.id}/language`, {
       method: "GET",
       headers: {
+        "user-agent":process.env.USER_AGENT,
         authorization: process.env.API_KEY
       }
     })
@@ -105,12 +107,13 @@ client.on("ready", async () => {
 ranks.on("error", console.error);
 client.on("messageDelete", message => {
   if (message.partial) return
-  snipe.set(message.channel.id, {
-    content: message.content,
-    author: {
-      tag: message.author.tag,
-      displayAvatarURL: message.author.displayAvatarURL
-    }, createdTimestamp: message.createdTimestamp
+  snipe.create({
+    content:message.content,
+    created_at:message.createdAt,
+    author_tag:message.author.tag,
+    author_avatar_url:message.author.displayAvatarURL({ dynamic:true,size:256 }),
+    channel_id:message.channel.id,
+    is_dm:message.channel.type === 'dm'
   })
 })
 client.on("message", async message => {
@@ -131,7 +134,6 @@ client.on("message", async message => {
     client.commands.get(commandName) ||
     client.commands.find(cmd => cmd.aliases && cmd.aliases.includes(commandName)) ||
     client.commands.find(cmd => cmd.alias && cmd.alias.includes(commandName));
-  processTag(commandName, message, args);
   if (!command) return;
   console.log(`Command received from ${message.author.tag}
 command name:${commandName}
@@ -193,15 +195,10 @@ arguments:${args}`);
   timestamps.set(message.author.id, now);
   setTimeout(() => timestamps.delete(message.author.id), cooldownAmount);
   try {
-    await command.execute(message, args).catch(error => {
-      console.error(error);
-      if (!error.code) message.reply("there was an error trying to execute that command!");
-      else message.reply(`there was an error trying to execute that command! (${error.code})`);
-    });
+    await command.execute(message, args)
   } catch (error) {
     console.error(error);
-    if (!error.code) message.reply("there was an error trying to execute that command!");
-    else message.reply(`there was an error trying to execute that command! (${error.code})`);
+    if (!error.code) message.reply("There was an error trying to execute that command!\n```prolog\n"+error.toString()+'```');
   }
 });
 client.login(BOT_TOKEN);

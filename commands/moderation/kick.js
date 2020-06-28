@@ -1,7 +1,7 @@
 const t = require('..')
 const { findMember, role_check } = require('../../custom_modules')
 const { MessageEmbed } = require('discord.js')
-module.exprots = {
+module.exports = {
     name: 'kick',
     description: { en: 'kick a member' },
     guildOnly: true,
@@ -40,12 +40,12 @@ module.exprots = {
     async execute(message, args) {
         const c = message.client
         const g = message.guild
-        const member = findMember(message, args[0]);
+        const member = await findMember(message, args[0]);
+        if (!member) return message.reply("That's not a valid member!")
         let reason;
         if (role_check(member, message.member)) return message.reply(t('commands.kick.user_position_nokick', c, g))
         if (role_check(member, message.guild.me)) return message.reply(t('commands.kick.bot_position_nokick', c, g))
-        const days_delete = parseInt(args[1])
-        reason = args.slice(1).join()
+        reason = args.slice(1).join(' ')
         if (!member.kickable) return message.reply(t('commands.kick.cannot_ban', c, g))
         member.kick(message.author.tag + ' - ' + (reason || "No reason given"))
             .then(() => {
@@ -54,5 +54,5 @@ module.exprots = {
                 .setColor('#ff0000')
                 message.channel.send(embed)
             })
-    }
+        }
 }

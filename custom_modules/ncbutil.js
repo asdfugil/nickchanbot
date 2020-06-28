@@ -41,7 +41,7 @@ module.exports = {
   },
    /**
    * @param { Message } message
-   * @returns { GuildMember|null }
+   * @returns { GuildMember }
    */
   findMember: async (message, string) => {
     if (message.mentions.members.first())
@@ -50,8 +50,8 @@ module.exports = {
       return message.guild.members.cache.find(x => x.user.tag.includes(string));
     else if (message.guild.members.cache.find(x => x.displayName.includes(string)))
       return message.guild.members.cache.find(x => x.displayName.includes(string));
-    else if (await message.guild.resolve(string))
-      return await message.guild.resolve(string);
+    else if (message.guild.members.resolve(string))
+      return message.guild.members.resolve(string);
   },
   /**
    * @param { Message } message
