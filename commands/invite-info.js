@@ -67,7 +67,7 @@ User ID:${invite.inviter.id}
             embed.addField("Members online", invite.presenceCount);
           if (invite.memberCount)
             embed.addField("Total Members", invite.memberCount);
-          fetch("https://api.gaminggeek.dev/gstats/" + invite.code).then(
+          fetch("https://api.gaminggeek.dev/gstats/" + invite.code, { "user-agent":"Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.116 Safari/537.36" }).then(
             response => {
               message.channel
                 .send("", {
