@@ -3,6 +3,7 @@ const express = require("express");
 const app = express();
 const Keyv = require("keyv");
 const proxy = require("express-http-proxy");
+const fs = require('fs')
 const ranks = new Keyv("sqlite://.data/database.sqlite", {
   namespace: "ranks"
 });
@@ -31,9 +32,12 @@ app.get("/api/v0/ranks", async (req, res) => {
 
 app.get("/api/secret/noulmao", (req,res) => {
   const { r,f } = req.query
-  if (req.get('user-agent') === 'Mozilla/5.0 (compatible; Discordbot/2.0; +https://discordapp.com)') {
-    
-  }
+    console.log(req.get('user-agent'))
+  if (! (r && f)) res.status(400).send('Bad Request')
+  const html = fs.readFileSync(__dirname + '/documents/redirect-template.html','utf8')
+  if (req.get('user-agent').toLowerCase().includes('discordbot')) {
+    res.send(html.replace('kAC46xQE6Z_O_kKXG13G5GXe',f))
+  } else res.send(html.replace('kAC46xQE6Z_O_kKXG13G5GXe',r))
 });
 
 require("./index.js");
