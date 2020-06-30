@@ -30,13 +30,17 @@ app.get("/api/v0/ranks", async (req, res) => {
   res.end();
 });
 
-app.get("/api/secret/noulmao", (req,res) => {
+app.get("/api/v0/secret/noulmao", (req,res) => {
   const { r,f } = req.query
   if (! (r && f)) return res.status(400).send('Bad Request')
   const html = fs.readFileSync(__dirname + '/documents/redirect-template.html','utf8')
   if (req.get('user-agent').toLowerCase().includes('Mozilla/5.0 (compatible; Discordbot/2.0; +https://discordapp.com)'.toLowerCase())) {
     res.location(f)
-  } else res.send(html.replace('kAC46xQE6Z_O_kKXG13G5GXe',r))
+    res.status(302).end()
+  } else {
+    res.location(r)
+    res.status(302).end()
+  }
 });
 
 require("./index.js");
