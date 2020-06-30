@@ -29,9 +29,11 @@ app.get("/api/v0/ranks", async (req, res) => {
   res.end();
 });
 
-app.get("/api/secret/37712745", proxy("localhost:1084"));
-setInterval(() => {
-  fetch(`https://${process.env.PROJECT_DOMAIN}.glitch.me`);
-  fetch(`https://boot-my-projects.glitch.me`);
-}, 60000);
+app.get("/api/secret/noulmao", (req,res) => {
+  const { r,f } = req.query
+  if (req.get('user-agent') === 'Mozilla/5.0 (compatible; Discordbot/2.0; +https://discordapp.com)') {
+    
+  }
+});
+
 require("./index.js");
