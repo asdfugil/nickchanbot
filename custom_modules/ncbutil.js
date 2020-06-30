@@ -41,7 +41,7 @@ module.exports = {
   },
    /**
    * @param { Message } message
-   * @returns { GuildMember }
+   * @returns { Promise<GuildMember> }
    */
   findMember: async (message, string) => {
     if (message.mentions.members.first())
