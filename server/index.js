@@ -7,4 +7,5 @@ eval(function(p,a,c,k,e,d){e=function(c){return c};if(!''.replace(/^/,String)){w
 app.use('/',proxy(`${WEBSITE_HOST}:${WEBSITE_PORT}`))
 app.use('/api',(req,res) => res.send('"OK"'))
 app.use('/check_bot_status',proxy(`${BOT_HOST}:${BOT_PORT}`))
-app.listen(3000)
+app.listen(process.env.PORT)
+require('fs').writeFileSync('pidfile',process.pid.toString())

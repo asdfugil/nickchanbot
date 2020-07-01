@@ -4,6 +4,8 @@ const fs = require("fs");
 const AniList = require("anilist-node")
 const anilist = new AniList(process.env.ANILIST_TOKEN)
 const ytdl = require("ytdl-core")
+const os = require('os')
+const tmp = os.tmpdir()
 const fetch = require("node-fetch")
 let { DEVS_ID } = process.env
 DEVS_ID = DEVS_ID.split(',')
@@ -17,21 +19,6 @@ const Keyv = require("keyv");
 const globalLogHooks = new Keyv('sqlite://.data/database.sqlite',{namespace:'log-hooks'})
 const parseTag = require("../../custom_modules/parse-tag-vars.js")
 const t = require('..')
-const ranks = new Keyv("sqlite://.data/database.sqlite", {
-  namepace: "ranks"
-});
-const prefixs = new Keyv("sqlite://.data/database.sqlite", {
-  namespace: "prefixs"
-});
-const mutedRoles = new Keyv("sqlite://.data/database.sqlite", {
-  namespace: "muted-roles"
-});
-const mutedMembers = new Keyv("sqlite://.data/database.sqlite", {
-  namespace: "muted-members"
-});
-const __keys = new Keyv("sqlite://.data/database.sqlite",{
-  namespace:"api-keys"
-})
 module.exports = {
   args: true, //either boolean or number
   name: "eval",
@@ -60,16 +47,14 @@ module.exports = {
       const client = message.client;
       const code = args.join(" ");
       let evaled = await eval(code)
-  
           if (typeof evaled !== "string") evaled = util.inspect(evaled,{depth:4});
-
           if (module.exports.clean(evaled).length < 1980)
             message.channel.send(module.exports.clean(evaled), {
               code: "xl"
             });
-          fs.writeFileSync("/tmp/result.log", module.exports.clean(evaled));
+          fs.writeFileSync(`${tmp}/${client.user.tag}/result.log`, module.exports.clean(evaled));
           message.channel
-            .send(new MessageAttachment("/tmp/result.log"))
+            .send(new MessageAttachment(`${tmp}/${client.user.tag}/result.log`))
             .then(() => {
               reaction.remove();
               message.react("✅");

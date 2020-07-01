@@ -26,7 +26,6 @@
   "config": {},
   "main": "index.js",
   "bugs": "https://github.com/Assfugil/nickchanbot/issues",
-  "type": "module",
   "dependencies": {
     "@discordjs/opus": "^0.1.0",
     "@keyv/sqlite": "^2.0.2",
@@ -41,9 +40,6 @@
     "erlpack": "^0.1.3",
     "express": "^4.17.1",
     "express-http-proxy": "^1.6.0",
-    "google-it": "^1.5.0",
-    "is-url": "^1.2.4",
-    "isurl": "^4.0.1",
     "keyv": "^4.0.0",
     "mathjs": "^6.6.1",
     "moment": "^2.24.0",
@@ -55,18 +51,16 @@
     "people-names": "^1.0.15",
     "sequelize": "^5.21.12",
     "serialize-javascript": "^3.0.0",
-    "sodium": "^3.0.2",
     "sqlite3": "^4.2.0",
     "urban-dictionary": "^2.2.1",
-    "ytdl": "^1.3.0",
     "ytdl-core": "^2.0.0",
     "ytsearcher": "^1.2.2"
   },
   "scripts": {
-    "start": "node server.js"
+    "start": "./start.sh"
   },
   "engines": {
-    "node": "12.x",
+    "node": "14.x",
     "ffmpeg": ">= 4.2",
     "pnpm": "5.x"
   },

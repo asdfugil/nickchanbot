@@ -1,0 +1,12 @@
+{
+  "sqltools.connections": [
+    {
+      "database": ".data/database.sqlite",
+      "driver": "SQLite",
+      "group": "nickchanbot",
+      "name": "database",
+      "previewLimit": 50
+    }
+  ],
+  "sqltools.useNodeRuntime": true
+}

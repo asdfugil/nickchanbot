@@ -1,6 +1,4 @@
 ./*
-temp/
-\#/
 *.log
 !/.gitignore
 CODE_OF_CONDUCT.md
@@ -8,7 +6,7 @@ CODE_OF_CONDUCT.md
 .glitch-assets
 shrinkwrap.yaml
 node_modules
-./.data/database.sqlite
-.env
-.env.example
 .data/database.sqlite
+.env
+.data/database.sqlite
+pidfile

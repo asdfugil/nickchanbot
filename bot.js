@@ -11,6 +11,7 @@ const prefix = PREFIX;
 const { Collection, Permissions } = Discord;
 Discord.Guild.prototype.language = 'zh_Hant'
 Discord.Guild.prototype["xpCooldowns"] = new Collection();
+const { language } = require('./sequelize')
 class NickChanBotClient extends Discord.Client {
   constructor(clientOptions) {
     super(clientOptions);
@@ -85,15 +86,8 @@ client.once("ready", async () => {
     client.users.fetch(dev).then(user => client.developers.push(user))
   );
   client.guilds.cache.forEach(async guild => {
-    const res = await fetch(`http://localhost:${process.env.API_SERVER_PORT}/guilds/${guild.id}/language`, {
-      method: "GET",
-      headers: {
-        "user-agent":process.env.USER_AGENT,
-        authorization: process.env.API_KEY
-      }
-    })
-    if (!res.ok) return
-    guild.language = await res.json()
+    const value = await language.findOne({ where:{ id:guild.id } }) 
+    guild.language = value ? value.language : 'en'
   })
   require('express')().get('/', (req, res) => res.send('ok')).listen(BOT_PORT)
 });
