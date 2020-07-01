@@ -17,3 +17,4 @@ proxy.stdout.on('data',data => process.stdout.write(`[Proxy] ${data.toString()}`
 proxy.stderr.on('data',data => process.stderr.write(`[Proxy] ${data.toString()}`))
 bot.stdout.on('data',data => process.stdout.write(`[Bot] ${data.toString()}`))
 bot.stderr.on('data',data => process.stderr.write(`[Bot] ${data.toString()}`))
+require('fs').writeFileSync('pidfile',process.pid.toString())
