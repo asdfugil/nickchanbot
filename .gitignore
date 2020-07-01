@@ -1,8 +1,6 @@
-./*
 *.log
-!/.gitignore
+.gitignore
 CODE_OF_CONDUCT.md
-!.data/database.sqlite.example
 .glitch-assets
 shrinkwrap.yaml
 node_modules

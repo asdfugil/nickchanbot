@@ -25,7 +25,7 @@ class NickChanBotClient extends Discord.Client {
   }
 }
 const client = new NickChanBotClient({
-  ws: { intents: 16225 },
+  ws: { intents: 32767 },
   partials: ['USER', 'CHANNEL', 'REACTION', 'MESSAGE', 'GUILD_MEMBER'],
   http: {
     version: 7,
@@ -89,6 +89,9 @@ client.once("ready", async () => {
     const value = await language.findOne({ where:{ id:guild.id } }) 
     guild.language = value ? value.language : 'en'
   })
+  if (!fs.readdirSync(require('os').tmpdir()).includes(client.user.tag)) {
+    fs.mkdirSync(require('os').tmpdir() + `/${client.user.tag}`)
+  }
   require('express')().get('/', (req, res) => res.send('ok')).listen(BOT_PORT)
 });
 client.on("ready", async () => {

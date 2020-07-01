@@ -1,4 +1,4 @@
 #!/usr/bin/env bash
 NCBBASEDIR=$(dirname "$0")
 cd $NCBBASEDIR
-node .
+node --max-old-space-size=6000 .
