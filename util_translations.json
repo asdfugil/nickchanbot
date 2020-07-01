@@ -1,10 +1,11 @@
 {
-    "boolean":{
-        "true":{
-            "en:":"true",
-            "zh":"是"
-        }
-    },"you_cannot_use_this_command":{
-        "en":"You cannot use this command."
+  "boolean": {
+    "true": {
+      "en": "true",
+      "zh": "是"
     }
+  },
+  "you_cannot_use_this_command": {
+    "en": "You cannot use this command."
+  }
 }

@@ -6,5 +6,4 @@ shrinkwrap.yaml
 node_modules
 .data/database.sqlite
 .env
-.data/database.sqlite
 pidfile

@@ -54,6 +54,8 @@ for (let moduleName of moduleDirs) {
       command.module = module_
       module_.commands.set(command.name, command)
       client.commands.set(command.name, command)
+      if (command.module.id !== 'nsfw' && command.nsfw) console.error('WARNING: Command is NSFW but not in nsfw module!')
+      if (command.module.id === 'nsfw' && !command.nsfw) console.error('WARNING: Command is not NSFW but in nsfw module!')
       //console.debug(`Loaded command "${command.name}".`)
     } catch (error) {
       console.error(error)
@@ -92,7 +94,7 @@ client.once("ready", async () => {
   if (!fs.readdirSync(require('os').tmpdir()).includes(client.user.tag)) {
     fs.mkdirSync(require('os').tmpdir() + `/${client.user.tag}`)
   }
-  require('express')().get('/', (req, res) => res.send('ok')).listen(BOT_PORT)
+  //require('express')().get('/', (req, res) => res.send('ok')).listen(BOT_PORT)
 });
 client.on("ready", async () => {
   client.user.setPresence({ activity: {
