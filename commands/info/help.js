@@ -61,6 +61,9 @@ module.exports = {
     if (!args[0]) {
       const embed = new MessageEmbed()
       for (const module_ of client.modules.array()) {
+        if (process.env.WEEB_ANIME_HATERS_GUILD.split(',').includes(message.guild.id)) {
+          if (module_.weeb) continue
+        }
         embed
           .addField(t('modules.' + module_.id + '.name', c, g), module_.commands.map(x => `\`${x.name}\``).join(",") || "None")
           .setColor(0xac1677)

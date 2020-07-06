@@ -76,6 +76,14 @@ module.exports = {
     user = bans.find(x => string.includes(x.id)) //@memntions and ids
     return user
   },
+  findUser: async (message,string) => {
+    if (message.guild) {
+    if (message.mentions.members.first()) return message.mentions.users.first()
+    else if (message.guild.members.cache.find(x => x.user.tag.includes(string))) return message.guild.members.find(x => x.user.tag.includes(string)).user
+    else if (message.guild.members.cache.find(x => x.displayName.includes(string))) return message.guild.members.find(x => x.displayName.includes(string)).user
+    } else if (message.mentions.users.first()) return message.mentions.users.first()
+    return message.client.users.fetch(string)
+  },
   deserialize: str => eval(`(${str})`),
   /**
    * @param { string } perms

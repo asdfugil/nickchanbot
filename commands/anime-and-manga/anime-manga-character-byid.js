@@ -6,7 +6,7 @@ const { MessageEmbed } = require('discord.js')
 module.exports = {
     name:'anime-manga-character-byid',
     aliases:['anime-character-byid','manga-character-byid'],
-    description:['GET anime or manga characters by its AniList ID'],
+    description:{ en:'GET anime or manga characters by its AniList ID'},
     execute: async (message,args) => await module.exports.getCharacters(message,args.join(' ')),
     async getCharacters (message,id) {
         const character = await anilist.people.character(parseInt(id) || -1)

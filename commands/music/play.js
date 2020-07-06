@@ -11,17 +11,13 @@ module.exports = {
   usage:"<search query or youtube url>",
   args: true,
   cooldown: 2,
+  clientPermissions:['CONNECT','SPEAK'],
   execute: async (message, args) => {
     const { queue } = message.client;
     const serverQueue = queue.get(message.guild.id);
     const channel = message.member.voice.channel;
     if (!channel)
       return message.reply("You must be in a voice channel to play music!");
-    const { CONNECT, SPEAK } = channel
-      .permissionsFor(message.guild.me)
-      .serialize();
-    if (!CONNECT || !SPEAK)
-      return noBotPermission("connect and speak", message.channel);
     const result = (await searcher.search(args.join(" "))).first;
     if (!result) return message.reply("No results");
     const songInfo = await ytdl.getInfo(result.url);
@@ -69,12 +65,13 @@ module.exports = {
       queue.delete(guild.id);
       return;
     }
-
+      
     const dispatcher = serverQueue.connection
       .play(ytdl(song.url, { options: ["lowestvideo", "highestaudio"] }),{passes:2})
       //2 times
       //Youtube intentionally rate limkt audio only downloads,so we use the worst video quality as possible instead of audio only
-      .on("end", () => {
+      .on("speaking", speaking => {
+        if (speaking) return
         console.log("Music ended!");
         if (serverQueue.looping !== "song") {
           if (serverQueue.looping === "queue") serverQueue.songs.push(serverQueue.songs[0]);
@@ -87,5 +84,6 @@ module.exports = {
       });
     message.channel.send(`Started playing ${song.title}.`);
     dispatcher.setVolume(serverQueue.volume);
+    dispatcher.setPLP(0.1)
   }
 };

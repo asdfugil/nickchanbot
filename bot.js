@@ -22,6 +22,18 @@ class NickChanBotClient extends Discord.Client {
     this.owner = undefined;
     this.developers = [];
     this.modules = new Collection()
+    this.cooldowns = new Collection()
+    this.fetchGiftCode = function(code) {
+      code = args.join(' ')
+      .replace('https://discord.gift/')
+      .replace('http://discord.gift/')
+      .replace('https://discord.com/gifts/')
+      .replace('http://discord.com/gifts/')
+      .replace('http://canary.discord.com/gifts/')
+      .replace('https://canary.discord.com/gifts/')
+      //@ts-ignore
+      return message.client.api.entitlements['gift-codes'].get(code)
+    }
   }
 }
 const client = new NickChanBotClient({
@@ -54,8 +66,9 @@ for (let moduleName of moduleDirs) {
       command.module = module_
       module_.commands.set(command.name, command)
       client.commands.set(command.name, command)
-      if (command.module.id !== 'nsfw' && command.nsfw) console.error('WARNING: Command is NSFW but not in nsfw module!')
-      if (command.module.id === 'nsfw' && !command.nsfw) console.error('WARNING: Command is not NSFW but in nsfw module!')
+      if (command.module.id !== 'nsfw' && command.nsfw && !command.supressNSFWwarning) console.error(`WARNING: Command "${command.name}" is NSFW but not in nsfw module!`)
+      if (command.module.id === 'nsfw' && !command.nsfw && !command.supressNSFWwarning) console.error(`WARNING: Command "${command.name}" is not NSFW but in nsfw module!`)
+      //client.cooldowns.set(command.name, new Collection());
       //console.debug(`Loaded command "${command.name}".`)
     } catch (error) {
       console.error(error)
@@ -75,7 +88,6 @@ for (const file of loggerFiles) {
 }
 */
 require("./custom_modules/loggers.js")(client);
-const cooldowns = new Collection();
 client.once("ready", async () => {
   console.log("Ready!");
   mutedutil.mutedTimers(client);
@@ -140,7 +152,6 @@ arguments:${args}`);
   if ((command.devsOnly || command.module.id === 'devs-only') && !DEVS_ID.split(',').includes(message.author.id)) return message.channel.send(t('util.you_cannot_use_this_command', client, message.guild))
   if (command.guildOnly && message.channel.type !== "text")
     return message.reply("I can't execute that command inside DMs!");
-  // Voice permissions are NOT checked
   if (command.userPermissions && message.guild) {
     const text_perms = new Permissions(command.userPermissions)
     const normal_permissions = new Permissions(command.userPermissions)
@@ -157,17 +168,20 @@ arguments:${args}`);
   }
   if (command.clientPermissions && message.guild) {
     const text_perms = new Permissions(command.clientPermissions)
-    const normal_permissions = new Permissions(command.clientPermissions)
+    const normal_permissions = text_perms
+    const voice_permissions = text_perms
     if (text_perms.any(268443710) && message.guild.mfaLevel && !client.user.mfaEnabled) return message.reply('Please disable server 2FA and try again.')
     //strip non-text permissions
     text_perms.remove(2146436543)
     //strip channel permissions
     normal_permissions.remove(66583872)
-    if (!message.channel.permissionsFor(message.guild.me).has(text_perms.bitfield) || !message.guild.me.permissions.has(normal_permissions.bitfield)) {
+    voice_permissions.remove(2080898303)
+    const voice_channel = command.voiceChannel ? command.voiceChannel() : message.member.voice.channel;
+    if (voice_permissions.bitfield && !voice_channel) message.reply('Command requires voice permissions but voice_channel is undefined or null.\nPlease join a voice channel and try again.')
+    if (!message.channel.permissionsFor(message.guild.me).has(text_perms.bitfield) || !message.channel.permissionsFor(message.guild.me).has(voice_permissions)|| !message.guild.me.permissions.has(normal_permissions.bitfield)) {
       const perms_required = new Permissions(command.clientPermissions)
       const required_array = []
       for (const [key, value] of Object.entries(perms_required.serialize())) { if (value) required_array.push(key) }
-      console.log(required_array)
       return noBotPermission(required_array.map(item => `\`${t(`permissions.${item}`, client, message.guild)}\``).join(','), message.channel)
     }
   }
@@ -178,11 +192,9 @@ arguments:${args}`);
     if (command.usage) reply += `\nThe proper usage would be: \`${actualPrefix}${command.name} ${command.usage}\``;
     return message.channel.send(reply);
   }
-  if (!cooldowns.has(command.name)) {
-    cooldowns.set(command.name, new Collection());
-  }
+  if (!client.cooldowns.has(command.name)) client.cooldowns.set(command.name, new Collection());
   const now = Date.now();
-  const timestamps = cooldowns.get(command.name);
+  const timestamps = client.cooldowns.get(command.name);
   const cooldownAmount = (command.cooldown || 3) * 1000;
   if (timestamps.has(message.author.id)) {
     const expirationTime = timestamps.get(message.author.id) + cooldownAmount;

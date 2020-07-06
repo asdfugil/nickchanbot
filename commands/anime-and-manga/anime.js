@@ -6,9 +6,9 @@ const { writeFileSync } = require("fs");
 module.exports = {
   name: "anime",
   args: true,
-  usage: "<query>",
-  description: "Search anime on AniList.",
-  info: "A raw JSON file will also be provided.",
+  usage:{en: "<query>"},
+  description:{en: "Search anime on AniList." },
+  info: { en:"A raw JSON file will also be provided."},
   async execute(message, args) {
     /*
     Type:anime

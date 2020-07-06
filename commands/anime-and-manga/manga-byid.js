@@ -5,7 +5,7 @@ const { MessageEmbed } = require("discord.js")
 module.exports = {
     name: 'manga-byid',
     aliases: ['mangabyid'],
-    description: 'GET manga by id on AniList',
+    description:{en: 'GET manga by id on AniList'},
     execute: async (message, args) => await module.exports.getManga(message, parseInt(args.join(' '))),
     async getManga(message, id) {
         anilist.media

@@ -5,7 +5,7 @@ module.exports = {
   name: "manga",
   args: true,
   usage: "<query>",
-  description: "Search manga on AniList.",
+  description:{en: "Search manga on AniList."},
   info: "A raw JSON file will also be provided.",
   async execute(message, args) {
     /*

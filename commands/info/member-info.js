@@ -3,8 +3,8 @@ const { findMember } = require("../../custom_modules/ncbutil.js");
 module.exports = {
   name: "member-info",
   guildOnly: true,
-  description: "Shows information about a server member",
-  usage: "[member resolvable]",
+  description: {en:"Shows information about a server member"},
+  usage: {en:"[member resolvable]"},
   async execute(message, args) {
     /**@type { GuildMember } */
     let member;
