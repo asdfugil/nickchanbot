@@ -1,6 +1,6 @@
 {
   "name": "nick-chan-bot",
-  "version": "1.0.0",
+  "version": "0.7.0-beta.1",
   "description": "foo",
   "repository": {},
   "author": {
@@ -29,8 +29,6 @@
   "dependencies": {
     "@discordjs/opus": "^0.1.0",
     "@keyv/sqlite": "^2.0.2",
-    "@types/html2canvas": "0.0.35",
-    "@types/http-proxy": "^1.17.4",
     "anilist-node": "^1.3.0",
     "brains-api": "^1.0.8-2",
     "bufferutil": "^4.0.1",
@@ -41,7 +39,6 @@
     "erlpack": "^0.1.3",
     "express": "^4.17.1",
     "express-http-proxy": "^1.6.0",
-    "html2canvas": "^1.0.0-rc.4",
     "keyv": "^4.0.0",
     "mathjs": "^6.6.1",
     "moment": "^2.24.0",
@@ -67,5 +64,9 @@
     "ffmpeg": ">= 4.2",
     "pnpm": "5.x"
   },
-  "license": "MIT"
+  "license": "MIT",
+  "devDependencies": {
+    "@types/http-proxy": "^1.17.4",
+    "@types/node-fetch": "^2.5.7"
+  }
 }

@@ -10,7 +10,7 @@ const fetch = require('node-fetch')
 const prefix = PREFIX;
 const { Collection, Permissions } = Discord;
 Discord.Guild.prototype.language = 'zh_Hant'
-Discord.Guild.prototype["xpCooldowns"] = new Collection();
+Discord.Guild.prototype["xpCooldowns"] = new Array();
 const { language } = require('./sequelize')
 class NickChanBotClient extends Discord.Client {
   constructor(clientOptions) {
@@ -116,19 +116,31 @@ client.on("ready", async () => {
   });
 });
 ranks.on("error", console.error);
-client.on("messageDelete", message => {
+client.on("messageDelete", async message => {
   if (message.partial) return
+  const base64 = await Promise.all(
+  message.attachments.map(attachment => {
+    return new Promise(async (resolve,reject) => {
+      const chunks = []
+      const response = await fetch(attachment.proxyURL || attachment.url, { headers:{ 'user-agent':process.env.USER_AGENT }})
+      response.body.on('data',chunk => chunks.push(chunk))  
+      response.body.on('close',() => resolve(Buffer.concat(chunks)))
+    })
+  })).then(buffers => buffers.map(buffer => buffer.toString('base64')))
+  console.log(base64)
   snipe.create({
     content:message.content,
     created_at:message.createdAt,
     author_tag:message.author.tag,
     author_avatar_url:message.author.displayAvatarURL({ dynamic:true,size:256 }),
     channel_id:message.channel.id,
-    is_dm:message.channel.type === 'dm'
-  })
+    is_dm:message.channel.type === 'dm',
+    attachments:base64.join(',')
+    })
 })
 client.on("message", async message => {
   let actualPrefix = prefix;
+  require('./custom_modules/ranks')(message)
   if (message.guild) {
     //Read message (history),send message
     if (!message.guild.me.permissions.has(68608)) return
@@ -176,7 +188,7 @@ arguments:${args}`);
     //strip channel permissions
     normal_permissions.remove(66583872)
     voice_permissions.remove(2080898303)
-    const voice_channel = command.voiceChannel ? command.voiceChannel() : message.member.voice.channel;
+    const voice_channel = command.voiceChannel ? command.voiceChannel(message,args) : message.member.voice.channel;
     if (voice_permissions.bitfield && !voice_channel) message.reply('Command requires voice permissions but voice_channel is undefined or null.\nPlease join a voice channel and try again.')
     if (!message.channel.permissionsFor(message.guild.me).has(text_perms.bitfield) || !message.channel.permissionsFor(message.guild.me).has(voice_permissions)|| !message.guild.me.permissions.has(normal_permissions.bitfield)) {
       const perms_required = new Permissions(command.clientPermissions)

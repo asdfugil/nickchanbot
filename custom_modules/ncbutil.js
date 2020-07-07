@@ -141,41 +141,30 @@ module.exports = {
    */
   Rank: class {
     constructor(xp) {
-      "use strict";
-      if (xp) {
-        this.xp = xp;
-      } else {
-        this.xp = 0;
+      this.xp = xp
+    }
+    getLevel()  {
+      let level = 0
+      let levelXP = 100
+      let remainingXP = this.xp
+      while (remainingXP > levelXP) {
+        remainingXP -= levelXP
+        levelXP += 100
+        level += 1
       }
-      this.getLevel = function() {
-        let xpRequiredToLevelUp = 100;
-        let level = 1;
-        let xpo = this.xp;
-        for (let i = 0; xpo > 0; i++) {
-          xpo = xpo - xpRequiredToLevelUp;
-          xpRequiredToLevelUp += 100;
-          level += 1;
-        }
-        level -= 1;
-        return level;
-      };
-      this.getLevelXP = function() {
-        let xpRequiredToLevelUp = 0;
-        let xpo = this.xp;
-        for (let i = 0; xpo > 0; i++) {
-          xpo = xpo - xpRequiredToLevelUp;
-          if (xpo > 0) {
-            xpRequiredToLevelUp += 100;
-          }
-          i += 1;
-        }
-        return (
-          Math.floor(xpRequiredToLevelUp + xpo) + "/" + xpRequiredToLevelUp
-        );
-      };
-      this.toString = function() {
-        return this.xp.toString();
-      };
+      return level
+    }
+    getLevelXP() {
+      let levelXP = 100
+      let remainingXP = this.xp
+      while (remainingXP > levelXP) {
+        remainingXP -= levelXP
+        levelXP += 100
+      }
+      return remainingXP
+    }
+    getLevelTotalXP() {
+      return this.getLevel()*100 + 100
     }
   }
 };

@@ -18,14 +18,14 @@ module.exports = {
     client.commands = new Collection()
     client.modules = new Collection()
     const moduleDirs = fs
-      .readdirSync("..", { withFileTypes: true })
+      .readdirSync("./commands", { withFileTypes: true })
       .filter(x => x.isDirectory)
       .filter(x => x.name !== 'index.js')
       .map(x => x.name)
     for (let moduleName of moduleDirs) {
       const module_ = require(`../${moduleName}`)
       module_.commands = new Collection()
-      const commandFiles = fs.readdirSync(`../${moduleName}`)
+      const commandFiles = fs.readdirSync(`./commands/${moduleName}`)
         .filter(file => file.endsWith(".js"))
       for (const commandName of commandFiles) {
         try {

@@ -6,7 +6,7 @@ module.exports = {
     const { client } = message
     const embed = new MessageEmbed()
     .setColor("RAMDOM")
-    .setTitle("About")
+    .setTitle(client.username + ` v${require('../../package.json')}.version`)
     .setAuthor(client.owner.tag,client.owner.displayAvatarURL())
     .setThumbnail(client.user.displayAvatarURL())
     .setDescription(`${client.user.tag} is a bot developed by ${client.owner.tag}.`)
