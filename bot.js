@@ -128,7 +128,7 @@ client.on("messageDelete", async message => {
     })
   })).then(buffers => buffers.map(buffer => buffer.toString('base64')))
   console.log(base64)
-  snipe.create({
+  snipe.upsert({
     content:message.content,
     created_at:message.createdAt,
     author_tag:message.author.tag,

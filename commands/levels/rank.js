@@ -20,8 +20,7 @@ module.exports = {
     if (!member) return
     let guildRanks =
       (await guild_rank.findOne({ where: { guild_id: message.guild.id } })) || Object.create(null)
-    console.log(guildRanks)
-      guildRanks = guildRanks.dataValues || {}
+      guildRanks = guildRanks.dataValues.ranks || {}
     if (await guildRanks[member.id]) {
       message.channel.startTyping();
       const canvas = Canvas.createCanvas(1400, 250);
@@ -29,10 +28,8 @@ module.exports = {
       const background = await Canvas.loadImage(process.env.RANK_COMMAND_BACKGROUND_IMAGE)
       ctx.drawImage(background, 0, 0, canvas.width, canvas.height);
       const rank = new Rank(guildRanks[member.id]);
-
       ctx.strokeStyle = "#74037b";
       ctx.strokeRect(0, 0, canvas.width, canvas.height);
-
       ctx.font = module.exports.applyText(canvas, member.displayName);
       ctx.fillStyle = "#ffffff";
       ctx.fillText(member.displayName, canvas.width / 4.9, canvas.height / 3);
@@ -42,8 +39,8 @@ module.exports = {
       ctx.fillRect(
         280,
         100,
-        (parseInt(rank.getLevelXP().split("/")[0]) /
-          parseInt(rank.getLevelXP().split("/")[1])) *
+        (parseInt(rank.getLevelXP()) /
+          parseInt(rank.getLevelTotalXP())) *
         1080,
         40
       );
@@ -56,16 +53,14 @@ module.exports = {
       ctx.arc(125, 125, 100, 0, Math.PI * 2, true);
       ctx.closePath();
       ctx.clip();
-      const stream = fs.createWriteStream("/tmp/" + member.id + ".png");
-      const response = await fetch(member.user.displayAvatarURL);
-      response.body.pipe(stream);
-      stream.once("close", async () => {
-        const avatar = await Canvas.loadImage(`/tmp/${member.id}.png`);
+      const response = await fetch(member.user.displayAvatarURL({ size:512,dynamic:false,format:'png' }));
+      const buff_array = []
+      response.body.on('data',chunk => buff_array.push(chunk))
+      response.body.once("close", async () => {
+        const avatar = await Canvas.loadImage(Buffer.concat(buff_array));
         ctx.drawImage(avatar, 25, 25, 200, 200);
-        const card = new MessageEmbed(canvas.toBuffer(), "rank.png");
-        await message.channel.send("", {
-          file: card
-        });
+        const card = canvas.toBuffer()
+        await message.channel.send(new MessageAttachment(card,"rank.png"));
         message.channel.stopTyping();
       });
     } else {

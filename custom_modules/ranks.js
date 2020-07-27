@@ -4,14 +4,23 @@ const { guild_rank } = require('../sequelize')
  * 
  * @param { Message } message 
  */
-module.exports = async function(message) {
+module.exports = async function (message) {
   if (!message.guild || message.author.bot) return
-  if (message.guild.xpCooldowns.includes(message.guild.id)) return
-  const ranks = await guild_rank.findOne({ where:{ guild_id:message.guild.id } }) || {}
-  const currentXP = ranks.dataValues[message.author.id] || 0
-  ranks.dataValues[message.author.id] = currentXP += Math.floor(Math.random() * 10 + 8.5)
-  console.log(ranks)
-  guild_rank.create({ guild_id:message.guild.id, ranks:ranks.dataValues })
+  if (message.guild.xpCooldowns.includes(message.author.id)) return
+  console.log(1)
+  const ranks = await guild_rank.findOne({ where: { guild_id: message.guild.id } }) || { dataValues: {} }
+  console.log(2)
+  let currentXP = ranks.dataValues[message.author.id] || 0
+  currentXP += Math.floor(Math.random() * 10 + 8.5)
+  ranks.dataValues[message.author.id] = currentXP
+  await guild_rank.upsert({ guild_id: message.guild.id, ranks: ranks.dataValues.ranks })
+  console.log(3)
   message.guild.xpCooldowns.push(message.author.id)
-  setTimeout(() => message.guild.xpCooldowns = message.guild.xpCooldowns.filter(x => x !== message.author.id),60000)
+  setTimeout(() => {
+    const index = message.guild.xpCooldowns.indexOf(message.author.id);
+    if (index > -1) {
+      message.guild.xpCooldowns.splice(index, 1);
+      console.log(4)
+    }
+  }, 60000)
 }

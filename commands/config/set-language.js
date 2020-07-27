@@ -13,7 +13,7 @@ module.exports = {
   },
   async execute(message, args) {
     if (!message.member.hasPermission('MANAGE_GUILD')) return
-    await language.create({ id:message.guild.id,language:args.join(' ') })
+    await language.upsert({ id:message.guild.id,language:args.join(' ') })
     message.guild.language = args.join(' ')
       message.channel.send(t('commands.set-language.lang_set', message.client, message.guild))
   }

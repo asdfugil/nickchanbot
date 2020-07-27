@@ -1,5 +1,5 @@
 const fetch = require('node-fetch');
-const { MEssageEmbed } = require('discord.js');
+const { MessageEmbed } = require('discord.js');
 const subreddits = ["dankmemes", "memes", "PrequelMemes", "PewdiepieSubmissions", "funny", "wholesomememes", "2meirl4meirl", "me_irl"];
 
 module.exports = {
@@ -16,7 +16,7 @@ module.exports = {
       const image = `https://i.imgur.com/${imgurData.hash}${imgurData.ext.replace(/\?.*/, "")}`;
       if (image && image.includes(".mp4")) image = ameme;
       if (!image || image.includes(".mp4")) return message.channel.send(`Woah too fast, Try again.`);
-      const memeEmbed = new MEssageEmbed()
+      const memeEmbed = new MessageEmbed()
       .setColor('RANDOM')
       .setTitle(imgurData.title)
       .setURL(`https://www.reddit.com${imgurData.reddit}`)
