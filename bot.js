@@ -20,7 +20,16 @@ class NickChanBotClient extends Discord.Client {
     this.developers = [];
   }
 }
-const client = new NickChanBotClient({ http:{ version:7 } });
+const client = new NickChanBotClient({
+  http:{ 
+    version:7,
+    api:'https://discord.com/api'
+  }
+  ,ws:{
+    intents:32767 
+  } 
+});
+//client.on('debug',console.log)
 const Keyv = require("keyv");
 const prefixs = new Keyv("sqlite://.data/database.sqlite", {
   namespace: "prefixs"
@@ -76,6 +85,10 @@ client.on("ready", () => {
   client.user.setActivity(`Use @${client.user.username} to get started!`);
 });
 ranks.on("error", console.error);
+client.on('messageDelete',message => {
+    if (message.partial) return
+    
+})
 async function processTag(commandName, message, args) {
   if (message.guild) {
     const guildTags = await tags.get(message.guild.id);
@@ -101,7 +114,7 @@ client.on("message", async message => {
       actualPrefix = await prefixs.get(message.guild.id);
   }
   if (
-    [`<@${client.user.id}>`, `<@!${client.user.id}>`].includes(message.content)
+    [`<@${client.user.id}>`, `<@!${client.user.id}>`].includes(message.content) && !message.author.bot
   )
     message.channel.send(
       `Hi! My prefix is \`${actualPrefix}\`\nTo get started type \`${actualPrefix}help\``

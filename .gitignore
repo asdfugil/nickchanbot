@@ -1,9 +1,4 @@
-./*
-temp/
-\#/
-*.log
-!/.gitignore
-CODE_OF_CONDUCT.md
-!.data/database.sqlite.example
-.glitch-assets
-shrinkwrap.yaml
+.env
+.data
+node_modules
+nohup.out

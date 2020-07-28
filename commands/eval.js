@@ -57,9 +57,8 @@ module.exports = {
             message.channel.send(module.exports.clean(evaled), {
               code: "xl"
             });
-          fs.writeFileSync("../tmp/result.log", module.exports.clean(evaled));
           message.channel
-            .send(new Attachment("../../tmp/result.log"))
+            .send(new Attachment(Buffer.from(util.inspect(evaled),'utf8'),'result.log'))
             .then(() => {
               reaction.remove();
               message.react("✅");

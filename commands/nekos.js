@@ -1,90 +1,24 @@
-const { Attachment } = require("discord.js");
 const fetch = require('node-fetch')
-const SFWImages = [
-  "smug",
-  "baka",
-  "tickle",
-  "slap",
-  "poke",
-  "pat",
-  "neko",
-  "nekoGif",
-  "meow",
-  "lizard",
-  "kiss",
-  "hug",
-  "foxGirl",
-  "feed",
-  "cuddle"
-];
-const NSFWImages = [
-  "lewdkemo",
-  "lewdk",
-  "keta",
-  "hololewd",
-  "holoero",
-  "hentai",
-  "futanari",
-  "femdom",
-  "feetg",
-  "erofeet",
-  "feet",
-  "ero",
-  "erok",
-  "erokemo",
-  "eron",
-  "eroyuri",
-  "cum_jpg",
-  "blowjob",
-  "pussy"
+const valid_args = [
+'femdom', 'tickle', 'classic', 'ngif', 'erofeet', 'meow', 'erok', 'poke', 'hololewd','lewdk', 'keta', 'feetg', 'nsfw_neko_gif', 'eroyuri', 'kiss', '8ball', 'kuni', 'tits', 'pussy_jpg', 'cum_jpg', 'pussy', 'lewdkemo', 'lizard', 'slap', 'lewd', 'cum', 'cuddle', 'spank', 'smallboobs', 'goose', 'Random_hentai_gif', 'avatar', 'fox_girl', 'nsfw_avatar', 'hug', 'gecg', 'boobs', 'pat', 'feet', 'smug', 'kemonomimi', 'solog', 'holo', 'wallpaper', 'bj', 'woof', 'yuri', 'trap', 'anal', 'baka', 'blowjob', 'holoero', 'feed', 'neko', 'gasm', 'hentai', 'futanari', 'ero', 'solo', 'waifu', 'pwankg', 'eron', 'erokemo'
 ];
 module.exports = {
-  name: "nekos-life",
-  aliases: ["nekos", "neko", "nekoslife"],
-  args: 1,
-  nsfw:true,
+  name: "nekos",
+  aliases: ["nekosimg"],
+  nsfw: true,
   usage: "<argument>",
-  description: "Fetch a image from https://nekos.life",
-  info:
-    "Available arguments:\n\n`" +
-    SFWImages.join("` `") +
-    "`" +
-    "\nNSFW:\n`" +
-    NSFWImages.join("` `") +
-    "`",
-  execute: async (receivedMessage, args) => {
-    receivedMessage.channel.startTyping();
+  description:
+    "Send a link to a relvant image. Powered by nekos.life ." ,
+  info: 
+      "Valid arguments:\n\n`" +
+      valid_args.join("` `") +
+      "`" + "\nIf no argument is providied, send a link to a random image."
+  , async execute(message, args) {
+    message.channel.startTyping();
     const api = "https://nekos.life/api/v2/img/";
-    if (SFWImages.includes(args[0]))
-      return receivedMessage.channel
-        .send(
-          new Attachment(
-            (await fetch(api + args[0]).then(response => response.json())).url
-          )
-        )
-        .then(() => receivedMessage.channel.stopTyping());
-    else if (NSFWImages.includes(args[0])) {
-      if (receivedMessage.channel.nsfw)
-        return receivedMessage.channel
-          .send(
-            new Attachment(
-              (await fetch(api + args[0]).then(response => response.json())).url
-            )
-          )
-          .then(() => receivedMessage.channel.stopTyping());
-      else
-        receivedMessage
-          .reply("NSFW arguments can only be used in NSFW channels.")
-          .then(() => receivedMessage.channel.stopTyping());
-    } else
-      return receivedMessage
-        .reply(
-          "Invalid arguments,available arguments:\nSFW:\n`" +
-            NSFWImages.join("` `") +
-            "`\n\nNSFW:\n`" +
-            NSFWImages.join("` `") +
-            "`"
-        )
-        .then(() => receivedMessage.channel.stopTyping());
+    if (!valid_args.includes(args.join(' ')) && args[0]) return message.reply("That's not a valid argument!")
+    const { url } = await fetch(api + (args[0] ? args.join(' ') : valid_args[Math.floor(Math.random() * valid_args.length)])).then(res => res.json())
+    await message.channel.send(url)
+    message.channel.stopTyping()
   }
 };

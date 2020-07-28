@@ -14,12 +14,7 @@ module.exports = {
 
 		if (!command) return message.channel.send(`There is no command with name or alias \`${commandName}\`, ${message.author}!`);
         let type = 'js'
-        try {
 			delete require.cache[require.resolve(`./${commandName}.js`)];
-		} catch (error) {
-			delete require.cache[require.resolve(`./${commandName}.mjs`)]
-			type = 'mjs'
-		}
 
 		try {
 			const newCommand = require(`./${commandName}.${type}`);
