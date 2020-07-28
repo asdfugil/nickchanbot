@@ -5,9 +5,9 @@ module.exports = {
   cooldown: 10,
   aliases: ["guild-info", "guildinfo", "serverinfo"],
   description: "shows server info",
-  execute: async (receivedMessage, args) => {
-    const client = receivedMessage.client;
-    const g = receivedMessage.guild;
+  execute: async (message, args) => {
+    const client = message.client;
+    const g = message.guild;
     const data = [];
     let roles = [];
     let members = [];
@@ -47,6 +47,6 @@ module.exports = {
       .setThumbnail(g.iconURL)
       .setFooter(client.user.tag, client.user.displayAvatarURL);
     if (g.bannerURL) embed.attachFile(new Attachment(g.bannerURL,'server-banner.png'))
-    receivedMessage.channel.send(embed);
+    message.channel.send(embed);
   }
 };

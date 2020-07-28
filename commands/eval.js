@@ -49,7 +49,7 @@ module.exports = {
     try {
       const client = message.client;
       const code = args.join(" ");
-      let evaled = await eval(code);
+      let evaled = await eval(code)
   
           if (typeof evaled !== "string") evaled = util.inspect(evaled);
 
@@ -57,9 +57,8 @@ module.exports = {
             message.channel.send(module.exports.clean(evaled), {
               code: "xl"
             });
-          fs.writeFileSync("../tmp/result.log", module.exports.clean(evaled));
           message.channel
-            .send(new Attachment("../../tmp/result.log"))
+            .send(new Attachment(Buffer.from(util.inspect(evaled),'utf8'),'result.log'))
             .then(() => {
               reaction.remove();
               message.react("✅");

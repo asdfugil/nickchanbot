@@ -24,9 +24,8 @@
   ],
   "homepage": "https://nick-chan-bot.glitch.me",
   "config": {},
-  "main": "server.js",
+  "main": "nickchanbot.js",
   "bugs": "https://github.com/Assfugil/nickchanbot/issues",
-  "type": "module",
   "dependencies": {
     "@discordjs/opus": "^0.3.2",
     "@keyv/sqlite": "^2.0.2",
@@ -68,7 +67,7 @@
     "ytsearcher": "^1.2.2"
   },
   "scripts": {
-    "start": "node server.js --max_old_space_size=500"
+    "start": "node nickchanbot.js --max_old_space_size=4000"
   },
   "engines": {
     "node": "12.x",
