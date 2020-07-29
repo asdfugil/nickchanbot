@@ -11,3 +11,4 @@ gift.json
 nitro.json
 server/ssl/
 nohup.out
+*.swp
