@@ -3,7 +3,7 @@ const {
   noBotPermission,
   findMember,
   findUser
-} = require("../../custom_modules/ncbutil.js");
+} = require("../../modules/ncbutil.js");
 const { Message } = require('discord.js')
 module.exports = {
   name: "ban",

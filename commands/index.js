@@ -1,1 +1,1 @@
-../custom_modules/translate.js
+../modules/translate.js

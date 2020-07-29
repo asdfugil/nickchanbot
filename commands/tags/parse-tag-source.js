@@ -1,4 +1,4 @@
-const parseTag = require("../../custom_modules/parse-tag-vars.js");
+const parseTag = require("../../modules/parse-tag-vars.js");
 module.exports = {
   name: "parse-tag-source",
   guildOnly: true,

@@ -1,6 +1,6 @@
 require("dotenv").config();
 const { YTSearcher } = require("ytsearcher");
-const { noBotPermission } = require("../../custom_modules/ncbutil.js");
+const { noBotPermission } = require("../../modules/ncbutil.js");
 const ytdl = require("ytdl-core");
 const searcher = new YTSearcher({ key: process.env.YOUTUBE_KEY });
 module.exports = {

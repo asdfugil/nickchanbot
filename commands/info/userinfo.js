@@ -1,4 +1,4 @@
-const { findUser } = require("../../custom_modules/ncbutil.js")
+const { findUser } = require("../../modules/ncbutil.js")
 const { MessageEmbed } = require("discord.js")
 module.exports = {
   name: "userinfo",

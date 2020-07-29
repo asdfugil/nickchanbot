@@ -2,7 +2,7 @@ const { guild_rank } = require('../../sequelize')
 const {
   Rank,
   findMember,
-} = require("../../custom_modules/ncbutil.js");
+} = require("../../modules/ncbutil.js");
 const fetch = require("node-fetch");
 require("dotenv").config();
 const { MessageAttachment } = require("discord.js");

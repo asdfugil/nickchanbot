@@ -13,11 +13,11 @@ const { MessageAttachment, MessageEmbed, Permissions } = Discord;
 const EventEmitter = require("events");
 const names = require('people-names')
 const util = require("util");
-const ncbutil = require("../../custom_modules/ncbutil.js");
-const friendly_permissions = require("../../custom_modules/friendly_permissions.js");
+const ncbutil = require("../../modules/ncbutil.js");
+const friendly_permissions = require("../../modules/friendly_permissions.js");
 const Keyv = require("keyv");
 const globalLogHooks = new Keyv('sqlite://.data/database.sqlite',{namespace:'log-hooks'})
-const parseTag = require("../../custom_modules/parse-tag-vars.js")
+const parseTag = require("../../modules/parse-tag-vars.js")
 const t = require('..')
 module.exports = {
   args: true, //either boolean or number

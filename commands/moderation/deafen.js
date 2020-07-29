@@ -2,7 +2,7 @@ const {
   noPermission,
   noBotPermission,
   findMember
-} = require("../../custom_modules/ncbutil.js");
+} = require("../../modules/ncbutil.js");
 const { Message, GuildMember } = require('discord.js')
 module.exports = {
   name: "setdeaf",

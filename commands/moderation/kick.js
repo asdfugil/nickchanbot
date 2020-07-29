@@ -1,5 +1,5 @@
 const t = require('..')
-const { findMember, role_check } = require('../../custom_modules')
+const { findMember, role_check } = require('../../modules')
 const { MessageEmbed } = require('discord.js')
 module.exports = {
     name: 'kick',

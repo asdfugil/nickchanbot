@@ -42,12 +42,12 @@ module.exports = {
       }
       client.modules.set(module_.id, module_)
     }
-    client.on("message", require('../../custom_modules/message_handler'));
+    client.on("message", require('../../modules/message_handler'));
     client.guilds.cache.forEach(async guild => {
       const value = await language.findOne({ where: { id: guild.id } })
       guild.language = value ? value.language : 'en'
     })
-    require("../../custom_modules/loggers.js")(client);
+    require("../../modules/loggers.js")(client);
     message.channel.send('Reloaded successfully')
   }
 }

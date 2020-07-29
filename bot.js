@@ -4,15 +4,15 @@ console.log("Starting...");
 const Discord = require("discord.js");
 const fs = require("fs");
 const { BOT_TOKEN, PREFIX, DEVS_ID, BOT_PORT } = process.env;
-const { noBotPermission, noPermission, Tag } = require('./custom_modules')
-const t = require('./custom_modules/translate')
+const { noBotPermission, noPermission, Tag } = require('./modules')
+const t = require('./modules/translate')
 const fetch = require('node-fetch')
 const prefix = PREFIX;
 const { Collection, Permissions } = Discord;
 Discord.Guild.prototype.language = 'en'
 Discord.Guild.prototype["xpCooldowns"] = new Array();
 const { language, tags, snipe } = require('./sequelize')
-const tag_parser = require("./custom_modules/parse-tag-vars")
+const tag_parser = require("./modules/parse-tag-vars")
 class NickChanBotClient extends Discord.Client {
   constructor(clientOptions) {
     super(clientOptions);
@@ -52,7 +52,7 @@ const moduleDirs = fs
   .filter(x => x.name !== 'index.js')
   .map(x => x.name)
 //console.log(moduleDirs)
-const mutedutil = require("./custom_modules/muted.js");
+const mutedutil = require("./modules/muted.js");
 for (let moduleName of moduleDirs) {
   const module_ = require(`./commands/${moduleName}`)
   module_.commands = new Collection()
@@ -85,7 +85,7 @@ for (const file of loggerFiles) {
   }
 }
 */
-require("./custom_modules/loggers.js")(client);
+require("./modules/loggers.js")(client);
 client.once("ready", async () => {
   console.log("Ready!");
   mutedutil.mutedTimers(client);
@@ -151,7 +151,7 @@ const processTag = (async (message, args,prefix) => {
 })
 client.on("message", async message => {
   let actualPrefix = prefix;
-  require('./custom_modules/ranks')(message)
+  require('./modules/ranks')(message)
   if (message.guild) {
     //Read message (history),send message
     if (!message.guild.me.permissions.has(68608)) return

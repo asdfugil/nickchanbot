@@ -1,4 +1,4 @@
-const { noBotPermission } = require("../../custom_modules/ncbutil.js")
+const { noBotPermission } = require("../../modules/ncbutil.js")
 module.exports = {
   name:"say",
   usage:{en:"<content ,embed,and/or attachment(s)>"},

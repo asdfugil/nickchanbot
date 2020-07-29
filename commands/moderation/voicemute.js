@@ -2,7 +2,7 @@ const {
   noPermission,
   noBotPermission,
   findMember
-} = require("../../custom_modules/ncbutil.js");
+} = require("../../modules/ncbutil.js");
 module.exports = {
   name: "voicemute",
   guildOnly: true,

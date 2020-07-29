@@ -5,8 +5,8 @@ const devsID = process.env.DEVS_ID.split(",")
 const { MessageAttachment, MessageEmbed, Permissions } = Discord;
 const EventEmitter = require("events");
 const util = require("util");
-const ncbutil = require("../../custom_modules/ncbutil.js");
-const friendly_permissions = require("../../custom_modules/friendly_permissions.js");
+const ncbutil = require("../../modules/ncbutil.js");
+const friendly_permissions = require("../../modules/friendly_permissions.js");
 module.exports = {
   args: true, //either boolean or number
   name: "exec",

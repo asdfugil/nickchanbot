@@ -1,5 +1,5 @@
 const { MessageEmbed } = require("discord.js");
-const { noBotPermission } = require("../../custom_modules/ncbutil.js")
+const { noBotPermission } = require("../../modules/ncbutil.js")
 module.exports = {
   name: "@someone",
   aliases: ["random-ping"],

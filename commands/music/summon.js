@@ -1,4 +1,4 @@
-const { noBotPermission } = require("../../custom_modules/ncbutil.js")
+const { noBotPermission } = require("../../modules/ncbutil.js")
 module.exports = {
   name:"summon",
   description:{ en:"make the bot join a voice channel" },

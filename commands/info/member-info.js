@@ -1,5 +1,5 @@
 const { MessageEmbed, GuildMember } = require("discord.js");
-const { findMember } = require("../../custom_modules/ncbutil.js");
+const { findMember } = require("../../modules/ncbutil.js");
 module.exports = {
   name: "member-info",
   guildOnly: true,
