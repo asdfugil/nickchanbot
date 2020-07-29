@@ -30,12 +30,10 @@ module.exports = (message, tag, args, isRes) => {
       )
     })
   }
-  console.log(parsed)
   return parsed
 };
 function core(message, tag, args, isRes) {
   const { member, author, channel, guild } = message
-  console.log("Started parsing " + tag.name)
   //in regex ,$ and . arr a special characters
   //so do \$, \.
   return tag.content
@@ -63,31 +61,31 @@ function core(message, tag, args, isRes) {
     //member.*
     .replace(/\${member\.mention}/gi, member.toString())
     .replace(/\${member\.id}/gi, member.id)
-    .replace(/\${member\.highestRole\.name}/gi, member.highestRole.name)
-    .replace(/\${member\.highestRole\.mention}/gi, member.highestRole)
+    .replace(/\${member\.roles\.highest\.name}/gi, member.roles.highest?.name)
+    .replace(/\${member\.roles\.highest\.mention}/gi, member.roles.highest?.toString())
     .replace(
-      /\${member\.highestRole\.hexColor}/gi,
-      member.highestRole.hexColor
+      /\${member\.roles\.highest\.hexColor}/gi,
+      member.roles.highest?.hexColor
     )
-    .replace(/\${member\.hoistRole\.name}/gi, () => {
-      if (member.hoistRole) return member.hoistRole.name;
+    .replace(/\${member\.roles\.hoist\.name}/gi, () => {
+      if (member.hoistRole) return member.roles.hoist?.name;
       else return "N/A";
     })
-    .replace(/\${member\.hoistRole\.mention}/gi, () => {
-      if (member.hoistRole) return member.hoistRole.toString();
+    .replace(/\${member\.roles\.hoist\.mention}/gi, () => {
+      if (member.hoistRole) return member.roles.hoist?.toString();
       else return "N/A";
     })
-    .replace(/\${member\.hoistRole\.hexColor}/gi, () => {
-      if (member.hoistRole) return member.hoistRole.hexColor;
+    .replace(/\${member\.roles\.hoist\.hexColor}/gi, () => {
+      if (member.hoistRole) return member.roles.hoist?.hexColor;
       else return "N/A";
     })
     .replace(/\${member\.joinedAt}/gi, member.joinedAt)
-    .replace(/\${member\.voiceChannel.name}/gi, () => {
-      if (member.voiceChannel) return member.voiceChannel.name;
+    .replace(/\${member\.voice\.channel\.name}/gi, () => {
+      if (member.voiceChannel) return member.voice.channel?.name;
       else return "N/A";
     })
-    .replace(/\${member.voiceChannel.id}/gi, () => {
-      if (member.voiceChannel) return member.voiceChannel.id;
+    .replace(/\${member\.voice\.channel\.id}/gi, () => {
+      if (member.voiceChannel) return member.voice.channel?.id;
       else return "N/A";
     })
     //channel.*
@@ -106,36 +104,36 @@ function core(message, tag, args, isRes) {
     .replace(/\${guild\.owner\.mention}/gi, guild.owner.toString())
     .replace(/\${guild\.owner\.id}/gi, guild.owner.id)
     .replace(
-      /\${guild\.owner\.highestRole\.name}/gi,
-      guild.owner.highestRole.name
+      /\${guild\.owner\.roles\.hoist\.name}/gi,
+      guild.owner.roles.highest?.name
     )
     .replace(
-      /\${guild\.owner\.highestRole\.mention}/gi,
-      guild.owner.highestRole
+      /\${guild\.owner\.roles\.highest\.mention}/gi,
+      guild.owner.roles.highest?.toString()
     )
     .replace(
-      /\${guild\.owner\.highestRole\.hexColor}/gi,
-      guild.owner.highestRole.hexColor
+      /\${guild\.owner\.roles\.highest\.hexColor}/gi,
+      guild.owner.roles.highest?.hexColor
     )
-    .replace(/\${guild\.owner\.hoistRole\.name}/gi, () => {
-      if (guild.owner.hoistRole) return guild.owner.hoistRole.name;
+    .replace(/\${guild\.owner\.roles\.hoist\.name}/gi, () => {
+      if (guild.owner.hoistRole) return guild.owner.roles.hoist?.name;
       else return "N/A";
     })
-    .replace(/\${guild\.owner\.hoistRole\.mention}/gi, () => {
-      if (guild.owner.hoistRole) return guild.owner.hoistRole.toString();
+    .replace(/\${guild\.owner\.roles\.hoist\.mention}/gi, () => {
+      if (guild.owner.hoistRole) return guild.owner.roles.hoist?.toString();
       else return "N/A";
     })
-    .replace(/\${guild\.owner\.hoistRole\.hexColor}/gi, () => {
-      if (guild.owner.hoistRole) return guild.owner.hoistRole.hexColor;
+    .replace(/\${guild\.owner\.roles\.hoist\.hexColor}/gi, () => {
+      if (guild.owner.hoistRole) return guild.owner.hoist?.hexColor;
       else return "N/A";
     })
     .replace(/\${guild\.owner\.joinedAt}/gi, guild.owner.joinedAt)
-    .replace(/\${guild\.owner\.voiceChannel.name}/gi, () => {
-      if (guild.owner.voiceChannel) return guild.owner.voiceChannel.name;
+    .replace(/\${guild\.owner\.voice\.channel\.name}/gi, () => {
+      if (guild.owner.voiceChannel) return guild.owner.voice.channel?.name;
       else return "N/A";
     })
     .replace(/\${member.voiceChannel.id}/gi, () => {
-      if (guild.owner.voiceChannel) return guild.owner.voiceChannel.id;
+      if (guild.owner.voiceChannel) return guild.owner.voice.channel?.id;
       else return "N/A";
     })
     //guild.owner.user.*

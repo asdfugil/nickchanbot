@@ -6,10 +6,8 @@ const bot = exec('node manager.js')
 console.log('[Main] Started bot')
 proxy.stderr.on('data',data => process.stderr.write(`[Proxy] ${data.toString()}`))
 bot.stderr.on('data',data => process.stderr.write(`[Bot] ${data.toString()}`))
-if (true){
 proxy.stdout.on('data',data => process.stdout.write(`[Proxy] ${data.toString()}`))
 bot.stdout.on('data',data => process.stdout.write(`[Bot] ${data.toString()}`))
-}
 require('fs').writeFileSync('pidfile',process.pid.toString())
 process.on('SIGTERM',() => {
   console.log('[Main] SIGTERM')

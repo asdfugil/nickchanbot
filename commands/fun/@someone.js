@@ -14,7 +14,7 @@ module.exports = {
       .setColor("#03cffc")
       .setDescription(args.join(" "));
     message.delete()
-    message.channel.send(message.guild.members.random().toString(), {
+    message.channel.send(message.guild.members.cache.random().toString(), {
       embed: embed,
       files:message.attachments.array().map(x => x.proxyURL)
     });

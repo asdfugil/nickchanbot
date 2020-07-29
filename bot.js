@@ -4,14 +4,15 @@ console.log("Starting...");
 const Discord = require("discord.js");
 const fs = require("fs");
 const { BOT_TOKEN, PREFIX, DEVS_ID, BOT_PORT } = process.env;
-const { noBotPermission, noPermission } = require('./custom_modules')
+const { noBotPermission, noPermission, Tag } = require('./custom_modules')
 const t = require('./custom_modules/translate')
 const fetch = require('node-fetch')
 const prefix = PREFIX;
 const { Collection, Permissions } = Discord;
-Discord.Guild.prototype.language = 'zh_Hant'
+Discord.Guild.prototype.language = 'en'
 Discord.Guild.prototype["xpCooldowns"] = new Array();
-const { language } = require('./sequelize')
+const { language, tags, snipe } = require('./sequelize')
+const tag_parser = require("./custom_modules/parse-tag-vars")
 class NickChanBotClient extends Discord.Client {
   constructor(clientOptions) {
     super(clientOptions);
@@ -23,14 +24,14 @@ class NickChanBotClient extends Discord.Client {
     this.developers = [];
     this.modules = new Collection()
     this.cooldowns = new Collection()
-    this.fetchGiftCode = function(code) {
+    this.fetchGiftCode = function (code) {
       code = args.join(' ')
-      .replace('https://discord.gift/')
-      .replace('http://discord.gift/')
-      .replace('https://discord.com/gifts/')
-      .replace('http://discord.com/gifts/')
-      .replace('http://canary.discord.com/gifts/')
-      .replace('https://canary.discord.com/gifts/')
+        .replace('https://discord.gift/')
+        .replace('http://discord.gift/')
+        .replace('https://discord.com/gifts/')
+        .replace('http://discord.com/gifts/')
+        .replace('http://canary.discord.com/gifts/')
+        .replace('https://canary.discord.com/gifts/')
       //@ts-ignore
       return message.client.api.entitlements['gift-codes'].get(code)
     }
@@ -42,12 +43,9 @@ const client = new NickChanBotClient({
   http: {
     version: 7,
     api: 'https://discord.com/api'
-  }
+  },
+  disableMentions:'everyone'
 });
-const Keyv = require("keyv");
-const prefixs = new Keyv("sqlite://.data/database.sqlite", { namespace: "prefixs" });
-const ranks = new Keyv("sqlite://.data/database.sqlite", { namespace: "ranks" });
-const { snipe } = require('./sequelize')
 const moduleDirs = fs
   .readdirSync("./commands", { withFileTypes: true })
   .filter(x => x.isDirectory)
@@ -100,7 +98,7 @@ client.once("ready", async () => {
     client.users.fetch(dev).then(user => client.developers.push(user))
   );
   client.guilds.cache.forEach(async guild => {
-    const value = await language.findOne({ where:{ id:guild.id } }) 
+    const value = await language.findOne({ where: { id: guild.id } })
     guild.language = value ? value.language : 'en'
   })
   if (!fs.readdirSync(require('os').tmpdir()).includes(client.user.tag)) {
@@ -109,34 +107,47 @@ client.once("ready", async () => {
   //require('express')().get('/', (req, res) => res.send('ok')).listen(BOT_PORT)
 });
 client.on("ready", async () => {
-  client.user.setPresence({ activity: {
-     name: `Use @${client.user.username} to get started!`,
-     application:{ id:'612829569199767574' }
-     } 
+  client.user.setPresence({
+    activity: {
+      name: `Use @${client.user.username} to get started!`,
+      application: { id: '612829569199767574' }
+    }
   });
 });
-ranks.on("error", console.error);
 client.on("messageDelete", async message => {
   if (message.partial) return
   const base64 = await Promise.all(
-  message.attachments.map(attachment => {
-    return new Promise(async (resolve,reject) => {
-      const chunks = []
-      const response = await fetch(attachment.proxyURL || attachment.url, { headers:{ 'user-agent':process.env.USER_AGENT }})
-      response.body.on('data',chunk => chunks.push(chunk))  
-      response.body.on('close',() => resolve(Buffer.concat(chunks)))
-    })
-  })).then(buffers => buffers.map(buffer => buffer.toString('base64')))
+    message.attachments.map(attachment => {
+      return new Promise(async (resolve, reject) => {
+        const chunks = []
+        const response = await fetch(attachment.proxyURL || attachment.url, { headers: { 'user-agent': process.env.USER_AGENT } })
+        response.body.on('data', chunk => chunks.push(chunk))
+        response.body.on('close', () => resolve(Buffer.concat(chunks)))
+      })
+    })).then(buffers => buffers.map(buffer => buffer.toString('base64')))
   console.log(base64)
   snipe.upsert({
-    content:message.content,
-    created_at:message.createdAt,
-    author_tag:message.author.tag,
-    author_avatar_url:message.author.displayAvatarURL({ dynamic:true,size:256 }),
-    channel_id:message.channel.id,
-    is_dm:message.channel.type === 'dm',
-    attachments:base64.join(',')
-    })
+    content: message.content,
+    created_at: message.createdAt,
+    author_tag: message.author.tag,
+    author_avatar_url: message.author.displayAvatarURL({ dynamic: true, size: 256 }),
+    channel_id: message.channel.id,
+    is_dm: message.channel.type === 'dm',
+    attachments: base64.join(',')
+  })
+})
+const processTag = (async (message, args,prefix) => {
+  if (!message.guild) return
+  const guildTags = (await tags.findOne({ where: { guild_id: message.guild.id } }))?.dataValues?.tags || {}
+  const tag = guildTags[message.content.split(" ")[0].substr(prefix.length).toLowerCase()]
+  if (!tag) return
+  const TAG = new Tag(message.content.split(" ")[0].substr(prefix.length).toLowerCase(), tag, false, "", 0)
+  try {
+    const result = tag_parser(message, TAG, args)
+    message.channel.send(result || "Tag returned nothing")
+  } catch (error) {
+    message.reply("tag error.\n```\n" + error.toString() + "\n```")
+  }
 })
 client.on("message", async message => {
   let actualPrefix = prefix;
@@ -144,7 +155,7 @@ client.on("message", async message => {
   if (message.guild) {
     //Read message (history),send message
     if (!message.guild.me.permissions.has(68608)) return
-    if (await prefixs.get(message.guild.id)) actualPrefix = await prefixs.get(message.guild.id);
+    //  if (await prefixs.get(message.guild.id)) actualPrefix = await prefixs.get(message.guild.id);
   } else { if (message.channel.partial) message.channel = await message.channel.fetch() }
   if ([`<@${client.user.id}>`, `<@!${client.user.id}>`].includes(message.content))
     message.channel.send(`Hi! My prefix is \`${actualPrefix}\`\nTo get started type \`${actualPrefix}help\``);
@@ -152,6 +163,7 @@ client.on("message", async message => {
   const args = message.content
     .slice(actualPrefix.length)
     .split(' ');
+  processTag(message, args,actualPrefix)
   const commandName = args.shift().toLowerCase();
   const command =
     client.commands.get(commandName) ||
@@ -188,9 +200,9 @@ arguments:${args}`);
     //strip channel permissions
     normal_permissions.remove(66583872)
     voice_permissions.remove(2080898303)
-    const voice_channel = command.voiceChannel ? command.voiceChannel(message,args) : message.member.voice.channel;
+    const voice_channel = command.voiceChannel ? command.voiceChannel(message, args) : message.member.voice.channel;
     if (voice_permissions.bitfield && !voice_channel) message.reply('Command requires voice permissions but voice_channel is undefined or null.\nPlease join a voice channel and try again.')
-    if (!message.channel.permissionsFor(message.guild.me).has(text_perms.bitfield) || !message.channel.permissionsFor(message.guild.me).has(voice_permissions)|| !message.guild.me.permissions.has(normal_permissions.bitfield)) {
+    if (!message.channel.permissionsFor(message.guild.me).has(text_perms.bitfield) || !message.channel.permissionsFor(message.guild.me).has(voice_permissions) || !message.guild.me.permissions.has(normal_permissions.bitfield)) {
       const perms_required = new Permissions(command.clientPermissions)
       const required_array = []
       for (const [key, value] of Object.entries(perms_required.serialize())) { if (value) required_array.push(key) }
@@ -221,7 +233,7 @@ arguments:${args}`);
     await command.execute(message, args)
   } catch (error) {
     console.error(error);
-    if (!error.code) message.reply("There was an error trying to execute that command!\n```prolog\n"+error.toString()+'```');
+    if (!error.code) message.reply("There was an error trying to execute that command!\n```prolog\n" + error.toString() + '```');
   }
 });
 client.login(BOT_TOKEN);

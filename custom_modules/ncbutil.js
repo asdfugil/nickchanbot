@@ -52,6 +52,7 @@ module.exports = {
       return message.guild.members.cache.find(x => x.displayName.includes(string));
     else if (message.guild.members.resolve(string))
       return message.guild.members.resolve(string);
+    else return message.guild.members.fetch(string)
   },
   /**
    * @param { Message } message
@@ -137,13 +138,14 @@ module.exports = {
     return c.send(noPermission)
   },
   /**
-   * @constructor Provides functionality needed a Discord Leveling System.
+   * @constructor Provides functionality needed in a Discord Leveling System.
    */
   Rank: class {
     constructor(xp) {
       this.xp = xp
     }
-    getLevel()  {
+    /**@returns { number } */
+    get level()  {
       let level = 0
       let levelXP = 100
       let remainingXP = this.xp
@@ -154,7 +156,16 @@ module.exports = {
       }
       return level
     }
-    getLevelXP() {
+    set level(level) {
+      if (level >= 0) for (let i = 0; i < level; i++) {
+        this.xp += (this.levelTotalXP - this.levelXP)
+      } 
+      else for (let i = 0; i > level; i--) {
+        this.xp -= (this.levelTotalXP - this.levelXP)
+      } 
+    }
+    /**@returns { number } */
+    get levelXP() {
       let levelXP = 100
       let remainingXP = this.xp
       while (remainingXP > levelXP) {
@@ -163,8 +174,15 @@ module.exports = {
       }
       return remainingXP
     }
-    getLevelTotalXP() {
-      return this.getLevel()*100 + 100
+    set levelXP(levelXP) {
+      this.xp += (levelXP - this.levelXP)
+    }
+    /**
+     * @returns { number } 
+     * @readonly
+     */
+    get levelTotalXP() {
+      return this.level*100 + 100
     }
   }
 };

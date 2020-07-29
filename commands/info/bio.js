@@ -11,7 +11,6 @@ module.exports = {
       message.reply("This user has no discord.bio profile");
     });
     if (!profile) return;
-    const presence = (await bio.users.presence(profile.discord.id))[0]
     let flags = [];
     let connection_array = [];
     for (const [key, value] of Object.entries(
@@ -19,34 +18,25 @@ module.exports = {
     )) {
       if (value) flags.push(key);
     }
-    for (const [key, value] of Object.entries(profile.user.userConnections)) {
-      connection_array.push(`**${key}:**${value}`);
+    for (const [key, value] of Object.entries(profile.user.userConnections) || {}) {
+      connection_array.push(`​**${key}:**${value}`);
     }
-    for (const dconn of profile.user.discordConnections) {
-      if (dconn.name) connection_array.push(`**${dconn.name} (${dconn.connection_type}):**${dconn.url}`);
-    }
+    (profile.user.discordConnections || []).forEach(dconn =>
+      connection_array.push(`​**${dconn.type}:** ${dconn.name}`)
+    );
+
     const embed = new MessageEmbed()
       .setColor("RANDOM")
       .setTitle(profile.discord.tag + "'s profile")
-      .setDescription(
-        presence ?
-          `[${presence.type === 'CUSTOM_STATUS' ?
-            presence.name :
-            presence.type
-              .replace('_')
-              .toLowerCase()
-              .charAt(0)
-              .toUpperCase() +
-            presence.type
-              .replace('_')
-              .toLowerCase()
-              .slice(1)} **${presence.type === 'CUSTOM_STATUS' ?
-                presence.state : presence.name}**]\n` :
-          '' + (profile.user.details.description || "No description set"))
+      .setDescription(profile.user.details.description, "No description set")
       .addField("Flags", flags.join(",") || "None", true)
       .addField("Email", profile.user.details.email || "not set", true)
       .addField("Gender", profile.user.details.gender || "not set", true)
-      .addField("Occupation", profile.user.details.occupation || "not set", true)
+      .addField(
+        "Occupation",
+        profile.user.details.occupation || "not set",
+        true
+      )
       .addField("Location", profile.user.details.location || "not set", true)
       .addField("Premium", profile.user.details.premium, true)
       .addField("Verified", profile.user.details.verified, true)
@@ -54,11 +44,10 @@ module.exports = {
       .setThumbnail(
         profile.discord.displayAvatarURL({
           size: 1024,
-          dynamic: true,
-          format: "png"
+          dynamic: true
         })
       )
-      .setFooter("⬆" + profile.user.details.upvotes);
+      .setFooter("❤️" + profile.user.details.likes);
     if (profile.user.details.banner)
       embed.setImage(profile.user.details.banner);
     message.channel.send(embed);

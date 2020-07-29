@@ -31,7 +31,7 @@ app.use('/api/v1',(req,res,next) => {
 })
 app
   .get('/api/v1/login', (req, res) => {
-    res.location(`https://discord.com/api/oauth2/authorize?client_id=${CLIENT_ID}&redirect_uri=${encodeURIComponent(REDIRECT_URI)}&scope=${encodeURIComponent(SCOPES)}&response_type=code`)
+    res.location(`https://discord.com/api/oauth2/authorize?client_id=${CLIENT_ID}&redirect_uri=${encodeURIComponent(REDIRECT_URI)}&scope=${encodeURIComponent(SCOPES)}&response_type=code&prompt=none`)
     res.status(308).end()
   })
   .get('/api/v1/callback', async (req, res) => {
@@ -46,7 +46,7 @@ app
     const [ user,guilds ] = await Promise.all([
       oauth2.getUser(tokenInfo.access_token),
       oauth2.getUserGuilds(tokenInfo.access_token)
-    ])
+    ]) 
     req.session.user = user
     req.session.guilds = guilds 
     req.session.tokenInfo = tokenInfo

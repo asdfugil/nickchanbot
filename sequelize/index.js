@@ -19,5 +19,9 @@ const guild_rank = sequelize.define('guild_rank',{
   guild_id:{ type:STRING,primaryKey:true },
   ranks:{ type:JSON }
 })
+const tags = sequelize.define('tags',{ 
+  guild_id:{ type:STRING,primaryKey:true },
+  tags:{ type:JSON }
+})
 sequelize.sync({force:false})
-module.exports = { snipe,language,guild_rank }
+module.exports = { snipe,language,guild_rank,tags }

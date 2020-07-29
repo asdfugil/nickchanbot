@@ -17,11 +17,10 @@ module.exports = {
     let member
     if (args[0]) member = await findMember(message, args.join(" ")).catch(error => { message.reply("That's not a valid member!") })
     else member = message.member
-    if (!member) return
+    if (!member) return message.reply("Member not found")
     let guildRanks =
-      (await guild_rank.findOne({ where: { guild_id: message.guild.id } })) || Object.create(null)
-      guildRanks = guildRanks.dataValues.ranks || {}
-    if (await guildRanks[member.id]) {
+      (await guild_rank.findOne({ where: { guild_id: message.guild.id } }))?.dataValues?.ranks || {}
+    if (guildRanks[member.id]) {
       message.channel.startTyping();
       const canvas = Canvas.createCanvas(1400, 250);
       const ctx = canvas.getContext("2d");
@@ -39,16 +38,16 @@ module.exports = {
       ctx.fillRect(
         280,
         100,
-        (parseInt(rank.getLevelXP()) /
-          parseInt(rank.getLevelTotalXP())) *
+        (parseInt(rank.levelXP) /
+          parseInt(rank.levelTotalXP)) *
         1080,
         40
       );
       ctx.font = "30px sans-serif";
       ctx.fillStyle = "white";
-      ctx.fillText(rank.getLevelXP() + " XP", 1100, 170);
+      ctx.fillText(rank.levelXP + " XP", 1100, 170);
       ctx.fillText("Total XP: " + Math.round(rank.xp), 280, 230)
-      ctx.fillText("Level " + rank.getLevel(), 280, 170);
+      ctx.fillText("Level " + rank.level, 280, 170);
       ctx.beginPath();
       ctx.arc(125, 125, 100, 0, Math.PI * 2, true);
       ctx.closePath();
