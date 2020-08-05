@@ -4,14 +4,14 @@ console.log("Starting...");
 const Discord = require("discord.js");
 const fs = require("fs");
 const { BOT_TOKEN, PREFIX, DEVS_ID, BOT_PORT } = process.env;
-const { noBotPermission, noPermission, Tag } = require('./modules')
+const { noBotPermission, noPermission, Tag, findMember, findRole } = require('./modules')
 const t = require('./modules/translate')
 const fetch = require('node-fetch')
 const prefix = PREFIX;
 const { Collection, Permissions } = Discord;
 Discord.Guild.prototype.language = 'en'
 Discord.Guild.prototype["xpCooldowns"] = new Array();
-const { language, tags, snipe } = require('./sequelize')
+const { language, tags, snipe, mute_info } = require('./sequelize')
 const tag_parser = require("./modules/parse-tag-vars")
 class NickChanBotClient extends Discord.Client {
   constructor(clientOptions) {
@@ -44,7 +44,7 @@ const client = new NickChanBotClient({
     version: 7,
     api: 'https://discord.com/api'
   },
-  disableMentions:'everyone'
+  disableMentions: 'everyone'
 });
 const moduleDirs = fs
   .readdirSync("./commands", { withFileTypes: true })
@@ -74,24 +74,39 @@ for (let moduleName of moduleDirs) {
   }
   client.modules.set(module_.id, module_)
 }
-/*
-for (const file of loggerFiles) {
-  try {
-    const logger = require(`./loggers/${file}`);
-    client.loggers.set(logger.name, logger);
-    console.log(`Loaded '${logger.name}' logger.`);
-  } catch (error) {
-    console.error(`Unable to load ${file}, reason:\n${error.stack}`);
-  }
-}
-*/
-require("./modules/loggers.js")(client);
 client.once("ready", async () => {
   console.log("Ready!");
-  mutedutil.mutedTimers(client);
-  mutedutil.updateMutedRoles(client);
-  mutedutil.autoReMute(client);
-  mutedutil.autoUpdateDataBase(client);
+  mute_info.findAll()
+    .then(allMuteInfoModels => {
+      for (const muteInfoModel of allMuteInfoModels) {
+        const { mutes, guild_id, muted_role } = muteInfoModel?.dataValues || { mutes: {} }
+        if (!client.guilds.resolve(guild_id)) return
+        const role = findRole(muted_role)
+        if (!role) return
+        for (const [memberID, expiresAt] of Object.entries(mutes)) {
+          if ((expiresAt - Date.now()) <= 100) {
+            findMember(memberID)
+              .then(member => {
+                if (!member) return
+                member.roles.remove(role, 'Automatic un-mute')
+                delete mutes[member.id]
+                mute_info.upsert({ mutes, guild_id, muted_role })
+              }).catch(_ => { })
+          } else {
+            setTimeout(async () => {
+              const newInfo = (await mute_info.findOne({ where: { guild_id: message.guild.id } }))?.dataValues
+                || { guild_id: member.guild.id, mutes: {} }
+              if (member.guild.deleted || role.deleted || !member.managable
+                || role.posiiton >= message.guild.me.roles.highest.position) return
+              await member.roles.remove(role, 'Automatic un-mute')
+              delete newInfo.mutes[member.id]
+              mute_info.upsert(newInfo)
+            }, expiresAt - Date.now())
+          }
+        }
+      }
+    })
+
   client.owner = await client.users.fetch(process.env.OWNERID);
   client.developers = [];
   DEVS_ID.split(",").forEach(dev =>
@@ -104,8 +119,7 @@ client.once("ready", async () => {
   if (!fs.readdirSync(require('os').tmpdir()).includes(client.user.tag)) {
     fs.mkdirSync(require('os').tmpdir() + `/${client.user.tag}`)
   }
-  //require('express')().get('/', (req, res) => res.send('ok')).listen(BOT_PORT)
-});
+})
 client.on("ready", async () => {
   client.user.setPresence({
     activity: {
@@ -136,7 +150,7 @@ client.on("messageDelete", async message => {
     attachments: base64.join(',')
   })
 })
-const processTag = (async (message, args,prefix) => {
+const processTag = (async (message, args, prefix) => {
   if (!message.guild) return
   const guildTags = (await tags.findOne({ where: { guild_id: message.guild.id } }))?.dataValues?.tags || {}
   const tag = guildTags[message.content.split(" ")[0].substr(prefix.length).toLowerCase()]
@@ -163,7 +177,7 @@ client.on("message", async message => {
   const args = message.content
     .slice(actualPrefix.length)
     .split(' ');
-  processTag(message, args,actualPrefix)
+  processTag(message, args, actualPrefix)
   const commandName = args.shift().toLowerCase();
   const command =
     client.commands.get(commandName) ||

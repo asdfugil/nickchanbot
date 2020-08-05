@@ -1,5 +1,6 @@
-const { Collection, MessageEmbed,TextBasedChannel,Message,GuildMember,WebhookClient,Guild } = require("discord.js");
-const Keyv = require('keyv')
+const { Collection, MessageEmbed,TextBasedChannel,Message,GuildMember,WebhookClient,Guild, Role } = require("discord.js");
+const Keyv = require('keyv');
+const { User } = require("discord.bio");
 const globalLogHooks = new Keyv("sqlite://.data/database.sqlite", {
   namespace: "log-hooks"
 });
@@ -57,19 +58,24 @@ module.exports = {
   /**
    * @param { Message } message
    * @param { string } string 
-   * @returns { Promise<GuildMember> }
+   * @returns { ?Role }
    */
   
   findRole: (message,string) => {
     const { guild } = message
     let role = message.mentions.roles.first()
     if (role) return role
-    else role = guild.roles.find(x => x.name.toLownerCase().includes(string.toLowerCase()))
+    else role = guild.roles.cache.find(x => x.name.toLownerCase().includes(string.toLowerCase()))
     if (role) return role
-    else role = guild.roles.find(x => x.hexColor === string)
+    else role = guild.roles.cache.find(x => x.hexColor === string)
     if (role) return role
-    else return guild.roles.get(string)
+    else return guild.roles.cache.get(string)
   },
+  /**
+   * @param { Message } message
+   * @param { string } string
+   * @returns { Promise<?User> } 
+   */
   findBannedUser:async (message,string) => {
     const bans = await message.guild.fetchBans()
     let user = bans.find(x => x.tag.includes(string))
@@ -77,6 +83,11 @@ module.exports = {
     user = bans.find(x => string.includes(x.id)) //@memntions and ids
     return user
   },
+  /**
+   * @param { Message } message
+   * @param { string } string
+   * @returns { Promise<User> } 
+   */
   findUser: async (message,string) => {
     if (message.guild) {
     if (message.mentions.members.first()) return message.mentions.users.first()

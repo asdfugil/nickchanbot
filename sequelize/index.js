@@ -23,5 +23,11 @@ const tags = sequelize.define('tags',{
   guild_id:{ type:STRING,primaryKey:true },
   tags:{ type:JSON }
 })
+// { member_id:Date,member2_id:Date2 }
+const mute_info = sequelize.define({ 
+  guild_id:{ type:STRING,primaryKey:true },
+  muted_role:{ type:STRING },
+  mutes:{ type:JSON }
+})
 sequelize.sync({force:false})
-module.exports = { snipe,language,guild_rank,tags }
+module.exports = { snipe,language,guild_rank,tags,mute_info }
