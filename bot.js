@@ -51,8 +51,6 @@ const moduleDirs = fs
   .filter(x => x.isDirectory)
   .filter(x => x.name !== 'index.js')
   .map(x => x.name)
-//console.log(moduleDirs)
-const mutedutil = require("./modules/muted.js");
 for (let moduleName of moduleDirs) {
   const module_ = require(`./commands/${moduleName}`)
   module_.commands = new Collection()
@@ -74,6 +72,15 @@ for (let moduleName of moduleDirs) {
   }
   client.modules.set(module_.id, module_)
 }
+client.on('guildMemberAdd', async member => {
+  const muteInfo = (await mute_info.findOne({ where: { guild_id: member.guild.id } }))?.dataValues  || { mutes: {} }
+  if (!muteInfo) return
+  if (Object.prototype.hasOwnProperty.call(muteInfo.mutes,member.id) && (muteInfo.mutes[member.id] > (Date.now() - 100) || !muteInfo[member.id])) {
+    const role = member.guild.roles.resolve(muteInfo.muted_role)
+    if (!role) return;
+    if (member.guild.me.hasPermission('MANAGE_ROLES') && role.position < member.guild.me.roles.highest.position)  member.roles.add(role,'Automatic re-mute')
+  }
+})
 client.once("ready", async () => {
   console.log("Ready!");
   mute_info.findAll()
@@ -84,25 +91,30 @@ client.once("ready", async () => {
         const role = findRole(muted_role)
         if (!role) return
         for (const [memberID, expiresAt] of Object.entries(mutes)) {
-          if ((expiresAt - Date.now()) <= 100) {
-            findMember(memberID)
-              .then(member => {
+          if (!expiresAt) return
+          findMember(memberID)
+            .then(member => {
+              if ((expiresAt - Date.now()) <= 100) {
                 if (!member) return
                 member.roles.remove(role, 'Automatic un-mute')
                 delete mutes[member.id]
                 mute_info.upsert({ mutes, guild_id, muted_role })
-              }).catch(_ => { })
-          } else {
-            setTimeout(async () => {
-              const newInfo = (await mute_info.findOne({ where: { guild_id: message.guild.id } }))?.dataValues
-                || { guild_id: member.guild.id, mutes: {} }
-              if (member.guild.deleted || role.deleted || !member.managable
-                || role.posiiton >= message.guild.me.roles.highest.position) return
-              await member.roles.remove(role, 'Automatic un-mute')
-              delete newInfo.mutes[member.id]
-              mute_info.upsert(newInfo)
-            }, expiresAt - Date.now())
-          }
+              } else {
+                setTimeout(async () => {
+                  const newInfo = (await mute_info.findOne({ where: { guild_id: member.guild.id } }))?.dataValues
+                    || { guild_id: member.guild.id, mutes: {} }
+                  if (member.deleted) {
+                    delete newInfo.mutes[member.id]
+                    return mute_info.upsert(newInfo)
+                  }
+                  if (member.guild.deleted || role.deleted || !member.managable
+                    || role.posiiton >= message.guild.me.roles.highest.position) return
+                  await member.roles.remove(role, 'Automatic un-mute')
+                  delete newInfo.mutes[member.id]
+                  mute_info.upsert(newInfo)
+                }, expiresAt - Date.now())
+              }
+            }).catch(_ => { })
         }
       }
     })

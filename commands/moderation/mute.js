@@ -36,9 +36,8 @@ module.exports = {
     .addField('Reason',args.slice(2).toString() || 'No reason given')
     .setColor('RANDOM')
     message.channel.send(embed)
-    if (!timeInMs || timeInMs === Infinity) return
     const mutes = (await mute_info.findOne({ where:{ guild_id:message.guild.id }}))?.dataValues?.mutes || {}
-    mutes[member.id] = Date.now() + timeInMs
+    mutes[member.id] = (timeInMs == 0 || timeInMs == Infinity) ? Date.now() + timeInMs : null
     mute_info.upsert({ guild_id:message.guild.id,muted_role:roleID,mutes })
     setTimeout(async () => {
       const newInfo = (await mute_info.findOne({ where:{ guild_id:message.guild.id }}))?.dataValues
