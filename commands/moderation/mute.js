@@ -13,7 +13,7 @@ module.exports = {
   clientPermissions:['MANAGE_ROLES'],
   guildOnly:true,
   args:1,
-    /**
+  /**
    * 
    * @param { Message } message 
    * @param { string[] } args 

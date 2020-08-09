@@ -23,8 +23,8 @@ const tags = sequelize.define('tags',{
   guild_id:{ type:STRING,primaryKey:true },
   tags:{ type:JSON }
 })
-// { member_id:Date,member2_id:Date2 }
-const mute_info = sequelize.define({ 
+// { member_id:timestamp,member2_id:timestamp2 }
+const mute_info = sequelize.define('mute_info',{ 
   guild_id:{ type:STRING,primaryKey:true },
   muted_role:{ type:STRING },
   mutes:{ type:JSON }

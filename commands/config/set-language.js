@@ -1,6 +1,5 @@
 require('dotenv').config()
 const { language } = require('../../sequelize')
-const fetch = require('node-fetch')
 const t = require('..')
 module.exports = {
   name: 'set-language',

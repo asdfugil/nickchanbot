@@ -73,12 +73,12 @@ for (let moduleName of moduleDirs) {
   client.modules.set(module_.id, module_)
 }
 client.on('guildMemberAdd', async member => {
-  const muteInfo = (await mute_info.findOne({ where: { guild_id: member.guild.id } }))?.dataValues  || { mutes: {} }
+  const muteInfo = (await mute_info.findOne({ where: { guild_id: member.guild.id } }))?.dataValues || { mutes: {} }
   if (!muteInfo) return
-  if (Object.prototype.hasOwnProperty.call(muteInfo.mutes,member.id) && (muteInfo.mutes[member.id] > (Date.now() - 100) || !muteInfo[member.id])) {
+  if (Object.prototype.hasOwnProperty.call(muteInfo.mutes, member.id) && (muteInfo.mutes[member.id] > (Date.now() - 100) || !muteInfo[member.id])) {
     const role = member.guild.roles.resolve(muteInfo.muted_role)
     if (!role) return;
-    if (member.guild.me.hasPermission('MANAGE_ROLES') && role.position < member.guild.me.roles.highest.position)  member.roles.add(role,'Automatic re-mute')
+    if (member.guild.me.hasPermission('MANAGE_ROLES') && role.position < member.guild.me.roles.highest.position) member.roles.add(role, 'Automatic re-mute')
   }
 })
 client.once("ready", async () => {
@@ -125,7 +125,7 @@ client.once("ready", async () => {
     client.users.fetch(dev).then(user => client.developers.push(user))
   );
   client.guilds.cache.forEach(async guild => {
-    const value = await language.findOne({ where: { id: guild.id } })
+    const value = (await language.findOne({ where: { id: guild.id } }))?.dataValues || {}
     guild.language = value ? value.language : 'en'
   })
   if (!fs.readdirSync(require('os').tmpdir()).includes(client.user.tag)) {
