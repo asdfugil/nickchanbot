@@ -33,7 +33,7 @@ module.exports = {
     await member.roles.add(role,args.slice(2).toString() || 'No reason given')
     const embed = new MessageEmbed()
     .setDescription(`Member ${member.toString()} muted.`)
-    .addField('Reason',args.slice(2).toString() || 'No reason given')
+    .addField('Reason',args.slice(2).join(' ').toString() || 'No reason given')
     .setColor('RANDOM')
     message.channel.send(embed)
     const mutes = (await mute_info.findOne({ where:{ guild_id:message.guild.id }}))?.dataValues?.mutes || {}
@@ -42,7 +42,7 @@ module.exports = {
     setTimeout(async () => {
       const newInfo = (await mute_info.findOne({ where:{ guild_id:message.guild.id }}))?.dataValues
       ||  { guild_id: message.guild.id, mutes: {} }
-      if (message.guild.deleted || role.deleted || !member.managable 
+      if (message.guild.deleted || role.deleted || !member.manageable 
       || role.posiiton >= message.guild.me.roles.highest.position) return
       await member.roles.remove(role,'Automatic un-mute')
       delete newInfo.mutes[member.id]

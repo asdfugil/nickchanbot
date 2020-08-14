@@ -72,7 +72,7 @@ for (let moduleName of moduleDirs) {
   }
   client.modules.set(module_.id, module_)
 }
-client.on('guildMemberAdd', async member => {
+client.on('guildMemberAdd', async member => { 
   const muteInfo = (await mute_info.findOne({ where: { guild_id: member.guild.id } }))?.dataValues || { mutes: {} }
   if (!muteInfo) return
   if (Object.prototype.hasOwnProperty.call(muteInfo.mutes, member.id) && (muteInfo.mutes[member.id] > (Date.now() - 100) || !muteInfo[member.id])) {
@@ -80,6 +80,16 @@ client.on('guildMemberAdd', async member => {
     if (!role) return;
     if (member.guild.me.hasPermission('MANAGE_ROLES') && role.position < member.guild.me.roles.highest.position) member.roles.add(role, 'Automatic re-mute')
   }
+})
+client.on('channelCreate', async channel => {
+  if (!channel.guild) return;
+  const muteInfo = (await mute_info.findOne({
+      where: { guild_id: channel.guild.id }
+    }))?.dataValues
+    || { mutes: {} }
+  const role = member.guild.roles.resolve(muteInfo.muted_role)
+  if (!role) return;
+  if (member.guild.me.hasPermission('MANAGE_ROLES') && role.position < member.guild.me.roles.highest.position) channel.createOverwrite(role, { SEND_MESSAGES: false, SPEAK: false }, 'Muted role')
 })
 client.once("ready", async () => {
   console.log("Ready!");

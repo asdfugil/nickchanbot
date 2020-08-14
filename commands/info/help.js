@@ -86,7 +86,7 @@ module.exports = {
         if (command.info) data.push(`**${t('commands.help.info', c, g)}:** ${t(`help.${command.name}.info`, c, g)}`)
         if (command.usage) data.push(`**${t('commands.help.usage', c, g)}:** \`${actualPrefix}${command.name} ${t(`help.${command.name}.usage`, c, g)}\``)
         if (command.clientPermissions) data.push(`**${t('commands.help.bot_permission_required', c, g)}:**${command.clientPermissions.map(perm => "`" + t(`permissions.${perm}`, c, g) + "`").join(',')}`)
-        if (command.userPermissions) data.push(`**${t('commands.help.user_permissions_required', c, g)}:**${command.userPermissions.map(perm => "`" + t(`permissions.${perm}`, c, g) + "`").join(',')}`)
+        if (command.userPermissions) data.push(`**${t('commands.help.user_permission_required', c, g)}:**${command.userPermissions.map(perm => "`" + t(`permissions.${perm}`, c, g) + "`").join(',')}`)
         message.channel.send(data.join('\n'))
       } else if (module_) {
 

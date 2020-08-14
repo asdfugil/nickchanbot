@@ -1,5 +1,5 @@
 const { Sequelize,DataTypes, STRING } = require('sequelize');
-const sequelize = new Sequelize('sqlite://.data/database.sqlite')
+const sequelize = new Sequelize('sqlite://.data/database.sqlite',{ logging:false })
 const { TEXT,BOOLEAN,DATE,JSON } = DataTypes
 sequelize.authenticate();
 const snipe = sequelize.define('snipe_message',{

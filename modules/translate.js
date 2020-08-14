@@ -4,7 +4,7 @@ const t2s = new Opencc('t2s.json')
 const s2t = new Opencc('s2t.json')
 function returns(result, language) {
   if (!language.startsWith('zh_')) {
-    return result[language] || result.en
+    return result ? (result[language] || result.en) : 'undefined'
   } else {
     if (language === 'zh_Hant') {
       if (result.zh) return s2t.convertSync(result.zh)

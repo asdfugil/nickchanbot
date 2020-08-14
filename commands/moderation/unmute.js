@@ -3,10 +3,9 @@ const { findMember } = require('../../modules')
 const { Message, MessageEmbed } = require('discord.js')
 require('moment-duration-format')
 module.exports = {
-  name:'mute',
-  description:{ en:'mute a member' },
-  usage:{ en: "<member> [time] [reason]"},
-  info:{ en:'use 0 for Infinity '},
+  name:'unmute',
+  description:{ en:'unmute a member' },
+  usage:{ en: "<member> [reason]"},
   userPermissions:['MANAGE_MESSAGES'],
   clientPermissions:['MANAGE_ROLES'],
   guildOnly:true,
@@ -21,7 +20,6 @@ module.exports = {
     const roleID = (await mute_info.findOne({ where:{ guild_id:message.guild.id }}))?.dataValues?.muted_role
     const role = message.guild.roles.cache.get(roleID)
     if (!role) return message.reply('muted role not set or deleted.')
-    if (!timeInMs) readableTime = 'infinity'
     const member = await findMember(message,args[0])
     if (member.roles.highest.position >= message.member.roles.highest.position) return message.reply('No muting someone higher than you.')
     if (role.position >= message.guild.me.roles.highest.position) return message.reply('the muted role is higher than me and I can\' assign the role.')
