@@ -37,7 +37,7 @@ module.exports = {
     .setColor('RANDOM')
     message.channel.send(embed)
     const mutes = (await mute_info.findOne({ where:{ guild_id:message.guild.id }}))?.dataValues?.mutes || {}
-    mutes[member.id] = (timeInMs == 0 || timeInMs == Infinity) ? Date.now() + timeInMs : null
+    mutes[member.id] = Date.now() + timeInMs
     mute_info.upsert({ guild_id:message.guild.id,muted_role:roleID,mutes })
     setTimeout(async () => {
       const newInfo = (await mute_info.findOne({ where:{ guild_id:message.guild.id }}))?.dataValues

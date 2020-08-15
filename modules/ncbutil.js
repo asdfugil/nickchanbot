@@ -1,4 +1,4 @@
-const { Collection, MessageEmbed,TextBasedChannel,Message,GuildMember,WebhookClient,Guild, Role } = require("discord.js");
+const { Collection, MessageEmbed,TextBasedChannel,Message,GuildMember,WebhookClient,Guild,GuildChannel, Role } = require("discord.js");
 const Keyv = require('keyv');
 const { User } = require("discord.bio");
 const globalLogHooks = new Keyv("sqlite://.data/database.sqlite", {
@@ -41,31 +41,32 @@ module.exports = {
     return member1.roles.highest.postiton > member2.roles.highest.position
   },
    /**
-   * @param { Message } message
+   * @param { Message | GuildMember | Guild } message
    * @returns { Promise<GuildMember> }
    */
   findMember: async (message, string) => {
-    if (message.mentions.members.first())
+    const guild = message instanceof Guild ? message : message.guild
+    if (message instanceof Message && message.mentions.members.first())
       return message.mentions.members.first();
-    else if (message.guild.members.cache.find(x => x.user.tag.includes(string)))
-      return message.guild.members.cache.find(x => x.user.tag.includes(string));
-    else if (message.guild.members.cache.find(x => x.displayName.includes(string)))
-      return message.guild.members.cache.find(x => x.displayName.includes(string));
-    else if (message.guild.members.resolve(string))
-      return message.guild.members.resolve(string);
-    else return message.guild.members.fetch(string)
+    else if (guild.members.cache.find(x => x.user.tag.includes(string)))
+      return guild.members.cache.find(x => x.user.tag.includes(string));
+    else if (guild.members.cache.find(x => x.displayName.includes(string)))
+      return guild.members.cache.find(x => x.displayName.includes(string));
+    else if (guild.members.resolve(string))
+      return guild.members.resolve(string);
+    else return guild.members.fetch(string)
   },
   /**
-   * @param { Message } message
+   * @param { Message | GuildMember | GuildChannel | Guild } message
    * @param { string } string 
    * @returns { ?Role }
    */
   
   findRole: (message,string) => {
-    const { guild } = message
-    let role = message.mentions.roles.first()
+    const guild = message instanceof Guild ?  message : message.guild
+    let role = message instanceof Message ? message.mentions.roles.first() : false
     if (role) return role
-    else role = guild.roles.cache.find(x => x.name.toLownerCase().includes(string.toLowerCase()))
+    else role = guild.roles.cache.find(x => x.name.toLowerCase().includes(string.toLowerCase()))
     if (role) return role
     else role = guild.roles.cache.find(x => x.hexColor === string)
     if (role) return role

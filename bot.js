@@ -97,13 +97,15 @@ client.once("ready", async () => {
     .then(allMuteInfoModels => {
       for (const muteInfoModel of allMuteInfoModels) {
         const { mutes, guild_id, muted_role } = muteInfoModel?.dataValues || { mutes: {} }
-        if (!client.guilds.resolve(guild_id)) return
-        const role = findRole(muted_role)
+        const guild = client.guilds.resolve(guild_id)
+        if (!guild) return
+        const role = findRole(guild,muted_role)
         if (!role) return
         for (const [memberID, expiresAt] of Object.entries(mutes)) {
           if (!expiresAt) return
-          findMember(memberID)
+          findMember(guild,memberID)
             .then(member => {
+              console.log(1)
               if ((expiresAt - Date.now()) <= 100) {
                 if (!member) return
                 member.roles.remove(role, 'Automatic un-mute')
@@ -124,10 +126,16 @@ client.once("ready", async () => {
                   mute_info.upsert(newInfo)
                 }, expiresAt - Date.now())
               }
-            }).catch(_ => { })
+            }).catch(
+              /**
+               * @param { import("discord.js").APIErrror | Error } _
+               */
+              _ => {
+              if (_.message !== 'Unknown Member') throw _
+            })
         }
       }
-    })
+    }).catch(console.error)
 
   client.owner = await client.users.fetch(process.env.OWNERID);
   client.developers = [];
@@ -152,7 +160,7 @@ client.on("ready", async () => {
 });
 client.on("messageDelete", async message => {
   if (message.partial) return
-  const base64 = await Promise.all(
+  const base64 = ''/* await Promise.all(
     message.attachments.map(attachment => {
       return new Promise(async (resolve, reject) => {
         const chunks = []
@@ -161,7 +169,8 @@ client.on("messageDelete", async message => {
         response.body.on('close', () => resolve(Buffer.concat(chunks)))
       })
     })).then(buffers => buffers.map(buffer => buffer.toString('base64')))
-  console.log(base64)
+  */
+    console.log(base64)
   snipe.upsert({
     content: message.content,
     created_at: message.createdAt,
