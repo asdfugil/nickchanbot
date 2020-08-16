@@ -12,8 +12,8 @@ module.exports = {
   name: "exec",
   aliases: ["$","bash"],
   cooldown: 0.1,
-  description: "Run bash or command on terminal (bot developers only)",
-  usage: "<terminal-command>",
+  description: {en:"Run bash or command on terminal (bot developers only)"},
+  usage: {en:"<terminal-command>"},
   translations:{
     empty_output:{
       

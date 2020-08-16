@@ -8,7 +8,7 @@ module.exports = {
   args: true,
   usage:{en: "<query>"},
   description:{en: "Search anime on AniList." },
-  info: { en:"A raw JSON file will also be provided."},
+  info: { en:"A raw JSON file will also be provided. Some fields will be truncated as they are too long"},
   async execute(message, args) {
     /*
     Type:anime
@@ -103,13 +103,13 @@ ${content.join("\n")}`,
           )
           .addField(
             "Characters",
-            anime.characters.map(x => `${x.name}  (${x.id})`).join(", ")
+            anime.characters.map(x => `${x.name}  (${x.id})`).join(", ").substring(0,1023)
           )
           .addField(
             "Staff",
             anime.staff
               .map(x => `${x.native || x.name} (${x.name}) - ID: ${x.id}`)
-              .join("\n")
+              .join("\n").substring(0,1023)
           )
           .addField(
             "Studios",

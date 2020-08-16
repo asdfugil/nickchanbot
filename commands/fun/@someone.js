@@ -3,8 +3,8 @@ const { noBotPermission } = require("../../modules/ncbutil.js")
 module.exports = {
   name: "@someone",
   aliases: ["random-ping"],
-  description: "Randomly pings people",
-  usage: "[message]",
+  description: {en:"Randomly pings people"},
+  usage: {en:"[message]"},
   cooldown: 180,
   guildOnly: true,
   async execute(message, args) {

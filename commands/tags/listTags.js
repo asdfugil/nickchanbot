@@ -2,7 +2,7 @@ const { tags } = require('../../sequelize')
 module.exports = {
   name: "listTags",
   aliases: ["list-tags"],
-  description: "list tags (custom commands)",
+  description: {en:"list tags (custom commands)"},
   guildOnly: true,
   args: 0,
   async execute(message, args) {

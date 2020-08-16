@@ -6,6 +6,7 @@ module.exports = {
     name: 'manga-byid',
     aliases: ['mangabyid'],
     description:{en: 'GET manga by id on AniList'},
+    info:{en:' Some fields will be truncated as they are too long'},
     execute: async (message, args) => await module.exports.getManga(message, parseInt(args.join(' '))),
     async getManga(message, id) {
         anilist.media
@@ -52,7 +53,7 @@ module.exports = {
                         "Staff",
                         manga.staff
                             .map(x => `${x.native || x.name} (${x.name}) - ID: ${x.id}`)
-                            .join("\n")
+                            .join("\n").substring(0,1023)
                     )
                     .addField("Weighted mean score", manga.averageScore + "/100")
                     .addField("Trending", manga.trending)
@@ -91,13 +92,13 @@ module.exports = {
                         manga.tags
                             .map(tag => {
                                 if (tag.isMediaSpoiler) return `||${tag}||`
-                                else return tag
+                                else return tag.name
                             })
                             .join(", ")
                     )
                     if (manga.characters) embed.addField(
                         "Characters",
-                        manga.characters.map(x => `${x.name}  (${x.id})`).join(", ") 
+                        manga.characters.map(x => `${x.name}  (${x.id})`).join(", ").substring(0,1023)
                     )
                     if (manga.staff)  embed.setAuthor(manga.staff[0].native || manga.staff[0].name)
                 await message.channel.send("", { embed: embed });

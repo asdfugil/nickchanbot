@@ -3,5 +3,6 @@
         "en":"devs only"
     },
     "description":{ "en": "Bot developers only commands" },
+    "devsOnly":true,
     "id":"devs-only"
 } 

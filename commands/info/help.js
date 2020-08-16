@@ -1,6 +1,6 @@
 require('dotenv').config()
 const t = require('..')
-const { MessageEmbed } = require('discord.js')
+const { MessageEmbed, Permissions } = require('discord.js')
 const Keyv = require('keyv')
 const prefixs = new Keyv("sqlite://.data/database.sqlite", {
   namespace: "prefixs"
@@ -85,8 +85,22 @@ module.exports = {
         if (command.nsfw) data.push(`**${t('commands.help.nsfw', c, g)}:** ${t(`util.boolean.true`, c, g)}`)
         if (command.info) data.push(`**${t('commands.help.info', c, g)}:** ${t(`help.${command.name}.info`, c, g)}`)
         if (command.usage) data.push(`**${t('commands.help.usage', c, g)}:** \`${actualPrefix}${command.name} ${t(`help.${command.name}.usage`, c, g)}\``)
-        if (command.clientPermissions) data.push(`**${t('commands.help.bot_permission_required', c, g)}:**${command.clientPermissions.map(perm => "`" + t(`permissions.${perm}`, c, g) + "`").join(',')}`)
-        if (command.userPermissions) data.push(`**${t('commands.help.user_permission_required', c, g)}:**${command.userPermissions.map(perm => "`" + t(`permissions.${perm}`, c, g) + "`").join(',')}`)
+        if (command.clientPermissions) 
+        data.push(`**${t('commands.help.bot_permission_required', c, g)}:**${Object.entries(
+          (new Permissions(command.clientPermissions)
+          ).serialize())
+          .filter(x => x[1])
+          .map(x => x[0])
+          .map(perm => "`" + t(`permissions.${perm}`, c, g) + "`")
+          .join(',')}`)
+        if (command.userPermissions) 
+        data.push(`**${t('commands.help.user_permission_required', c, g)}:**${Object.entries(
+          (new Permissions(command.userPermissions))
+          .serialize())
+          .filter(x => x[1])
+          .map(x => x[0])
+          .map(perm => "`" + t(`permissions.${perm}`, c, g) + "`")
+          .join(',')}`)
         message.channel.send(data.join('\n'))
       } else if (module_) {
 

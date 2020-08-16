@@ -25,7 +25,7 @@ module.exports = {
   aliases: ["run", "execute"],
   cooldown: 0.1,
   description: { en: "Execute code (bot developers only)",zh:"運行程式碼（僅限開發者）" },
-  usage: "<code>",
+  usage: {en:"<code>"},
   translations:{
     error:{
       en:"error",

@@ -8,8 +8,8 @@ module.exports = {
   guildOnly: true,
   args: 2,
   aliases: ["set-mute", "voice-mute"],
-  description: "Voice mute a member",
-  usage: "<true|false> <member>",
+  description: {en:"Voice mute a member"},
+  usage: {en:"<true|false> <member>"},
   cooldown: 3,
   voiceChannel:(message,args) => { 
     const member = findMember(message, args.slice(1).join(" "))

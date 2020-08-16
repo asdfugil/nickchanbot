@@ -5,9 +5,9 @@ const fetch = require("node-fetch")
 module.exports = {
   name: "npm",
   args: true,
-  usage: "<query>",
+  usage: {en:"<query>"},
   aliases: ["pnpm"],
-  description: "search a package on npm",
+  description: {en:"search a package on npm"},
 /**
   * @param { Message } message 
   * @param { Array<string> } args

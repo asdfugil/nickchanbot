@@ -5,10 +5,10 @@ const ytdl = require("ytdl-core");
 const searcher = new YTSearcher({ key: process.env.YOUTUBE_KEY });
 module.exports = {
   name: "play",
-  description: "plays music",
+  description: {en:"plays music"},
   guildOnly: true,
   aliases:["p"],
-  usage:"<search query or youtube url>",
+  usage:{en:"<search query or youtube url>"},
   args: true,
   cooldown: 2,
   clientPermissions:['CONNECT','SPEAK'],

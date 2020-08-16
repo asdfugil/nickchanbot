@@ -4,7 +4,7 @@ const anilist = new AniList(process.env.ANILIST_TOKEN);
 module.exports = {
   name: "manga",
   args: true,
-  usage: "<query>",
+  usage: {en:"<query>"},
   description:{en: "Search manga on AniList."},
   info: "A raw JSON file will also be provided.",
   async execute(message, args) {

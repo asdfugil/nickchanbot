@@ -6,7 +6,7 @@ module.exports = {
   cooldown: 5, //Rate limit
   async execute(message, args) {
     const bio = new Bio();
-    const slugOrID = args.join(" ") || message.author.id;
+    const slugOrID = message.mentions.users.first()?.id || args.join(" ") || message.author.id;
     const profile = await bio.users.details(slugOrID).catch(error => {
       message.reply("This user has no discord.bio profile");
     });

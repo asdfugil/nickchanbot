@@ -4,7 +4,7 @@ module.exports = {
   name: "userinfo",
   aliases: ["whois", "user-info"],
   description: { en: "shows user info" },
-  usage: "[user resolvable]",
+  usage: {en:"[user resolvable]"},
   cooldown: 2,
   execute: async (message, args) => {
     let user
