@@ -46,7 +46,8 @@ module.exports = {
     }, second: {
       en: "second(s)",
       zh: "秒"
-    }
+    }, command_list: { en:"Command list" },
+    devsOnly:{ en:'bot developers only' }
   },
   clientPermissions: 16384,
   async execute(message, args) {
@@ -103,9 +104,18 @@ module.exports = {
           .join(',')}`)
         message.channel.send(data.join('\n'))
       } else if (module_) {
-
+        const data = []
+        data.push(`**${t('commands.help.name',c,g)}:** ` + t(`modules.${module_.id}.name`,c,g))
+        if (module_.description) data.push(`**${t('commands.help.description',c,g)}:** ` + t(`modules.${module_.id}.description`,c,g))
+        if (module_.nsfw) data.push(`**${t('commands.help.nsfw',c,g)}:** ` + t('util.boolean.'+Boolean(module_.nsfw).toString(),c,g))
+        if (module_.devsOnly) data.push(`**${t('commands.help.devsOnly',c,g)}:** ` + t('util.boolean.'+Boolean(module_.devsOnly).toString(),c,g))
+        data.push(`**${t('commands.help.command_list',c,g)}:**`)
+        module_.commands.forEach(cmd => {
+          data.push('`' + cmd.name + '` - ' + t(`help.${cmd.name}.description`,c,g))
+        })
+        message.channel.send(data.join('\n'))
       } else {
-
+        message.reply('Unknown command or module.')
       }
     }
   }
