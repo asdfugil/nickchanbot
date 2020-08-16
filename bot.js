@@ -82,14 +82,16 @@ client.on('guildMemberAdd', async member => {
   }
 })
 client.on('channelCreate', async channel => {
+  try {
   if (!channel.guild) return;
   const muteInfo = (await mute_info.findOne({
       where: { guild_id: channel.guild.id }
     }))?.dataValues
     || { mutes: {} }
-  const role = member.guild.roles.resolve(muteInfo.muted_role)
+  const role = channel.guild.roles.resolve(muteInfo.muted_role)
   if (!role) return;
-  if (member.guild.me.hasPermission('MANAGE_ROLES') && role.position < member.guild.me.roles.highest.position) channel.createOverwrite(role, { SEND_MESSAGES: false, SPEAK: false }, 'Muted role')
+  if (channel.guild.me.hasPermission('MANAGE_ROLES') && role.position < channel.guild.me.roles.highest.position) channel.createOverwrite(role, { SEND_MESSAGES: false, SPEAK: false }, 'Muted role')
+  } catch (error) { console.error(error) }
 })
 client.once("ready", async () => {
   console.log("Ready!");
@@ -105,7 +107,6 @@ client.once("ready", async () => {
           if (!expiresAt) return
           findMember(guild,memberID)
             .then(member => {
-              console.log(1)
               if ((expiresAt - Date.now()) <= 100) {
                 if (!member) return
                 member.roles.remove(role, 'Automatic un-mute')
@@ -119,9 +120,9 @@ client.once("ready", async () => {
                     delete newInfo.mutes[member.id]
                     return mute_info.upsert(newInfo)
                   }
-                  if (member.guild.deleted || role.deleted || !member.managable
-                    || role.posiiton >= message.guild.me.roles.highest.position) return
-                  await member.roles.remove(role, 'Automatic un-mute')
+                    if (member.guild.deleted || role.deleted
+                    || role.posiiton >= member.guild.me.roles.highest.position || !member.guild.me.hasPermission('MANAGE_ROLES')) return
+                    await member.roles.remove(role, 'Automatic un-mute')
                   delete newInfo.mutes[member.id]
                   mute_info.upsert(newInfo)
                 }, expiresAt - Date.now())
@@ -170,7 +171,6 @@ client.on("messageDelete", async message => {
       })
     })).then(buffers => buffers.map(buffer => buffer.toString('base64')))
   */
-    console.log(base64)
   snipe.upsert({
     content: message.content,
     created_at: message.createdAt,
