@@ -1,4 +1,8 @@
 #!/usr/bin/env node
+console.log(`Nick Chan Bot Copyright (C) 2020 Assfugil
+This program comes with ABSOLUTELY NO WARRANTY;
+This is free software, and you are welcome to redistribute it
+under the conditions of the GNU GPL-3.0 or a later version; `)
 const { exec } = require('child_process')
 const proxy = exec('node server/index.js')
 console.log('[Main] Started proxy server.')
