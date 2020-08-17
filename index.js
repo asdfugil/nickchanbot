@@ -1,15 +1,22 @@
-console.log("Launching shard manager...");
-require("dotenv").config();
-const { ShardingManager, WebhookClient } = require("discord.js");
-const { TOKEN } = process.env;
-const manager = new ShardingManager("./bot.js", {
-  token: TOKEN,
-  mode: "process"
-});
-manager.spawn(1, 4000);
-manager.on("launch", shard => console.log(`Launched shard ${shard.id}.`));
-manager.on("message", (shard, receivedMessage) => {
-  console.log("Message received from shard " + shard.id);
-  console.log(receivedMessage._eval);
-  console.log(receivedMessage._result);
-});
+#!/usr/bin/env node
+console.log(`Nick Chan Bot Copyright (C) 2020 Assfugil
+This program comes with ABSOLUTELY NO WARRANTY;
+This is free software, and you are welcome to redistribute it
+under the conditions of the GNU GPL-3.0 or a later version; `)
+const { exec } = require('child_process')
+const proxy = exec('node server/index.js')
+console.log('[Main] Started proxy server.')
+const bot = exec('node manager.js')
+console.log('[Main] Started bot')
+proxy.stderr.on('data',data => process.stderr.write(`[Proxy] ${data.toString()}`))
+bot.stderr.on('data',data => process.stderr.write(`[Bot] ${data.toString()}`))
+proxy.stdout.on('data',data => process.stdout.write(`[Proxy] ${data.toString()}`))
+bot.stdout.on('data',data => process.stdout.write(`[Bot] ${data.toString()}`))
+require('fs').writeFileSync('pidfile',process.pid.toString())
+process.on('SIGTERM',() => {
+  console.log('[Main] SIGTERM')
+  console.log('[Main] Killing child')
+  bot.kill('SIGTERM')
+  proxy.kill('SIGTERM')
+  process.exit(0)
+})

@@ -1,0 +1,123 @@
+{
+    "CREATE_INSTANT_INVITE": {
+        "en":"create instant invite",
+        "zh":"建立邀請"
+    },
+    "KICK_MEMBERS": {
+        "en":"kick members",
+        "zh":"踢出成員"
+    },
+    "BAN_MEMBERS": {
+        "en":"ban members",
+        "zh":"驅逐成員"
+    },
+    "ADMINISTRATOR": {
+        "en":"administrator",
+        "zh":"管理員"
+    },
+    "MANAGE_CHANNELS": {
+        "en":"manage channels",
+        "zh":"管理頻道"
+    },
+    "MANAGE_GUILD": {
+        "en":"manage server",
+        "zh":"管理何服器"
+    },
+    "ADD_REACTIONS": {
+        "en":"add reactions",
+        "zh":"新增反應"
+    },
+    "VIEW_AUDIT_LOG": {
+        "en":"view audit log",
+        "zh":"檢視審核日誌"
+    },
+    "PRIORITY_SPEAKER": {
+        "en":"priority speaker",
+        "zh":"優先發言者"
+    },
+    "STREAM": {
+        "en":"streaming",
+        "zh":"視訊通話"
+    },
+    "VIEW_CHANNEL": {
+        "en":"view channel",
+        "zh":"讀取文字頻道及觀看語音頻道"
+    },
+    "SEND_MESSAGES": {
+        "en":"send messages",
+        "zh":"發送訊息"
+    },
+    "SEND_TTS_MESSAGES": {
+        "en":"send TTS messages",
+        "zh":"發送訊息"
+    },
+    "MANAGE_MESSAGES": {
+        "en":"managa messages",
+        "zh":"管理訊息"
+    },
+    "EMBED_LINKS": {
+        "en":"embed links",
+        "zh":"嵌入連結"
+    },
+    "ATTACH_FILES": {
+        "en":"attach files",
+        "zh":"附加檔案"
+    },
+    "READ_MESSAGE_HISTORY": {
+        "en":"read message history",
+        "zh":"讀取訊息歷史"
+    },
+    "MENTION_EVERYONE": {
+        "en":"mention @everyone,@here and all roles",
+        "zh":""
+    },
+    "USE_EXTERNAL_EMOJIS": {
+        "en":"use external emojis",
+        "zh":"使用外部表情符號"
+    },
+    "CONNECT": {
+        "en":"connect",
+        "zh":"連接"
+    },
+    "SPEAK": {
+        "en":"speak",
+        "zh":"說話"
+    },
+    "MUTE_MEMBERS": {
+        "en":"mute members",
+        "zh":"讓成員靜音"
+    },
+    "DEAFEN_MEMBERS": {
+        "en":"deafen memners",
+        "zh":"讓成員拒聽"
+    },
+    "MOVE_MEMBERS": {
+        "en":"move members",
+        "zh":"移動成員"
+    },
+    "USE_VAD": {
+        "en":"use voice activity detection",
+        "zh":"使用語音活動"
+    },
+    "CHANGE_NICKNAME": {
+        "en":"change nickname",
+        "zh":"更改暱稱"
+    },
+    "MANAGE_NICKNAMES": {
+        "en":"manage nickname",
+        "zh":"管理暱稱"
+    },
+    "MANAGE_ROLES": {
+        "en":"manage roles",
+        "zh":"管理身份組"
+    },
+    "MANAGE_WEBHOOKS": {
+        "en":"manage webhooks",
+        "zh":"管理Webhooks"
+    },
+    "MANAGE_EMOJIS": {
+        "en":"manage emojis",
+        "zh":"管理表情符號"
+    }
+  }
+  

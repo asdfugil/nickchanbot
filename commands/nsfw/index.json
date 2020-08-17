@@ -1,0 +1,9 @@
+{
+    "nsfw":true,
+    "name":{
+        "en":"NSFW"
+    },
+    "description":{ "en":"NSFW stuff" },
+    "clientPermissions":"ATTACH_FILES",
+    "id":"nsfw"
+}

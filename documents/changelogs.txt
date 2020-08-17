@@ -1,1 +1,34 @@
-patched a vulnerability in the npm command (CVE-2020-5282)
+- Bot rewritten from scratch
+- This release contains all beta features
+- Removed spam,embed-spam and spam-ping command 
+(Fun)
+- addad anime,manga,anime-byid,manga-byid,
+anime-manga-character,anime-manga-character-byid command
+- added nick command
+(Music)
+- added summon,disconnect,loop,pause,resume,volume command
+(Info)
+- added urban command
+- added member-info,invite-info,uptimerobot command
+- Added a rank card for the rank command
+- Added xp-leaderboard command
+- Changed how this changelogs command work
+- Added math command
+(Voice)
+- added voicemute,deafen command
+(Moderation)
+- Added mute,set-muted-role command
+- Added stoptyping command
+- Reworked a few loggers
+- Added deafen and voicemute command
+(Public developer commands)
+- Added npm and vm command.
+(Bug fixes)
+- This release squashes so many bugs we couldn’t keep track of them. Sorry bugs…
+(Others)
+- Added randomping command with a 180 seconds cooldown
+- Added qr command
+- Used SQLite as database,all previous data is deleted (That won't happen again).
+- Added tags (custom commands) system
+- Aailable commands:list-tag,tag-info,addtag,delete-tag
+- Use help addtag to view the documentation on tags

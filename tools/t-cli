@@ -1,0 +1,7 @@
+#!/usr/bin/env node
+// command-line translation tool
+process.chdir(__dirname + '/../commands')
+if (!process.argv[2]) {
+    console.log('Usage: t-cli <target language>')
+    process.exit(1)
+}
