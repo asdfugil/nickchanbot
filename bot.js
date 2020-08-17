@@ -72,7 +72,7 @@ for (let moduleName of moduleDirs) {
   }
   client.modules.set(module_.id, module_)
 }
-client.on('guildMemberAdd', async member => { 
+client.on('guildMemberAdd', async member => {
   const muteInfo = (await mute_info.findOne({ where: { guild_id: member.guild.id } }))?.dataValues || { mutes: {} }
   if (!muteInfo) return
   if (Object.prototype.hasOwnProperty.call(muteInfo.mutes, member.id) && (muteInfo.mutes[member.id] > (Date.now() - 100) || !muteInfo[member.id])) {
@@ -83,14 +83,14 @@ client.on('guildMemberAdd', async member => {
 })
 client.on('channelCreate', async channel => {
   try {
-  if (!channel.guild) return;
-  const muteInfo = (await mute_info.findOne({
+    if (!channel.guild) return;
+    const muteInfo = (await mute_info.findOne({
       where: { guild_id: channel.guild.id }
     }))?.dataValues
-    || { mutes: {} }
-  const role = channel.guild.roles.resolve(muteInfo.muted_role)
-  if (!role) return;
-  if (channel.guild.me.hasPermission('MANAGE_ROLES') && role.position < channel.guild.me.roles.highest.position) channel.createOverwrite(role, { SEND_MESSAGES: false, SPEAK: false }, 'Muted role')
+      || { mutes: {} }
+    const role = channel.guild.roles.resolve(muteInfo.muted_role)
+    if (!role) return;
+    if (channel.guild.me.hasPermission('MANAGE_ROLES') && role.position < channel.guild.me.roles.highest.position) channel.createOverwrite(role, { SEND_MESSAGES: false, SPEAK: false }, 'Muted role')
   } catch (error) { console.error(error) }
 })
 client.once("ready", async () => {
@@ -101,11 +101,11 @@ client.once("ready", async () => {
         const { mutes, guild_id, muted_role } = muteInfoModel?.dataValues || { mutes: {} }
         const guild = client.guilds.resolve(guild_id)
         if (!guild) return
-        const role = findRole(guild,muted_role)
+        const role = findRole(guild, muted_role)
         if (!role) return
         for (const [memberID, expiresAt] of Object.entries(mutes)) {
           if (!expiresAt) return
-          findMember(guild,memberID)
+          findMember(guild, memberID)
             .then(member => {
               if ((expiresAt - Date.now()) <= 100) {
                 if (!member) return
@@ -120,9 +120,9 @@ client.once("ready", async () => {
                     delete newInfo.mutes[member.id]
                     return mute_info.upsert(newInfo)
                   }
-                    if (member.guild.deleted || role.deleted
+                  if (member.guild.deleted || role.deleted
                     || role.posiiton >= member.guild.me.roles.highest.position || !member.guild.me.hasPermission('MANAGE_ROLES')) return
-                    await member.roles.remove(role, 'Automatic un-mute')
+                  await member.roles.remove(role, 'Automatic un-mute')
                   delete newInfo.mutes[member.id]
                   mute_info.upsert(newInfo)
                 }, expiresAt - Date.now())
@@ -132,8 +132,8 @@ client.once("ready", async () => {
                * @param { import("discord.js").APIErrror | Error } _
                */
               _ => {
-              if (_.message !== 'Unknown Member') throw _
-            })
+                if (_.message !== 'Unknown Member') throw _
+              })
         }
       }
     }).catch(console.error)
@@ -160,8 +160,9 @@ client.on("ready", async () => {
   });
 });
 client.on("messageDelete", async message => {
-  if (message.partial) return
-  const base64 = ''/* await Promise.all(
+  try {
+    if (message.partial) return
+    const base64 = ''/* await Promise.all(
     message.attachments.map(attachment => {
       return new Promise(async (resolve, reject) => {
         const chunks = []
@@ -171,15 +172,18 @@ client.on("messageDelete", async message => {
       })
     })).then(buffers => buffers.map(buffer => buffer.toString('base64')))
   */
-  snipe.upsert({
-    content: message.content,
-    created_at: message.createdAt,
-    author_tag: message.author.tag,
-    author_avatar_url: message.author.displayAvatarURL({ dynamic: true, size: 256 }),
-    channel_id: message.channel.id,
-    is_dm: message.channel.type === 'dm',
-    attachments: base64.join(',')
-  })
+    snipe.upsert({
+      content: message.content,
+      created_at: message.createdAt,
+      author_tag: message.author.tag,
+      author_avatar_url: message.author.displayAvatarURL({ dynamic: true, size: 256 }),
+      channel_id: message.channel.id,
+      is_dm: message.channel.type === 'dm',
+      //  attachments: base64.join(',')
+    }).catch(console.error)
+  } catch (error) {
+    console.error(error)
+  }
 })
 const processTag = (async (message, args, prefix) => {
   if (!message.guild) return

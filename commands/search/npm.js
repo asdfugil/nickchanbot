@@ -17,7 +17,7 @@ module.exports = {
     message.channel.send(
       `Searching \`${args
         .join(" ")
-        .replace(/\n/g, " ")}\` on ${message.client.emojis.get(
+        .replace(/\n/g, " ")}\` on ${message.client.emojis.cache.get(
          process.env.NPM_EMOJI_ID
         )}...`,
       { disableEveryone: true }

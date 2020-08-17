@@ -14,7 +14,6 @@ module.exports = {
         if (error.code === 10013) return
         else throw error
       })
-      console.log(user)
     if (!user) return message.reply("That's not a valid user!")
     const embed = new MessageEmbed()
       .setAuthor(
