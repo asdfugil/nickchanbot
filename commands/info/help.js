@@ -69,7 +69,7 @@ module.exports = {
           .addField(t('modules.' + module_.id + '.name', c, g), module_.commands.map(x => `\`${x.name}\``).join(",") || "None")
           .setColor(0xac1677)
       }
-      message.channel.send(t('commands.help.command_count', c, g) + ":" + client.commands.size, {
+      message.channel.send(t('commands.help.command_count', c, g) + ":" + client.commands.size + '\n**Support Server:** ' + process.env.SUPPORT_SERVER_LINK, {
         embed: embed
       })
     } else {
