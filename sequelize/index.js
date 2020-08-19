@@ -1,6 +1,6 @@
-const { Sequelize,DataTypes, STRING } = require('sequelize');
+const { Sequelize,DataTypes } = require('sequelize');
 const sequelize = new Sequelize('sqlite://.data/database.sqlite',{ logging:false })
-const { TEXT,BOOLEAN,DATE,JSON } = DataTypes
+const { TEXT,BOOLEAN,DATE,JSON,STRING } = DataTypes
 sequelize.authenticate();
 const snipe = sequelize.define('snipe_message',{
     content:{ type:TEXT },
@@ -23,11 +23,18 @@ const tags = sequelize.define('tags',{
   guild_id:{ type:STRING,primaryKey:true },
   tags:{ type:JSON }
 })
-// { member_id:timestamp,member2_id:timestamp2 }
 const mute_info = sequelize.define('mute_info',{ 
   guild_id:{ type:STRING,primaryKey:true },
   muted_role:{ type:STRING },
   mutes:{ type:JSON }
+})
+const rank_background = sequelize.define('rank_background',{ 
+  user_id:{ type: STRING,primaryKey:true },
+  url:{ type:STRING }
+})
+const prefixes = sequelize.define('prefix',{
+  guild_id:{ type:STRING },
+  prefix:{ type:STRING }
 })
 sequelize.sync({force:false})
 module.exports = { snipe,language,guild_rank,tags,mute_info }
