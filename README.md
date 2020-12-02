@@ -16,6 +16,8 @@ Nick Chan#5213 [BOT] (Nick Chan Bot) is a private Discord bot written by Nick Ch
 
 **Default Prefix** : !
 
+## License
+GPL-3.0-or-later (exception given to @mgplayz)
 ## Support
 
 [Support server link](https://discord.gg/uzvHwQv)
