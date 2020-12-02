@@ -1,3 +1,5 @@
+# NO LONGER MAINTAINED, check out https://github.com/mgplayzyt/mgplayz-bot for a replacement.
+
 <div align="center">
     <img src="https://i.imgur.com/mAojAot.png"><br><br>
 ---
