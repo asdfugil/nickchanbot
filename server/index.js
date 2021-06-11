@@ -6,7 +6,7 @@ const { CLIENT_ID, CLIENT_SECRET, REDIRECT_URI, SCOPES, SESSION_SECRET } = proce
 const DiscordOAuth2 = require('discord-oauth2')
 const session = require('express-session')
 const MemoryStore = require('memorystore')(session)
-const https = require('https')
+//const https = require('https')
 const fs = require('fs');
 app.use(session({
   cookie: { secure: true, maxAge: 604800000 }, // valid for 14 days
@@ -67,7 +67,8 @@ app
   .use('/api/v1/*',(req,res) => {
     res.send('"Not Found"')
   })
-https.createServer({
-  key:fs.readFileSync('./server/ssl/private.pem','utf8'),
-  cert:fs.readFileSync('./server/ssl/certificate.crt','utf8')
-},app).listen(process.env.PORT || 4000)
+//https.createServer({
+  //key:fs.readFileSync('./server/ssl/private.pem','utf8'),
+  //cert:fs.readFileSync('./server/ssl/certificate.crt','utf8')
+//},app).listen(process.env.PORT || 4000)
+app.listen(process.env.PORT || 4000)

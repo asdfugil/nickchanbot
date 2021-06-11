@@ -71,8 +71,7 @@ ${content.join("\n")}`,
           .addField("English title", anime.title.romaji || "N/A")
           .addField(
             "Links",
-            anime.externalLinks
-              .map((link, index) => `[${index}](${link})`)
+            anime.externalLinks?.map((link, index) => `[${index}](${link})`)
               .join(",") || "N/A"
           )
           .addField("Episode length", anime.duration + " minutes")

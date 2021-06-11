@@ -1,4 +1,4 @@
-#!/usr/bin/env sh
-NCBBASEDIR=$(dirname "$0")
-cd $NCBBASEDIR
-node --max-old-space-size=6942 . $@
+#!/usr/bin/env bash
+. ~/.nvm/nvm.sh
+nvm use 14 > /dev/null
+node --max-old-space-size=1024 . $@
