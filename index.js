@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-console.log(`Nick Chan Bot Copyright (C) 2020 Assfugil
+console.log(`Nick Chan Bot Copyright (C) 2021 Assfugil
 This program comes with ABSOLUTELY NO WARRANTY;
 This is free software, and you are welcome to redistribute it
 under the conditions of the GNU GPL-3.0 or a later version; `)
