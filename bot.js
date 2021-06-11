@@ -262,7 +262,7 @@ arguments:${args}`);
     return message.reply("NSFW commands can only be used in NSFW channels.");
   if (command.args > args.length) {
     let reply = `You didn't provide enough arguments, ${message.author}!`;
-    if (command.usage) reply += `\nThe proper usage would be: \`${actualPrefix}${command.name} ${command.usage}\``;
+    if (command.usage) reply += `\nThe proper usage would be: \`${actualPrefix}${command.name} ${command.usage[message.guild.language] || command.usage.en}\``;
     return message.channel.send(reply);
   }
   if (!client.cooldowns.has(command.name)) client.cooldowns.set(command.name, new Collection());

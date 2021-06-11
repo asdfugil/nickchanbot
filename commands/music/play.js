@@ -20,10 +20,9 @@ module.exports = {
       return message.reply("You must be in a voice channel to play music!");
     const result = (await searcher.search(args.join(" "))).first;
     if (!result) return message.reply("No results");
-    const songInfo = await ytdl.getInfo(result.url);
     const song = {
-      title: songInfo.title,
-      url: songInfo.video_url
+      title: result.title,
+      url: result.url
     };
 
     if (!serverQueue) {
