@@ -1,7 +1,5 @@
 require("dotenv").config();
 const { YTSearcher } = require("ytsearcher");
-const { noBotPermission } = require("../../modules/ncbutil.js");
-const ytdl = require("ytdl-core");
 const youtubedl = require("youtube-dl-exec")
 const searcher = new YTSearcher({ key: process.env.YOUTUBE_KEY });
 module.exports = {
@@ -81,11 +79,8 @@ module.exports = {
     try {
     const dispatcher = serverQueue.connection
       .play(youtubedl.raw(song.url, { output: "-",extractAudio:true }).stdout,{passes:2})
-      //2 times
-      //Youtube intentionally rate limkt audio only downloads,so we use the worst video quality as possible instead of audio only
       .on("speaking", speaking => {
         if (speaking) return
-        console.log("Music ended!");
         if (serverQueue.looping !== "song") {
           if (serverQueue.looping === "queue") serverQueue.songs.push(serverQueue.songs[0]);
           serverQueue.songs.shift();
@@ -93,6 +88,8 @@ module.exports = {
         module.exports.play(message, serverQueue.songs[0]);
       })
       .on("error", error => {
+        message.channe.send(`Skipping ${song.title} due to error: \`\`\`\n${error.message}\n\`\`\``)
+        serverQueue.songs.shift();
         console.error(error);
       });
     message.channel.send(`Started playing ${song.title}.`);
