@@ -23,8 +23,10 @@ module.exports = {
     result = (await searcher.search(args.join(" "))).first;
    } else {
      const resulttext = await youtubedl(args.join(" "),{
+     noWarnings:true,
+     noCallHome:true,
      simulate:true,
-     getTitle:true
+     getTitle:true,
      }).catch(error => { message.channel.send(error.message.split("--simulate --get-title")[1]) })
        if (!resulttext) return
        result = {
@@ -78,7 +80,13 @@ module.exports = {
     }
     try {
     const dispatcher = serverQueue.connection
-      .play(youtubedl.raw(song.url, { output: "-",extractAudio:true }).stdout,{passes:2})
+      .play(youtubedl.raw(song.url, {
+          output: "-",
+          noWarnings:true,
+          noCallHome:true,
+          preferFreeFormats: true,
+          format: "opus/bestaudio/best",
+        }).stdout,{passes:2})
       .on("speaking", speaking => {
         if (speaking) return
         if (serverQueue.looping !== "song") {
