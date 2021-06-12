@@ -2,24 +2,38 @@ require("dotenv").config();
 const { YTSearcher } = require("ytsearcher");
 const { noBotPermission } = require("../../modules/ncbutil.js");
 const ytdl = require("ytdl-core");
+const youtubedl = require("youtube-dl-exec")
 const searcher = new YTSearcher({ key: process.env.YOUTUBE_KEY });
 module.exports = {
   name: "play",
   description: {en:"plays music"},
   guildOnly: true,
   aliases:["p"],
-  usage:{en:"<search query or youtube url>"},
+  usage:{en:"<YouTube search query|youtube-dl supported URL>"},
   args: true,
   cooldown: 2,
   clientPermissions:['CONNECT','SPEAK'],
+  info: { en: "See https://ytdl-org.github.io/youtube-dl/supportedsites.html for specifically-supported URLs. Other sites may or may not work." },
   execute: async (message, args) => {
     const { queue } = message.client;
     const serverQueue = queue.get(message.guild.id);
     const channel = message.member.voice.channel;
     if (!channel)
       return message.reply("You must be in a voice channel to play music!");
-    const result = (await searcher.search(args.join(" "))).first;
-    if (!result) return message.reply("No results");
+    let result;
+   if (!args.join(" ").startsWith("http://") && !args.join(" ").startsWith("https://")) {
+    result = (await searcher.search(args.join(" "))).first;
+   } else {
+     const resulttext = await youtubedl(args.join(" "),{
+     simulate:true,
+     getTitle:true
+     }).catch(error => { message.channel.send(error.message.split("--simulate --get-title")[1]) })
+       if (!resulttext) return
+       result = {
+         title: resulttext.split("\n")[0],
+         url: args.join(" ")
+       }
+    }
     const song = {
       title: result.title,
       url: result.url
@@ -64,9 +78,9 @@ module.exports = {
       queue.delete(guild.id);
       return;
     }
-      
+    try {
     const dispatcher = serverQueue.connection
-      .play(ytdl(song.url, { options: ["lowestvideo", "highestaudio"] }),{passes:2})
+      .play(youtubedl.raw(song.url, { output: "-",extractAudio:true }).stdout,{passes:2})
       //2 times
       //Youtube intentionally rate limkt audio only downloads,so we use the worst video quality as possible instead of audio only
       .on("speaking", speaking => {
@@ -84,5 +98,9 @@ module.exports = {
     message.channel.send(`Started playing ${song.title}.`);
     dispatcher.setVolume(serverQueue.volume);
     dispatcher.setPLP(0.1)
+    } catch (error) {
+      console.log(error)
+      module.exports.play(message, serverQueue.songs[0]);
+    }
   }
 };

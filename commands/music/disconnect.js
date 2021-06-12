@@ -6,6 +6,7 @@ module.exports = {
     if (!message.guild.me.voice.channel) return message.reply("I am not connected to a voice channel.")
     if (message.guild.me.voice.speaking) return message.reply("Please use stop instead.")
     message.guild.me.voice.channel.leave()
+    message.client.queue.delete(message.guild.id)
     message.channel.send("Left voice channel.")
   }
 }
