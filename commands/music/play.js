@@ -96,7 +96,7 @@ module.exports = {
         module.exports.play(message, serverQueue.songs[0]);
       })
       .on("error", error => {
-        message.channe.send(`Skipping ${song.title} due to error: \`\`\`\n${error.message}\n\`\`\``)
+        message.channel.send(`Skipping ${song.title} due to error: \`\`\`\n${error.message}\n\`\`\``)
         serverQueue.songs.shift();
         console.error(error);
       });
