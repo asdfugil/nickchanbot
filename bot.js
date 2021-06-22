@@ -11,7 +11,7 @@ const prefix = PREFIX;
 const { Collection, Permissions } = Discord;
 Discord.Guild.prototype.language = 'en'
 Discord.Guild.prototype["xpCooldowns"] = new Array();
-const { language, tags, snipe, mute_info } = require('./sequelize')
+const { language, tags, snipe, mute_info,prefixes } = require('./sequelize')
 const tag_parser = require("./modules/parse-tag-vars")
 class NickChanBotClient extends Discord.Client {
   constructor(clientOptions) {
@@ -72,6 +72,12 @@ for (let moduleName of moduleDirs) {
   }
   client.modules.set(module_.id, module_)
 }
+process.on("uncaughtException",(error) => {
+  console.error(error)
+  client.destroy()
+  process.exit(9)
+})
+process.on("unhandledRejection",(error) => console.error(error))
 client.on('guildMemberAdd', async member => {
   const muteInfo = (await mute_info.findOne({ where: { guild_id: member.guild.id } }))?.dataValues || { mutes: {} }
   if (!muteInfo) return
@@ -204,7 +210,8 @@ client.on("message", async message => {
   if (message.guild) {
     //Read message (history),send message
     if (!message.guild.me.permissions.has(68608)) return
-    //  if (await prefixs.get(message.guild.id)) actualPrefix = await prefixs.get(message.guild.id);
+    actualPrefix = (await prefixes.findOne({ where: { guild_id: message.guild.id }}) || undefined)?.dataValues.prefix || prefix
+    console.log(actualPrefix)
   } else { if (message.channel.partial) message.channel = await message.channel.fetch() }
   if ([`<@${client.user.id}>`, `<@!${client.user.id}>`].includes(message.content))
     message.channel.send(`Hi! My prefix is \`${actualPrefix}\`\nTo get started type \`${actualPrefix}help\``);

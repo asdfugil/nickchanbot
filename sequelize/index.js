@@ -37,4 +37,4 @@ const prefixes = sequelize.define('prefix',{
   prefix:{ type:STRING }
 })
 sequelize.sync({force:false})
-module.exports = { snipe,language,guild_rank,tags,mute_info }
+module.exports = { snipe,language,guild_rank,tags,mute_info,prefixes }

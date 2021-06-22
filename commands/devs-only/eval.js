@@ -5,6 +5,7 @@ const AniList = require("anilist-node")
 const anilist = new AniList(process.env.ANILIST_TOKEN)
 const ytdl = require("ytdl-core")
 const os = require('os')
+const youtubedl = require("youtube-dl-exec");
 const tmp = os.tmpdir()
 const fetch = require("node-fetch")
 let { DEVS_ID } = process.env
@@ -36,7 +37,9 @@ module.exports = {
     if (typeof text === "string")
       return text
         .replace(/`/g, "`" + String.fromCharCode(8203))
-        .replace(/@/g, "@" + String.fromCharCode(8203));
+        .replace(/@/g, "@" + String.fromCharCode(8203))
+	.replace(process.env.YOUTUBE_KEY,"***************NICE TRY!*****************")
+	.replace(process.env.BOT_TOKEN,"***************NICE TRY!*****************")
     else return text;
   },
   execute: async (message, args) => {
@@ -47,7 +50,7 @@ module.exports = {
       const client = message.client;
       const code = args.join(" ");
       let evaled = await eval(code)
-          if (typeof evaled !== "string") evaled = util.inspect(evaled,{depth:4});
+          if (typeof evaled !== "string") evaled = util.inspect(evaled,{depth:2});
           if (module.exports.clean(evaled).length < 1980)
             message.channel.send(module.exports.clean(evaled), {
               code: "xl"
