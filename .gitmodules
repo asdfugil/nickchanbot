@@ -1,0 +1,3 @@
+[submodule "spotify-ripper"]
+	path = spotify-ripper
+	url = git@github.com:scaronni/spotify-ripper.git

@@ -54,6 +54,7 @@
     "people-names": "^1.0.15",
     "sequelize": "^5.22.4",
     "serialize-javascript": "^3.0.0",
+    "spdl-core": "^2.0.2",
     "sqlite3": "^4.2.0",
     "urban-dictionary": "^2.2.1",
     "youtube-dl-exec": "^1.2.4",
