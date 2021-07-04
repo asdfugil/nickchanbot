@@ -102,7 +102,7 @@ module.exports = {
           serverQueue.songs.shift();
           console.error(error);
         });
-      message.channel.send(`Started playing ${song.title}.`);
+      if (!serverQueue.looping) message.channel.send(`Started playing ${song.title}.`);
       dispatcher.setVolume(serverQueue.volume);
       dispatcher.setPLP(0.1)
     } catch (error) {
