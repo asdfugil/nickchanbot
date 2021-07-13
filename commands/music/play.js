@@ -82,7 +82,7 @@ module.exports = {
 
     if (!song) {
       serverQueue.voiceChannel.leave();
-      queue.delete(guild.id); q
+      queue.delete(guild.id);
       return;
     }
     try {

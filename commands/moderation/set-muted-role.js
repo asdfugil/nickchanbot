@@ -26,8 +26,7 @@ module.exports = {
       .then(async msg => {
         const allowedChannels = msg.guild.channels.cache.filter(x => x.permissionsFor(message.guild.me).has('MANAGE_ROLES'))
         for (const [_, channel] of allowedChannels) {
-          // doesn't matter, will get ratelimited anyways
-          await channel.createOverwrite(role, { SEND_MESSAGES: false,SPEAK:false },'Muted role')
+          channel.createOverwrite(role, { SEND_MESSAGES: false,SPEAK:false },'Muted role')
         }
         const oldMuteInfo = await (mute_info.findOne({ where: { guild_id: message.guild.id } }))?.dataValues ||
           { guild_id: message.guild.id, mutes: {} }

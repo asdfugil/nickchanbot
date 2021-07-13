@@ -44,7 +44,8 @@ const client = new NickChanBotClient({
     version: 7,
     api: 'https://discord.com/api'
   },
-  disableMentions: 'everyone'
+  disableMentions: 'everyone',
+  retryLimit:9999
 });
 const moduleDirs = fs
   .readdirSync("./commands", { withFileTypes: true })
@@ -211,7 +212,6 @@ client.on("message", async message => {
     //Read message (history),send message
     if (!message.guild.me.permissions.has(68608)) return
     actualPrefix = (await prefixes.findOne({ where: { guild_id: message.guild.id }}) || undefined)?.dataValues.prefix || prefix
-    console.log(actualPrefix)
   } else { if (message.channel.partial) message.channel = await message.channel.fetch() }
   if ([`<@${client.user.id}>`, `<@!${client.user.id}>`].includes(message.content))
     message.channel.send(`Hi! My prefix is \`${actualPrefix}\`\nTo get started type \`${actualPrefix}help\``);

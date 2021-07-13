@@ -1,6 +1,7 @@
 require('dotenv').config()
 const Discord = require("discord.js");
 const fs = require("fs");
+const { prefixes } = require('../../sequelize')
 const AniList = require("anilist-node")
 const anilist = new AniList(process.env.ANILIST_TOKEN)
 const ytdl = require("ytdl-core")
