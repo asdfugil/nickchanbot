@@ -35,7 +35,7 @@
     "canvas": "^2.8.0",
     "discord-oauth2": "^2.6.0",
     "discord.bio": "^9.1.3",
-    "discord.js": "^12.5.3",
+    "discord.js": "^13.0.1",
     "dotenv": "^8.6.0",
     "erlpack": "^0.1.3",
     "express": "^4.17.1",

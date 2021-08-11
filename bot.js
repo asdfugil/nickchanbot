@@ -2,6 +2,7 @@
 require("dotenv").config();
 console.log("Starting...");
 const Discord = require("discord.js");
+console.log(`Discord.js version ${Discord.version} Node.js version ${process.version}`)
 const fs = require("fs");
 const { BOT_TOKEN, PREFIX, DEVS_ID, BOT_PORT } = process.env;
 const { noBotPermission, noPermission, Tag, findMember, findRole } = require('./modules')
@@ -24,17 +25,6 @@ class NickChanBotClient extends Discord.Client {
     this.developers = [];
     this.modules = new Collection()
     this.cooldowns = new Collection()
-    this.fetchGiftCode = function (code) {
-      code = args.join(' ')
-        .replace('https://discord.gift/')
-        .replace('http://discord.gift/')
-        .replace('https://discord.com/gifts/')
-        .replace('http://discord.com/gifts/')
-        .replace('http://canary.discord.com/gifts/')
-        .replace('https://canary.discord.com/gifts/')
-      //@ts-ignore
-      return message.client.api.entitlements['gift-codes'].get(code)
-    }
   }
 }
 const client = new NickChanBotClient({
@@ -45,7 +35,8 @@ const client = new NickChanBotClient({
     api: 'https://discord.com/api'
   },
   disableMentions: 'everyone',
-  retryLimit:9999
+  retryLimit:9999,
+  intents: 32767
 });
 const moduleDirs = fs
   .readdirSync("./commands", { withFileTypes: true })
@@ -73,6 +64,7 @@ for (let moduleName of moduleDirs) {
   }
   client.modules.set(module_.id, module_)
 }
+console.log(`Loaded ${client.commands.size} commands`)
 process.on("uncaughtException",(error) => {
   console.error(error)
   client.destroy()
@@ -292,4 +284,5 @@ arguments:${args}`);
     if (!error.code) message.reply("There was an error trying to execute that command!\n```prolog\n" + error.toString() + '```');
   }
 });
+console.log('attmpting to login')
 client.login(BOT_TOKEN);
