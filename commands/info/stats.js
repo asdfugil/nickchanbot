@@ -17,15 +17,11 @@ module.exports = {
     const processDuration = moment
       .duration(process.uptime()*1000)
       .format(" D [days], H [hours], m [minutes], s [seconds]");
-    const servers = await client.shard.broadcastEval(new Function("this.guilds.cache.size"));
-    const users = await client.shard.broadcastEval(new Function("this.users.cache.size"));
-    const channels = await client.shard.broadcastEval(new Function("this.channels.cache.size"));
-    const rssUsage = await client.shard.broadcastEval(new Function(
-      "process.memoryUsage().rss/1024/1024"
-    ));
-    const heapUsage = await client.shard.broadcastEval(new Function(
-      "process.memoryUsage().heapUsed/1024/1024"
-    ));
+    const servers = await client.shard.broadcastEval(client => client.guilds.cache.size);
+    const users = await client.shard.broadcastEval(client => client.users.cache.size);
+    const channels = await client.shard.broadcastEval(client => client.channels.cache.size);
+    const rssUsage = await client.shard.broadcastEval(() => process.memoryUsage().rss/1024/1024);
+    const heapUsage = await client.shard.broadcastEval(() => process.memoryUsage().heapUsed/1024/1024);
     const statsEmbed = new MessageEmbed()
       .setColor("#363A3F")
       .setAuthor("Statistics", "https://i.imgur.com/7hCWXZk.png")
@@ -65,6 +61,6 @@ module.exports = {
         true
       )
       .setFooter(client.user.tag, client.user.displayAvatarURL);
-    message.channel.send(statsEmbed);
+    message.channel.send({ embeds: [ statsEmbed ] });
   }
 };
