@@ -17,15 +17,15 @@ module.exports = {
     const processDuration = moment
       .duration(process.uptime()*1000)
       .format(" D [days], H [hours], m [minutes], s [seconds]");
-    const servers = await client.shard.broadcastEval("this.guilds.cache.size");
-    const users = await client.shard.broadcastEval("this.users.cache.size");
-    const channels = await client.shard.broadcastEval("this.channels.cache.size");
-    const rssUsage = await client.shard.broadcastEval(
+    const servers = await client.shard.broadcastEval(new Function("this.guilds.cache.size"));
+    const users = await client.shard.broadcastEval(new Function("this.users.cache.size"));
+    const channels = await client.shard.broadcastEval(new Function("this.channels.cache.size"));
+    const rssUsage = await client.shard.broadcastEval(new Function(
       "process.memoryUsage().rss/1024/1024"
-    );
-    const heapUsage = await client.shard.broadcastEval(
+    ));
+    const heapUsage = await client.shard.broadcastEval(new Function(
       "process.memoryUsage().heapUsed/1024/1024"
-    );
+    ));
     const statsEmbed = new MessageEmbed()
       .setColor("#363A3F")
       .setAuthor("Statistics", "https://i.imgur.com/7hCWXZk.png")

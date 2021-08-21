@@ -51,6 +51,16 @@ for (let moduleName of moduleDirs) {
   for (const commandName of commandFiles) {
     try {
       const command = require(`./commands/${moduleName}/${commandName}`)
+      if (typeof command.clientPermissions === "number") {
+	console.error('Warning encountered while loading command `' + command.name + '`');
+	console.error('DEPRECATED: use bigint instead in command.clientPermissions');
+	command.clientPermissions = BigInt(command.clientPermissions);
+	}
+      if (typeof command.userPermissions === "number") {
+	console.error('Warning encountered while loading command `' + command.name + '`');
+        console.error('DEPRECATED: use bigint instead in command.userPermissions');
+	command.clientPermissions = BigInt(command.userPermissions);
+        }
       command.module = module_
       module_.commands.set(command.name, command)
       client.commands.set(command.name, command)
@@ -242,12 +252,12 @@ arguments:${args}`);
     const text_perms = new Permissions(command.clientPermissions)
     const normal_permissions = text_perms
     const voice_permissions = text_perms
-    if (text_perms.any(268443710) && message.guild.mfaLevel && !client.user.mfaEnabled) return message.reply('Please disable server 2FA and try again.')
+    if (text_perms.any(BigInt(268443710)) && message.guild.mfaLevel && !client.user.mfaEnabled) return message.reply('Please disable server 2FA and try again.')
     //strip non-text permissions
-    text_perms.remove(2146436543)
+    text_perms.remove(BigInt(2146436543))
     //strip channel permissions
-    normal_permissions.remove(66583872)
-    voice_permissions.remove(2080898303)
+    normal_permissions.remove(BigInt(66583872))
+    voice_permissions.remove(BigInt(2080898303))
     const voice_channel = command.voiceChannel ? command.voiceChannel(message, args) : message.member.voice.channel;
     if (voice_permissions.bitfield && !voice_channel) message.reply('Command requires voice permissions but voice_channel is undefined or null.\nPlease join a voice channel and try again.')
     if (!message.channel.permissionsFor(message.guild.me).has(text_perms.bitfield) || !message.channel.permissionsFor(message.guild.me).has(voice_permissions) || !message.guild.me.permissions.has(normal_permissions.bitfield)) {

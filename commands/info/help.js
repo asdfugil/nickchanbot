@@ -49,7 +49,7 @@ module.exports = {
     }, command_list: { en:"Command list" },
     devsOnly:{ en:'bot developers only' }
   },
-  clientPermissions: 16384,
+  clientPermissions: 19456,
   async execute(message, args) {
     let actualPrefix = prefix;
     if (message.guild) {

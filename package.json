@@ -35,9 +35,8 @@
     "canvas": "^2.8.0",
     "discord-oauth2": "^2.6.0",
     "discord.bio": "^9.1.3",
-    "discord.js": "^13.0.1",
+    "discord.js": "^13.1.0",
     "dotenv": "^8.6.0",
-    "erlpack": "^0.1.3",
     "express": "^4.17.1",
     "express-http-proxy": "^1.6.2",
     "express-session": "^1.17.2",
@@ -65,7 +64,7 @@
     "start": "./start.sh"
   },
   "engines": {
-    "node": "14.x",
+    "node": "16.x",
     "ffmpeg": ">= 4.2",
     "pnpm": "5.x"
   },
