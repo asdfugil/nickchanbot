@@ -1,10 +1,10 @@
-const { MessageEmbed,MessageAttachment, Collection } = require("discord.js");
+const { MessageEmbed, MessageAttachment, Collection } = require("discord.js");
 module.exports = {
   name: "server-info",
   guildOnly: true,
   cooldown: 10,
   aliases: ["guild-info", "guildinfo", "serverinfo"],
-  description: {en:"shows server info"},
+  description: { en: "shows server info" },
   execute: async (message, args) => {
     const client = message.client;
     const g = message.guild;
@@ -12,7 +12,7 @@ module.exports = {
     let roles = [];
     let members = [];
     for (const key of Object.keys(g)) {
-      if (["string", "number", "null",'boolean'].includes(typeof g[key])||g[key] instanceof Array || g[key] instanceof Collection) {
+      if (["string", "number", "null", 'boolean'].includes(typeof g[key]) || g[key] instanceof Array || g[key] instanceof Collection) {
         if (typeof g[key] !== "null") data.push(`**${key.replace(/([^A-Z])([A-Z])/g, '$1 $2')}:** ${g[key]}`);
         else data.push(`**${key.replace(/([^A-Z])([A-Z])/g, '$1 $2')}:** N/A`);
       }
@@ -43,10 +43,10 @@ module.exports = {
       .addField("Members", members)
       .addField("Roles", roles)
       .setTimestamp()
-      .setImage(g.splashURL({ format:'png',size:2048 }))
-      .setThumbnail(g.iconURL({ format:'png',size:512 }))
+      .setImage(g.splashURL({ format: 'png', size: 2048 }))
+      .setThumbnail(g.iconURL({ format: 'png', size: 512 }))
       .setFooter(client.user.tag, client.user.displayAvatarURL);
-    if (g.bannerURL()) embed.attachFiles([new MessageAttachment(g.bannerURL({ format:'png',size:2048 }),'server-banner.png')])
-    message.channel.send({ embeds: [embed] });
+    if (g.bannerURL({ format: 'png', size: 2048 })) message.channel.send({ embeds: [embed], files: [new MessageAttachment(g.bannerURL({ format: 'png', size: 2048 }), 'server-banner.png')] });
+    else message.channel.send({ embeds: [embed] })
   }
 };

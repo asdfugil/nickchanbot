@@ -28,9 +28,9 @@ module.exports = {
           );
           message.channel
             .send(
-              "Type the number to see the details (10 seconds)\n" +
-              res.join("\n"),
-              { code: "xl", split: true }
+              "```\nType the number to see the details (10 seconds)\n" +
+              res.join("\n") + '```',
+              { split: true }
             )
             .then(m => {
               message.channel

@@ -63,7 +63,7 @@ User ID:${invite.inviter.id}
             embed.addField("Total Members", invite.memberCount);
               message.channel
                 .send("", {
-                  embed: embed
+                  embeds: [ embed ]
                 })
                 .then(() => message.channel.stopTyping());
         })

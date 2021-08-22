@@ -53,12 +53,9 @@ module.exports = {
       let evaled = await eval(code)
       if (typeof evaled !== "string") evaled = util.inspect(evaled, { depth: 2 });
       if (module.exports.clean(evaled).length < 1980)
-        message.channel.send(module.exports.clean(evaled), {
-          code: "xl"
-        });
-      fs.writeFileSync(`${tmp}/${client.user.tag}/result.log`, module.exports.clean(evaled));
+        message.channel.send('```xl\n' + module.exports.clean(evaled) + '```');
       message.channel
-        .send({ files: [new MessageAttachment(`${tmp}/${client.user.tag}/result.log`)] })
+        .send({ files: [new MessageAttachment(Buffer.from(module.exports.clean(evaled)),'result.log')] })
         .then(() => {
           reaction.remove();
           message.react("✅");

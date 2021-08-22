@@ -1,7 +1,7 @@
 require("dotenv").config();
 const AniList = require("anilist-node");
 const anilist = new AniList(process.env.ANILIST_TOKEN);
-const { MessageEmbed } = require("discord.js");
+const { MessageEmbed,MessageAttachment } = require("discord.js");
 const { writeFileSync } = require("fs");
 module.exports = {
   name: "anime",
@@ -25,10 +25,9 @@ module.exports = {
             }) - ID:${result.id}`
         );
         const displayMsg = await message.channel.send(
-          `Type the ID to see the details. (60 seconds)
+          `\`\`\`Type the ID to see the details. (60 seconds)
 Showing page ${results.pageInfo.currentPage} of ${results.pageInfo.total}
-${content.join("\n")}`,
-          { code: true }
+${content.join("\n")}\`\`\``
         );
         message.channel
           .createMessageCollector(
@@ -50,7 +49,6 @@ ${content.join("\n")}`,
       .then(async anime => {
         if (!anime.siteUrl)
           return message.reply("That's not a valid anime ID!");
-        writeFileSync(`/tmp/${anime.id}.json`, JSON.stringify(anime, null, 2));
         if (anime.isAdult && !message.channel.nsfw)
           return message.reply(
             "That anime contains NSFW content,please try again in a NSFW channel."
@@ -78,8 +76,8 @@ ${content.join("\n")}`,
           .addField("Source type", anime.source)
           .addField("Twitter hashtag", anime.hashtag || "N/A")
           .addField("Country of origin", anime.countryOfOrigin)
-          .addField("Popularity", anime.popularity)
-          .addField("Episodes", anime.episodes)
+          .addField("Popularity", anime.popularity?.toString())
+          .addField("Episodes", anime.episodes.toString())
           .addField("Format", anime.format)
           .addField("Status", anime.status)
           .addField(
@@ -115,17 +113,16 @@ ${content.join("\n")}`,
             anime.studios.map(x => `${x.name} (ID:${x.id})`).join(", ") || "N/A"
           )
           .addField("Weighted mean score", anime.averageScore + "/100")
-          .addField("Trending", anime.trending)
+          .addField("Trending", anime.trending.toString() || 'N/A')
           .addField("Mean Score", anime.meanScore + "/100")
-          .addField("Genres", anime.genres)
-          .addField("NSFW", anime.isAdult || false)
+          .addField("Genres", anime.genres.toString())
+          .addField("NSFW", anime.isAdult.toString() || 'false')
           .setThumbnail(anime.coverImage.large)
           .addField(
             "Misc",
             `AniList ID: ${anime.id}
 MAL ID:${anime.idMal}`
           )
-          .attachFiles([`/tmp/${anime.id}.json`]);
         // 25 fields
         embed.setColor("RANDOM");
         if ([100977, 108631, 105662, 109085].includes(anime.id))
@@ -150,9 +147,10 @@ MAL ID:${anime.idMal}`
               })
               .join(" ,") || "N/A"
           )
-          .addField("Last updated", new Date(anime.updatedAt * 1000));
-        await message.channel.send(anime.trailer || "", { embed: embed });
-        message.channel.send(embed2);
+          .addField("Last updated", (new Date(anime.updatedAt * 1000)).toString());
+        await message.channel.send({ content: anime.trailer || undefined,  embeds: [embed,embed2], files:[
+          new MessageAttachment(Buffer.from(JSON.stringify(anime,null,2)),anime.id.toString() + '.json')
+        ] });
       })
       .catch(console.error);
   }

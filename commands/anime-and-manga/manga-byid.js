@@ -1,12 +1,11 @@
 require('dotenv').config()
 const anilist = new (require('anilist-node'))(process.env.ANILIST_TOKEN)
-const { writeFileSync } = require("fs")
-const { MessageEmbed } = require("discord.js")
+const { MessageEmbed, MessageAttachment } = require("discord.js")
 module.exports = {
     name: 'manga-byid',
     aliases: ['mangabyid'],
-    description:{en: 'GET manga by id on AniList'},
-    info:{en:' Some fields will be truncated as they are too long'},
+    description: { en: 'GET manga by id on AniList' },
+    info: { en: ' Some fields will be truncated as they are too long' },
     execute: async (message, args) => await module.exports.getManga(message, parseInt(args.join(' '))),
     async getManga(message, id) {
         anilist.media
@@ -14,13 +13,12 @@ module.exports = {
             .then(async manga => {
                 if (!manga.siteUrl)
                     return message.reply("That's not a valid manga ID!");
-                writeFileSync(`/tmp/${manga.id}.json`, JSON.stringify(manga, null, 2));
                 if (manga.isAdult && !message.channel.nsfw)
                     return message.reply(
                         "That anime contains NSFW content,please try again in a NSFW channel."
                     );
-                    let character
-                    if (manga.characters) character = await anilist.people.character(manga.characters[0].id);
+                let character
+                if (manga.characters) character = await anilist.people.character(manga.characters[0].id);
                 const embed = new MessageEmbed()
                     .setURL(manga.siteUrl)
                     .setTitle(
@@ -37,7 +35,7 @@ module.exports = {
                             .join(",") : "N/A")()
                     )
                     .addField("Country of origin", manga.countryOfOrigin)
-                    .addField("Popularity", manga.popularity)
+                    .addField("Popularity", manga.popularity?.toString())
                     .addField("Format", manga.format)
                     .addField("Status", manga.status)
                     .addField("Season", manga.season)
@@ -53,20 +51,19 @@ module.exports = {
                         "Staff",
                         manga.staff
                             .map(x => `${x.native || x.name} (${x.name}) - ID: ${x.id}`)
-                            .join("\n").substring(0,1023)
+                            .join("\n").substring(0, 1023)
                     )
                     .addField("Weighted mean score", manga.averageScore + "/100")
-                    .addField("Trending", manga.trending)
+                    .addField("Trending", manga.trending.toString() || 'N/A')
                     .addField("Mean Score", manga.meanScore + "/100")
-                    .addField("Genres", manga.genres)
-                    .addField("NSFW", manga.isAdult || false)
+                    .addField("Genres", manga.genres.toString())
+                    .addField("NSFW", manga.isAdult.toString() || 'false')
                     .setThumbnail(manga.coverImage.large)
                     .addField(
                         "Misc",
                         `AniList ID: ${manga.id}
     MAL ID:${manga.idMal}`
                     )
-                    .attachFiles([`/tmp/${manga.id}.json`])
                     .setColor("RANDOM")
                     .setImage(manga.bannerImage)
                     .addField("Synonyms", (() => manga.synonyms ? manga.synonyms.join(", ") : "N/A")())
@@ -80,28 +77,27 @@ module.exports = {
                             })
                             .join(" ,") || "N/A"
                     )
-                    .addField("Last updated", new Date(manga.updatedAt * 1000));
-                    if (character)                     embed.setFooter(
-                        `${character.name.native || ""}  (${
-                        character.name.first
-                        } ${character.name.last || ""})`,
-                        character.image.large
-                    )
-                    if (manga.tags[0]) embed.addField(
-                        "Tags",
-                        manga.tags
-                            .map(tag => {
-                                if (tag.isMediaSpoiler) return `||${tag}||`
-                                else return tag.name
-                            })
-                            .join(", ")
-                    )
-                    if (manga.characters) embed.addField(
-                        "Characters",
-                        manga.characters.map(x => `${x.name}  (${x.id})`).join(", ").substring(0,1023)
-                    )
-                    if (manga.staff)  embed.setAuthor(manga.staff[0].native || manga.staff[0].name)
-                await message.channel.send("", { embed: embed });
+                    .addField("Last updated", (new Date(manga.updatedAt * 1000)).toString());
+                if (character) embed.setFooter(
+                    `${character.name.native || ""}  (${character.name.first
+                    } ${character.name.last || ""})`,
+                    character.image.large
+                )
+                if (manga.tags[0]) embed.addField(
+                    "Tags",
+                    manga.tags
+                        .map(tag => {
+                            if (tag.isMediaSpoiler) return `||${tag}||`
+                            else return tag.name
+                        })
+                        .join(", ")
+                )
+                if (manga.characters) embed.addField(
+                    "Characters",
+                    manga.characters.map(x => `${x.name}  (${x.id})`).join(", ").substring(0, 1023)
+                )
+                if (manga.staff) embed.setAuthor(manga.staff[0].native || manga.staff[0].name)
+                await message.channel.send({ embeds: [embed], files: [new MessageAttachment(Buffer.from(JSON.stringify(manga, null, 2)), manga.id.toString() + '.json')] });
             })
             .catch(console.error);
     }

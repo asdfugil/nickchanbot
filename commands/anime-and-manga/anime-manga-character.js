@@ -6,17 +6,15 @@ module.exports = {
     aliases: ['anime-character', 'manga-character'],
     description: 'Search for a anime or manga character on AniList',
     async execute(message, args) {
-        const results = await anilist.search('character', args.join(' '), 1, 20)
+        const results = await anilist.search('char', args.join(' '), 1, 20)
+        console.log(results.characters)
         const content = results.characters.map(result =>
-            `${result.name.first || "(English name unavailable)"} ${result.name.last||''} (${
-            result.name.native ||`${result.name.first} ${result.name.last||''} `}) - ID:${result.id}`
+            `${result.english || "(English name unavailable)"} ${result.name.last||''} (${
+            result.name.native ||`${result.name.first} ${result.name.last||''}`}) - ID:${result.id}`
         );
-        const displayMsg = await message.channel.send(
-            `Type the ID to see the details. (60 seconds)
+        const displayMsg = await message.channel.send(`\`\`\`Type the ID to see the details. (60 seconds)
   Showing page ${results.pageInfo.currentPage} of ${results.pageInfo.total}
-  ${content.join("\n")}`,
-            { code: true }
-        );
+  ${content.join("\n")}\`\`\``);
         message.channel
             .createMessageCollector(
                 x => x.author.id === message.author.id && parseInt(x),

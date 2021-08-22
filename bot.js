@@ -152,9 +152,6 @@ client.once("ready", async () => {
     const value = (await language.findOne({ where: { id: guild.id } }))?.dataValues || {}
     guild.language = value ? value.language : 'en'
   })
-  if (!fs.readdirSync(require('os').tmpdir()).includes(client.user.tag)) {
-    fs.mkdirSync(require('os').tmpdir() + `/${client.user.tag}`)
-  }
 })
 client.on("ready", async () => {
   client.user.setPresence({
@@ -218,7 +215,7 @@ client.on("message", async message => {
 command name:${commandName}
 arguments:${args}`);
   if ((command.devsOnly || command.module.id === 'devs-only') && !DEVS_ID.split(',').includes(message.author.id)) return message.channel.send(t('util.you_cannot_use_this_command', client, message.guild))
-  if (command.guildOnly && message.channel.type !== "text")
+  if (command.guildOnly && !message.guild)
     return message.reply("I can't execute that command inside DMs!");
   if (command.userPermissions && message.guild) {
     const text_perms = new Permissions(command.userPermissions)

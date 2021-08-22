@@ -14,8 +14,7 @@ module.exports = {
           .map((entry, index) => (index + 1).toString() + "." + entry.word)
           .join("\n");
         message.channel.send(
-          `Type the number to see the details. (10 seconds)\n${list}`,
-          { code: true }
+          `Type the number to see the details. (10 seconds)\n${list}`
         );
         message.channel
           .createMessageCollector(

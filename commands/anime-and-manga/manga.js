@@ -23,10 +23,9 @@ module.exports = {
             }) - ID:${result.id}`
         );
         const displayMsg = await message.channel.send(
-          `Type the ID to see the details. (60 seconds)
+          `\`\`\`Type the ID to see the details. (60 seconds)
 Showing page ${results.pageInfo.currentPage} of ${results.pageInfo.total}
-${content.join("\n")}`,
-          { code: true }
+${content.join("\n")}\`\`\``
         );
         message.channel
           .createMessageCollector(

@@ -35,12 +35,6 @@ module.exports = {
       } else throw error;
     });
   },
-  sendError: function(info) {
-    info.client.channels
-      .get(info.channelID)
-      .send(info.error.stack, { code: "prolog" });
-    console.log(info.error);
-  },
   botError: function(message) {
     var error = new Error(message);
     error.name = "NickChanBotError";
