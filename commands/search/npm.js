@@ -81,7 +81,7 @@ module.exports = {
                     data.push(`${key}: ${result.links[key]}`);
                   }
                   embed.addField("Links", data.join("\n") || "N/A");
-                  message.channel.send(embed);
+                  message.channel.send({ embeds: [embed] });
                 });
             });
             message.channel.stopTyping();

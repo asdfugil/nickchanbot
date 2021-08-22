@@ -15,6 +15,6 @@ module.exports = {
     .setDescription('```'+cleaned+'```')
     .setTitle("Tag info")
     .addField("Name",args.join(' ').toLowerCase())
-    message.channel.send(embed)
+    message.channel.send({ embeds: [embed] })
   }
 }

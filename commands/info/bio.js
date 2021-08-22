@@ -50,6 +50,6 @@ module.exports = {
       .setFooter("❤️" + profile.user.details.likes);
     if (profile.user.details.banner)
       embed.setImage(profile.user.details.banner);
-    message.channel.send(embed);
+    message.channel.send({ embeds :embed});
   }
 };

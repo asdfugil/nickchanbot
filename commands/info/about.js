@@ -12,6 +12,6 @@ module.exports = {
     .setDescription(`${client.user.tag} is a bot developed by ${client.owner.tag}.`)
     .addField("Developers",client.developers.map(開發者 => 開發者.tag).join(", "))
     .addField('Version',require('../../package.json').version) 
-    message.channel.send(embed)
+    message.channel.send({ embeds: [embed] })
   }
 }

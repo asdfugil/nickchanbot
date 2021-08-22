@@ -35,7 +35,7 @@ module.exports = {
     .setDescription(`Member ${member.toString()} muted.`)
     .addField('Reason',args.slice(2).join(' ').toString() || 'No reason given')
     .setColor('RANDOM')
-    message.channel.send(embed)
+    message.channel.send({ embeds: [embed] })
     const mutes = (await mute_info.findOne({ where:{ guild_id:message.guild.id }}))?.dataValues?.mutes || {}
     mutes[member.id] = Date.now() + timeInMs
     mute_info.upsert({ guild_id:message.guild.id,muted_role:roleID,mutes })

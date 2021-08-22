@@ -32,7 +32,7 @@ module.exports = {
           .join("\n");
         embed.addField("Attachment(s) (ID: link)", content);
       } else {
-        const array = message.attachments.array();
+        const array = [...message.attachments.values()];
         const first = array
           .filter((x, index) => index < 5)
           .map(x => `${x.id} : [link](${x.proxyURL})`)
@@ -46,7 +46,7 @@ module.exports = {
           .addField("Attachment(s) (continued)", last);
       }
     }
-    hook.send(embed).catch(async error => {
+    hook.send({ embeds: [embed] }).catch(async error => {
       if (error.code === 10015) {
         const data = delete (await globalLogHooks.get(message.guild.id))
           .message;

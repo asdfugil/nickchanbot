@@ -24,6 +24,6 @@ module.exports = {
     .setTitle(":trophy: XP Leaderboard")//, "https://cdn.glitch.com/4442458b-7518-4393-9be3-14c12934f6d0%2FIMG_20200501_164149.jpg?v=1588322551669")
     .setDescription(leaderboard.join("\n"))
     .setFooter(message.guild.name);
-    message.channel.send(embed)
+    message.channel.send({ embeds: [embed] })
   }
 }

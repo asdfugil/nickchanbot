@@ -10,7 +10,7 @@ module.exports = {
     if (!args[0] && !message.attachments.first() && !message.embeds[0]) return message.reply("Please enter something for the bot to say!")
     message.channel.send(args.join(" ") + "\n\n -- "+message.author.tag,{
       embed:message.embeds[0],
-      files:message.attachments.array().map(x => x.url),
+      files:message.attachments.map(x => x.url),
       split:true,
       disableEveryone:message.member ? !message.channel.permissionsFor(message.member).has(131072): false ,
       tts:message.tts

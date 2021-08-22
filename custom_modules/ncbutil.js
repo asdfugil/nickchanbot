@@ -28,7 +28,7 @@ module.exports = {
     const embed = new RichEmbed();
     const term = await callback(embed);
     if (term === "BREAK") return;
-    hook.send(embed).catch(error => {
+    hook.send({ embeds: [embed] }).catch(error => {
       if (error.code === 10015) {
         delete data[logType];
         globalLogHooks.set(channel.guild.id, data);

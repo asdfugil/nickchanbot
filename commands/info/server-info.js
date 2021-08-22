@@ -47,6 +47,6 @@ module.exports = {
       .setThumbnail(g.iconURL({ format:'png',size:512 }))
       .setFooter(client.user.tag, client.user.displayAvatarURL);
     if (g.bannerURL()) embed.attachFiles([new MessageAttachment(g.bannerURL({ format:'png',size:2048 }),'server-banner.png')])
-    message.channel.send(embed);
+    message.channel.send({ embeds: [embed] });
   }
 };

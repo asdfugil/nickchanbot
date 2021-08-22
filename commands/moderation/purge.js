@@ -23,7 +23,7 @@ module.exports = {
         before: deathRow[deathRow.length - 1]?.id || message.id
       })
       if (fetchedMsgs.size === 0) break
-      deathRow.push(...fetchedMsgs.array())
+      deathRow.push(...fetchedMsgs.values())
     }
     const finalDeathRow = deathRow.filter(x => !x.pinned && x.createdTimestamp > (Date.now() - 1209600000))
     if (finalDeathRow.size === 0) return message.reply('No messages are found to delete.\nNote: Messages older than 14 days cannot be purged and pinned messages are not deleted.')

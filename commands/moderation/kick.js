@@ -52,7 +52,7 @@ module.exports = {
                 const embed = new MessageEmbed()
                 .setDescription('✅ ' + member.user.tag + t('commands.kick.kicked_reason',c,g) + reason)
                 .setColor('#ff0000')
-                message.channel.send(embed)
+                message.channel.send({ embeds: [embed] })
             })
         }
 }

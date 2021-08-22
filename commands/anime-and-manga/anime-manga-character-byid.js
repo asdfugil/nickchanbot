@@ -25,6 +25,6 @@ module.exports = {
         .attachFiles([`/tmp/${character.id}.json`])
         .setFooter(`${character.favourites} ❤️`)
         .setColor("RANDOM")
-        message.channel.send(embed)
+        message.channel.send({ embeds: [embed] })
     }
 }

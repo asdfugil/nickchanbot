@@ -33,7 +33,7 @@ module.exports = {
           .setDescription("```bash\n" + message.client.commands.get("eval").clean(stdout)+"```")
           .setFooter(`${time}ms`)
           .attachFiles(["/tmp/stdout.log"])
-          return message.channel.send(embed)
+          return message.channel.send({ embeds: [embed] })
       } else if (stderr) {
         fs.writeFileSync("/tmp/stderr.log",stdout)
         embed
@@ -42,7 +42,7 @@ module.exports = {
         .setDescription("```bash\n" + message.client.commands.get("eval").clean(stdout)+"```")
         .setFooter(`${time}ms`)
         .attachFiles(["/tmp/stderr.log"])
-        return message.channel.send(embed)
+        return message.channel.send({ embeds: [embed] })
       } else {
         embed
         .setColor("#00ff00")
@@ -50,7 +50,7 @@ module.exports = {
         .setDescription("```bash\n# Command executed successfully but returned no output```")
         .setFooter(`${time}ms`)
         .attachFiles(["/tmp/stdout.log"])
-        return message.channel.send(embed)
+        return message.channel.send({ embeds: [embed] })
       }
    })
   }

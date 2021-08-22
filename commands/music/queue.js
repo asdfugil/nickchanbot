@@ -17,6 +17,6 @@ module.exports = {
     .setAuthor("Music Queue","https://cdn.glitch.com/ae1bf1e9-34d2-43e8-af23-88db1cbe9616%2F06C28668-C28E-47B9-9AF0-7E73F1FCE1D2.jpeg?v=1580381492008")
     .setDescription(formatted)
     .setColor("#FF0000")
-    message.channel.send(embed)
+    message.channel.send({ embeds: [embed] })
   }
 }

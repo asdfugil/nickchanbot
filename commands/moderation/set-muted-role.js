@@ -22,7 +22,7 @@ module.exports = {
     const embed = new MessageEmbed()
       .setDescription(`Setting muted role to ${role.toString()}...`)
       .setColor('RANDOM')
-      message.channel.send(embed)
+      message.channel.send({ embeds: [embed] })
       .then(async msg => {
         const allowedChannels = msg.guild.channels.cache.filter(x => x.permissionsFor(message.guild.me).has('MANAGE_ROLES'))
         for (const [_, channel] of allowedChannels) {

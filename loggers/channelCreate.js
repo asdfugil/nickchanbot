@@ -23,7 +23,7 @@ module.exports = {
     .setFooter(tag,displayAvatarURL)
     .setColor("#00FF00")
     .setTimestamp(channel.createdAt)
-    hook.send(embed).catch(error => {
+    hook.send({ embeds: [embed] }).catch(error => {
       if (error.code === 10015) {
         delete data.channelCreate
         globalLogHooks.set(channel.guild.id,data)

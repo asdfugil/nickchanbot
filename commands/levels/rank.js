@@ -59,7 +59,7 @@ module.exports = {
         const avatar = await Canvas.loadImage(Buffer.concat(buff_array));
         ctx.drawImage(avatar, 25, 25, 200, 200);
         const card = canvas.toBuffer()
-        await message.channel.send(new MessageAttachment(card,"rank.png"));
+        await message.channel.send({ files: [new MessageAttachment(card,"rank.png")]});
         message.channel.stopTyping();
       });
     } else {

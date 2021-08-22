@@ -61,7 +61,7 @@ module.exports = {
     const g = message.guild
     if (!args[0]) {
       const embed = new MessageEmbed()
-      for (const module_ of client.modules.array()) {
+      for (const [_,module_] of client.modules) {
         if (process.env.WEEB_ANIME_HATERS_GUILD.split(',').includes(message.guild.id)) {
           if (module_.weeb) continue
         }
@@ -69,8 +69,8 @@ module.exports = {
           .addField(t('modules.' + module_.id + '.name', c, g), module_.commands.map(x => `\`${x.name}\``).join(",") || "None")
           .setColor(0xac1677)
       }
-      message.channel.send(t('commands.help.command_count', c, g) + ":" + client.commands.size + '\n**Support Server:** ' + process.env.SUPPORT_SERVER_LINK, {
-        embed: embed
+      message.channel.send({content: t('commands.help.command_count', c, g) + ":" + client.commands.size + '\n**Support Server:** ' + process.env.SUPPORT_SERVER_LINK, 
+        embeds: [ embed ]
       })
     } else {
       const data = []

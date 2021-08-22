@@ -16,7 +16,7 @@ module.exports = {
     message.delete()
     message.channel.send(message.guild.members.cache.random().toString(), {
       embed: embed,
-      files:message.attachments.array().map(x => x.proxyURL)
+      files:message.attachments.map(x => x.proxyURL)
     });
   }
 };

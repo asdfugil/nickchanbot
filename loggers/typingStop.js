@@ -16,7 +16,7 @@ module.exports = {
     .setDescription(`${user.toString()} stopped typing in ${channel.toString()}.`)
     .setTimestamp()
     .setFooter(channel.client.user.tag,channel.client.user.displayAvatarURL)
-    hook.send(embed)
+    hook.send({ embeds: [embed] })
     .catch(async error => {
       if (error.code === 10015) {
        const data = delete (await globalLogHooks.get(channel.guild.id)).typingStop

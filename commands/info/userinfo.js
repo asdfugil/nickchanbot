@@ -4,7 +4,7 @@ module.exports = {
   name: "userinfo",
   aliases: ["whois", "user-info"],
   description: { en: "shows user info" },
-  usage: {en:"[user resolvable]"},
+  usage: { en: "[user resolvable]" },
   cooldown: 2,
   execute: async (message, args) => {
     let user
@@ -25,28 +25,14 @@ module.exports = {
         "Note:Some information cannot be displayed if the user is offline/Not playing a game/Not streaming/Not a human\nThe only reliable way of using this command is using the user ID as argument"
       )
       .addField("Tag", user.tag)
-      .addField("Is Bot", user.bot)
-      .addField("Joined Discord", user.createdAt)
+      .addField("Is Bot", user.bot.toString())
+      .addField("Joined Discord", user.createdAt.toString())
       .addField("User ID", user.id)
       .addField("Avatar URL", user.displayAvatarURL({ size: 4096, format: 'png', dynamic: true }))
-      .setThumbnail(user.displayAvatarURL({ size: 512, format: 'png',dynamic:true }))
+      .setThumbnail(user.displayAvatarURL({ size: 512, format: 'png', dynamic: true }))
       .setColor("#00aaff")
       .setTimestamp()
       .setFooter(message.client.user.tag, message.client.user.displayAvatarURL);
-    try {
-      embed.addField("Status", user.presence.status);
-      if (user.presence.game) {
-        embed
-          .addField("Playing", user.presence.game.name)
-          .addField("Is streaming", user.presence.game.streaming)
-          .addField("Stream URL", user.presence.game.url);
-      }
-    } catch (error) { }
-    if (user.bot == false) {
-      if (user.presence.status != "offline") {
-        embed.addField('Using Discord on', Object.keys(user.presence.clientStatus).join(', ') || 'N/A')
-      }
-      message.channel.send(embed);
-    }
+     message.channel.send({ embeds: [embed] });
   }
 }

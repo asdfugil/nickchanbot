@@ -21,7 +21,7 @@ module.exports = {
     const embed = new MessageEmbed()
     const term = await callback(embed)
     if (term === 'BREAK') return
-    hook.send(embed)
+    hook.send({ embeds: [embed] })
     .catch(error => {
       if (error.code === 10015) {
         delete data[logType]

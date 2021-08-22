@@ -50,7 +50,7 @@ module.exports = {
               .addField("Definition ID", defid)
               .setFooter(`👍 ${thumbs_up} | 👎 ${thumbs_down}`)
               .setColor("RANDOM")
-            const m = await message.channel.send(embed);
+            const m = await message.channel.send({ embeds: [embed] });
             const target = sound_urls.find(x => x.startsWith("http://wav.urbandictionary.com/"))
             if (message.guild && !message.client.queue.get(message.guild.id) && target) {
               m.react("🔊");

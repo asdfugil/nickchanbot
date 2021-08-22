@@ -30,10 +30,6 @@ class NickChanBotClient extends Discord.Client {
 const client = new NickChanBotClient({
   ws: { intents: 32767 },
   partials: ['USER', 'CHANNEL', 'REACTION', 'MESSAGE', 'GUILD_MEMBER'],
-  http: {
-    version: 7,
-    api: 'https://discord.com/api'
-  },
   disableMentions: 'everyone',
   retryLimit:9999,
   intents: 32767
@@ -171,16 +167,6 @@ client.on("ready", async () => {
 client.on("messageDelete", async message => {
   try {
     if (message.partial) return
-    const base64 = ''/* await Promise.all(
-    message.attachments.map(attachment => {
-      return new Promise(async (resolve, reject) => {
-        const chunks = []
-        const response = await fetch(attachment.proxyURL || attachment.url, { headers: { 'user-agent': process.env.USER_AGENT } })
-        response.body.on('data', chunk => chunks.push(chunk))
-        response.body.on('close', () => resolve(Buffer.concat(chunks)))
-      })
-    })).then(buffers => buffers.map(buffer => buffer.toString('base64')))
-  */
     snipe.upsert({
       content: message.content,
       created_at: message.createdAt,
@@ -212,7 +198,7 @@ client.on("message", async message => {
   require('./modules/ranks')(message)
   if (message.guild) {
     //Read message (history),send message
-    if (!message.guild.me.permissions.has(68608)) return
+    if (!message.guild.me.permissions.has(68608n)) return
     actualPrefix = (await prefixes.findOne({ where: { guild_id: message.guild.id }}) || undefined)?.dataValues.prefix || prefix
   } else { if (message.channel.partial) message.channel = await message.channel.fetch() }
   if ([`<@${client.user.id}>`, `<@!${client.user.id}>`].includes(message.content))

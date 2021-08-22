@@ -31,7 +31,7 @@ module.exports = {
       .addField("After", newM)
       .setTimestamp()
       .setFooter(message.client.user.tag, message.client.displayAvatarURL);
-    hook.send(embed).catch(async error => {
+    hook.send({ embeds: [embed] }).catch(async error => {
       if (error.code === 10015) {
         const data = delete (await globalLogHooks.get(message.guild.id))
           .message;

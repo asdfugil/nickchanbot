@@ -23,7 +23,7 @@ module.exports = {
     .setTimestamp()
     .setColor("#ff47ed")
     .setFooter(client.user.tag,client.user.displayAvatarURL)
-    hook.send(embed)
+    hook.send({ embeds: [embed] })
     .catch(error => {
       delete data.messageDeleteBulk
       if (error.code === 10015) return globalLogHooks.set(guild.id,data)
