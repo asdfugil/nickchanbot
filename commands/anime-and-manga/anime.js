@@ -30,11 +30,10 @@ Showing page ${results.pageInfo.currentPage} of ${results.pageInfo.total}
 ${content.join("\n")}\`\`\``
         );
         message.channel
-          .createMessageCollector(
-            x => x.author.id === message.author.id && parseInt(x),
-            {
+          .createMessageCollector({
+            filter: x => x.author.id === message.author.id && parseInt(x),
               time: 60000,
-              maxMatches: 1
+              max: 1
             }
           )
           .on("collect", m => {

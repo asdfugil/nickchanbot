@@ -4,8 +4,8 @@ const anilist = new AniList(process.env.ANILIST_TOKEN);
 module.exports = {
   name: "manga",
   args: true,
-  usage: {en:"<query>"},
-  description:{en: "Search manga on AniList."},
+  usage: { en: "<query>" },
+  description: { en: "Search manga on AniList." },
   info: "A raw JSON file will also be provided.",
   async execute(message, args) {
     /*
@@ -18,8 +18,7 @@ module.exports = {
       .then(async results => {
         const content = results.media.map(
           result =>
-            `${result.title.english || "(English title unavailable)"}  (${
-              result.title.native
+            `${result.title.english || "(English title unavailable)"}  (${result.title.native
             }) - ID:${result.id}`
         );
         const displayMsg = await message.channel.send(
@@ -28,12 +27,11 @@ Showing page ${results.pageInfo.currentPage} of ${results.pageInfo.total}
 ${content.join("\n")}\`\`\``
         );
         message.channel
-          .createMessageCollector(
-            x => x.author.id === message.author.id && parseInt(x),
-            {
-              time: 60000,
-              maxMatches: 1
-            }
+          .createMessageCollector({
+            filter: x => x.author.id === message.author.id && parseInt(x),
+            time: 60000,
+            max: 1
+          }
           )
           .on("collect", m => {
             message.client.commands
