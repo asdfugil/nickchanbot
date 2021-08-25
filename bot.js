@@ -4,7 +4,7 @@ console.log("Starting...");
 const Discord = require("discord.js");
 console.log(`Discord.js version ${Discord.version} Node.js version ${process.version}`)
 const fs = require("fs");
-const { BOT_TOKEN, PREFIX, DEVS_ID, BOT_PORT } = process.env;
+const { BOT_TOKEN, PREFIX, DEVS_ID, BOT_PORT, ACTIVITY_NAME, ACTIVITY_TYPE } = process.env;
 const { noBotPermission, noPermission, Tag, findMember, findRole } = require('./modules')
 const t = require('./modules/translate')
 const fetch = require('node-fetch')
@@ -100,6 +100,10 @@ client.on('channelCreate', async channel => {
 })
 client.once("ready", async () => {
   console.log("Ready!");
+  client.user.setActivity({ 
+    name: ACTIVITY_NAME,
+    type: ACTIVITY_TYPE
+  })
   mute_info.findAll()
     .then(allMuteInfoModels => {
       for (const muteInfoModel of allMuteInfoModels) {
