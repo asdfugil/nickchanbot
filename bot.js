@@ -201,7 +201,8 @@ const processTag = (async (message, args, prefix) => {
     message.reply("tag error.\n```\n" + error.toString() + "\n```")
   }
 })
-client.on("message", async message => {
+client.on("messageCreate", async message => {
+  if (message.author.id === client.user.id) return 
   let actualPrefix = prefix;
   require('./modules/ranks')(message)
   if (message.guild) {
