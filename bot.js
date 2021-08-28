@@ -1,7 +1,7 @@
 "use strict";
 require("dotenv").config();
 console.log("Starting...");
-const Discord = require("discord.js");
+const Discord = require("fosscord.js");
 console.log(`Discord.js version ${Discord.version} Node.js version ${process.version}`)
 const fs = require("fs");
 const { BOT_TOKEN, PREFIX, DEVS_ID, BOT_PORT, ACTIVITY_NAME, ACTIVITY_TYPE } = process.env;
@@ -28,12 +28,19 @@ class NickChanBotClient extends Discord.Client {
   }
 }
 const client = new NickChanBotClient({
-  ws: { intents: 32767 },
+      http: {
+        version: 9,
+        api: "https://api.fosscord.com",
+        cdn: "https://cdn.fosscord.com",
+        invite: "https://fosscord.com/invite",
+        templates: "https://fosscord.new",
+    },
   partials: ['USER', 'CHANNEL', 'REACTION', 'MESSAGE', 'GUILD_MEMBER'],
   disableMentions: 'everyone',
   retryLimit:9999,
   intents: 32767
 });
+client.on('debug',console.error)
 const moduleDirs = fs
   .readdirSync("./commands", { withFileTypes: true })
   .filter(x => x.isDirectory)
@@ -100,7 +107,7 @@ client.on('channelCreate', async channel => {
 })
 client.once("ready", async () => {
   console.log("Ready!");
-  client.user.setActivity({ 
+  client.user.setActivity({
     name: ACTIVITY_NAME,
     type: ACTIVITY_TYPE
   })
@@ -225,9 +232,9 @@ arguments:${args}`);
     const text_perms = new Permissions(command.userPermissions)
     const normal_permissions = new Permissions(command.userPermissions)
     //strip non-text permissions
-    text_perms.remove(2146436543)
+    text_perms.remove(2146436543n)
     //strip channel permissions
-    normal_permissions.remove(66583872)
+    normal_permissions.remove(66583872n)
     if (!message.channel.permissionsFor(message.member).has(text_perms.bitfield) || !message.member.permissions.has(normal_permissions.bitfield)) {
       const perms_required = new Permissions(command.userPermissions)
       const required_array = []
